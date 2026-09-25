@@ -1,0 +1,8 @@
+{
+  "name": "weltquiz-server",
+  "private": true,
+  "type": "module",
+  "description": "Speichert den Weltquiz-Fortschritt von Emilia und Lars (Duell).",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

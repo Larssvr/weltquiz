@@ -12,11 +12,18 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 - **Flaggen** – Flagge → Land oder Land → eine von vier (ähnlichen) Flaggen
 - **Entdecken** – freie Karte mit Infos zu jedem Land und Gewässer
 - **Fakten** – über 900 überraschende Fakten zu Ländern, Meeren und der Welt
-- **Fortschritt** – was du sicher weißt (wird nur im eigenen Browser gespeichert)
+- **Fortschritt** – was du sicher weißt, auch die Karte des anderen Spielers
+- **Duell** – Emilia gegen Lars: wer hat mehr gelernt? Mit Vergleichskarte
 
 ## Technik
 
 Statische Seite ohne Build-Schritt: HTML, CSS, JavaScript (ES-Module), [d3](https://d3js.org) und [topojson-client](https://github.com/topojson/topojson-client).
+
+## Spieler & Online-Speicher
+
+Der Fortschritt von Emilia und Lars liegt zusätzlich auf einem kleinen Server (`server/`, Node ohne Abhängigkeiten,
+läuft auf Railway mit Volume unter `/data`). Er führt Stände von mehreren Geräten zusammen, löscht nie etwas und legt
+jeden Tag eine Sicherungskopie an. Ohne Internet spielt man lokal weiter; der Stand wird später nachgeliefert.
 
 ## Daten neu bauen
 

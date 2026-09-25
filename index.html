@@ -12,13 +12,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Weltquiz">
   <link rel="stylesheet" href="fonts/fonts.css">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
   <div id="map" class="map"></div>
 
   <header class="topbar">
     <button class="brand" id="brand" type="button" aria-label="Zur Startseite">Weltquiz</button>
+    <button class="player-chip" id="btn-player" type="button" hidden></button>
     <div class="hud" id="hud" hidden>
       <div class="scalebar" id="scalebar" aria-hidden="true"></div>
       <span class="hud-text" id="hud-text"></span>
@@ -40,11 +41,13 @@
     <section class="card" id="view-explore" data-dock="bottom" hidden></section>
     <section class="card" id="view-facts" data-dock="bottom" hidden aria-live="polite"></section>
     <section class="panel" id="view-progress" data-dock="left" hidden aria-label="Fortschritt"></section>
+    <section class="panel" id="view-player" data-dock="left" hidden aria-label="Wer spielt?"></section>
+    <section class="panel" id="view-duel" data-dock="left" hidden aria-label="Duell"></section>
   </main>
 
   <noscript><p class="noscript">Das Weltquiz braucht JavaScript.</p></noscript>
   <script src="vendor/d3.min.js"></script>
   <script src="vendor/topojson-client.min.js"></script>
-  <script type="module" src="js/app.js?v=2"></script>
+  <script type="module" src="js/app.js?v=3"></script>
 </body>
 </html>

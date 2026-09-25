@@ -1,10 +1,10 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=2';
-import { Searcher } from './search.js?v=2';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=2';
-import { COUNTRIES } from './data/countries.js?v=2';
-import { WATER } from './data/water.js?v=2';
-import { WORLD_FACTS } from './data/world-facts.js?v=2';
-import { CITIES } from './data/cities.js?v=2';
+import { WorldMap, REGION_BOX, W } from './map.js?v=3';
+import { Searcher } from './search.js?v=3';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=3';
+import { COUNTRIES } from './data/countries.js?v=3';
+import { WATER } from './data/water.js?v=3';
+import { WORLD_FACTS } from './data/world-facts.js?v=3';
+import { CITIES } from './data/cities.js?v=3';
 
 /* ================= Daten ================= */
 
@@ -84,26 +84,28 @@ const state = (() => {
     if (s && typeof s === 'object' && s.stats) {
       // Sicherheitskopie des zuletzt gültigen Spielstands
       try { localStorage.setItem(KEY + '.backup', raw); } catch { /* voll/blockiert */ }
-      return { sound: true, last: {}, factIdx: {}, round: null, ...s };
+      return { sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null, ...s };
     }
   } catch { /* kaputter Eintrag: Sicherheitskopie bleibt unangetastet */ }
-  return { stats: {}, sound: true, last: {}, factIdx: {}, round: null };
+  return { stats: {}, sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null };
 })();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* egal */ } };
 
 function stat(mode, id) { return state.stats[mode]?.[id]; }
-function level(mode, id) {
-  const s = stat(mode, id);
+function levelIn(stats, mode, id) {
+  const s = stats?.[mode]?.[id];
   if (!s || !s.n) return 0;
   if (s.s >= 2) return 3;
   if (s.s === 1) return 2;
   return 1;
 }
+function level(mode, id) { return levelIn(state.stats, mode, id); }
 function record(mode, id, ok, hinted) {
   const m = state.stats[mode] ||= {};
   const s = m[id] ||= { n: 0, c: 0, s: 0 };
   s.n++; s.t = Date.now();
   if (ok) { s.c++; if (!hinted) s.s++; } else s.s = 0;
+  markDirty(mode, id);
   save();
 }
 
@@ -209,7 +211,7 @@ function watchKeyboard() {
 
 /* ================= Ansichten ================= */
 
-const VIEWS = ['home', 'setup', 'quiz', 'summary', 'explore', 'facts', 'progress'];
+const VIEWS = ['home', 'setup', 'quiz', 'summary', 'explore', 'facts', 'progress', 'player', 'duel'];
 let view = 'home';
 
 function show(v) {
@@ -241,6 +243,7 @@ const SWATCH = {
   flaggen: '<svg viewBox="0 0 34 24"><rect width="34" height="8" fill="#2a2833"/><rect y="8" width="34" height="8" fill="#e0442a"/><rect y="16" width="34" height="8" fill="#f5c542"/></svg>',
   entdecken: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><circle cx="17" cy="12" r="8.5" fill="none" stroke="#2a2833" stroke-width="1.3"/><path d="M17 4.5l2.2 7.5-2.2 7.5-2.2-7.5z" fill="#d6246e"/><path d="M17 12l2.2 0-2.2 7.5z" fill="#2a2833"/></svg>',
   fakten: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d8cbea"/><text x="17" y="18.5" text-anchor="middle" font-family="Spectral, Georgia, serif" font-style="italic" font-size="17" font-weight="500" fill="#2a2833">i</text></svg>',
+  duell: '<svg viewBox="0 0 34 24"><rect width="17" height="24" fill="#7c5cf0"/><rect x="17" width="17" height="24" fill="#e0761b"/><path d="M11 7l12 10M23 7L11 17" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>',
   resume: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d6246e"/><path d="M13 6l10 6-10 6z" fill="#fff"/></svg>',
   fortschritt: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><rect x="0" y="0" width="12" height="24" fill="#86c895"/><rect x="12" y="0" width="9" height="24" fill="#f4d88a"/><rect x="21" y="0" width="6" height="24" fill="#f3b3a1"/></svg>',
 };
@@ -292,6 +295,7 @@ function renderHome() {
     ['flaggen', MODES.flaggen.title, MODES.flaggen.desc],
     ['entdecken', 'Entdecken', 'Frei auf der Karte stöbern'],
     ['fakten', 'Fakten', 'Überraschendes über die Welt'],
+    ['duell', 'Duell', 'Emilia gegen Lars: wer weiß mehr?'],
     ['fortschritt', 'Fortschritt', 'Was du schon sicher weißt'],
   ];
   const fotd = factOfTheDay();
@@ -299,6 +303,7 @@ function renderHome() {
   $('#view-home').innerHTML = `
     <h1 class="title">Weltquiz</h1>
     <p class="subtitle">Die Welt, Land für Land.</p>
+    ${duelStrip()}
     <ul class="legend-list">
       ${resumeRow()}
       ${rows.map(([id, name, desc]) => {
@@ -969,14 +974,20 @@ function renderFact() {
 /* ---------- Fortschritt ---------- */
 
 let progressMode = 'laender';
+let progressPlayer = null;
 
-function openProgress() {
+function openProgress(player) {
+  progressPlayer = player || state.player;
   show('progress');
   renderProgress();
 }
 
 function renderProgress() {
   const m = progressMode;
+  const pid = progressPlayer || state.player;
+  const own = !pid || pid === state.player;
+  const stats = statsOf(pid);
+  const level = (mode, id) => levelIn(stats, mode, id);
   const tabs = [['laender', 'Länder'], ['hauptstaedte', 'Hauptstädte'], ['flaggen', 'Flaggen'], ['gewaesser', 'Gewässer']];
   let rows;
   if (m === 'gewaesser') {
@@ -987,9 +998,10 @@ function renderProgress() {
   }
   $('#view-progress').innerHTML = `
     <button class="back" type="button" data-act="home">‹ Zurück</button>
-    <h2 class="h2">Dein Fortschritt</h2>
+    <h2 class="h2">${own ? 'Dein Fortschritt' : `Fortschritt von ${esc(playerName(pid))}`}</h2>
     <p class="lead">Grün heißt gelernt: die letzten zwei Antworten waren richtig.</p>
-    <div class="options" style="margin-top:14px">${tabs.map(([id, l]) => `<button type="button" class="opt" data-pmode="${id}" aria-pressed="${id === m}">${l}</button>`).join('')}</div>
+    ${state.player ? `<div class="options who-tabs" style="margin-top:14px">${PLAYERS.map(p => `<button type="button" class="opt p-${p.id}" data-pplayer="${p.id}" aria-pressed="${p.id === pid}">${esc(p.name)}</button>`).join('')}</div>` : ''}
+    <div class="options" style="margin-top:10px">${tabs.map(([id, l]) => `<button type="button" class="opt" data-pmode="${id}" aria-pressed="${id === m}">${l}</button>`).join('')}</div>
     <div class="progress-rows">${rows.map(([label, ids]) => {
       const lv = [0, 0, 0, 0];
       ids.forEach(id => lv[level(m, id)]++);
@@ -998,7 +1010,7 @@ function renderProgress() {
         <div class="meter"><i class="m3" style="width:${lv[3] / n * 100}%"></i><i class="m2" style="width:${lv[2] / n * 100}%"></i><i class="m1" style="width:${lv[1] / n * 100}%"></i></div></div>`;
     }).join('')}</div>
     <div class="key"><span><i style="background:#86c895"></i>gelernt</span><span><i style="background:#f4d88a"></i>einmal richtig</span><span><i style="background:#f3b3a1"></i>zuletzt falsch</span><span><i style="background:#e9e5de"></i>noch nicht gefragt</span></div>
-    <div class="actions"><button class="btn danger" type="button" data-act="reset">Fortschritt zurücksetzen</button></div>`;
+    ${!own && !state.remote ? '<p class="hint" style="margin-top:12px">Der Stand von ' + esc(playerName(pid)) + ' wird gerade geladen …</p>' : ''}`;
   map.clear();
   if (m === 'gewaesser') {
     for (const w of WATER) { const l = level(m, w.id); if (l === 3) map.setWaterClass(w.id, 'is-right'); else if (l === 1) map.setWaterClass(w.id, 'is-wrong'); }
@@ -1006,6 +1018,284 @@ function renderProgress() {
     map.setMastery(Object.fromEntries(COUNTRIES.map(c => [c.iso, level(m, c.iso)])));
   }
   map.showRegion('welt');
+}
+
+/* ================= Spieler, Online-Speicher und Duell ================= */
+
+// Lokal lässt sich zum Testen ein anderer Server angeben (?api=…), damit echte Spielstände unberührt bleiben.
+const API = (location.hostname === 'localhost' && new URLSearchParams(location.search).get('api')) || 'https://weltquiz-api-production.up.railway.app';
+const PLAYERS = [{ id: 'emilia', name: 'Emilia' }, { id: 'lars', name: 'Lars' }];
+const playerName = id => PLAYERS.find(p => p.id === id)?.name || id;
+const otherPlayer = id => PLAYERS.find(p => p.id !== id)?.id;
+const sync = { online: null, pushing: false, retry: null, pushTimer: null };
+
+function statsOf(pid) {
+  if (!pid || pid === state.player) return state.stats;
+  return state.remote?.players?.[pid]?.stats || state.bench?.[pid]?.stats || {};
+}
+
+function markDirty(mode, id) {
+  if (!state.player) return;
+  (state.dirty[mode] ||= {})[id] = 1;
+  clearTimeout(sync.pushTimer);
+  sync.pushTimer = setTimeout(() => push(), 1200);
+}
+
+function mergeItem(a, b) {
+  if (!a) return b ? { n: b.n || 0, c: b.c || 0, s: b.s || 0, t: b.t || 0 } : a;
+  if (!b) return a;
+  const latest = (b.t || 0) > (a.t || 0) ? b : a;
+  return { n: Math.max(a.n || 0, b.n || 0), c: Math.max(a.c || 0, b.c || 0), s: latest.s || 0, t: Math.max(a.t || 0, b.t || 0) };
+}
+const sameItem = (a, b) => a && b && a.n === b.n && a.c === b.c && a.s === b.s && a.t === b.t;
+
+/** Online-Stand eines Spielers in den lokalen Stand einarbeiten (für mehrere Geräte). */
+function mergeRemoteIntoLocal(remote) {
+  if (!remote) return false;
+  let changed = false;
+  for (const [mode, items] of Object.entries(remote)) {
+    if (!MODES[mode] || !items) continue;
+    const m = state.stats[mode] ||= {};
+    for (const [id, r] of Object.entries(items)) {
+      const merged = mergeItem(m[id], r);
+      if (!sameItem(m[id], merged)) { m[id] = merged; changed = true; }
+      if (!sameItem(merged, r)) (state.dirty[mode] ||= {})[id] = 1;   // lokal neuer: nachschieben
+    }
+  }
+  return changed;
+}
+
+async function push(opts = {}) {
+  const player = state.player;
+  if (!player || sync.pushing) return;
+  const payload = {};
+  let count = 0;
+  for (const [mode, ids] of Object.entries(state.dirty || {})) {
+    for (const id of Object.keys(ids)) {
+      const v = state.stats[mode]?.[id];
+      if (v) { (payload[mode] ||= {})[id] = v; count++; }
+    }
+  }
+  if (!count) { state.dirty = {}; return; }
+  const sending = state.dirty;
+  state.dirty = {};
+  sync.pushing = true;
+  try {
+    const body = JSON.stringify({ stats: payload });
+    const res = await fetch(`${API}/api/players/${player}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
+      keepalive: !!opts.keepalive && body.length < 60000,
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    sync.online = true;
+    if (state.player === player) {
+      state.remote ||= { players: {} };
+      state.remote.players[player] = { ...(state.remote.players[player] || {}), name: playerName(player), stats: data.stats, updatedAt: data.updatedAt };
+      if (mergeRemoteIntoLocal(data.stats)) onRemoteUpdate();
+    }
+  } catch {
+    // Warteschlange behalten und später erneut versuchen
+    const target = state.player === player ? state.dirty : ((state.bench[player] ||= { stats: {} }).dirty ||= {});
+    for (const [mode, ids] of Object.entries(sending)) for (const id of Object.keys(ids)) (target[mode] ||= {})[id] = 1;
+    sync.online = false;
+    clearTimeout(sync.retry);
+    sync.retry = setTimeout(() => push(), 20000);
+  } finally {
+    sync.pushing = false;
+    save();
+  }
+}
+
+async function pull() {
+  try {
+    const res = await fetch(`${API}/api/state`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    state.remote = { players: data.players, fetchedAt: Date.now() };
+    sync.online = true;
+    if (state.player && data.players[state.player]) mergeRemoteIntoLocal(data.players[state.player].stats);
+    save();
+    onRemoteUpdate();
+    if (Object.keys(state.dirty || {}).length) push();
+  } catch {
+    sync.online = false;
+  }
+}
+
+function onRemoteUpdate() {
+  if (view === 'home') renderHome();
+  else if (view === 'duel') renderDuel(false);
+}
+
+function startSync() {
+  pull();
+  setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 45000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') push({ keepalive: true }); else pull();
+  });
+  window.addEventListener('online', () => { push(); pull(); });
+}
+
+/* ---------- Spielerwahl ---------- */
+
+function renderPlayerChip() {
+  const chip = $('#btn-player');
+  chip.hidden = !state.player;
+  chip.className = 'player-chip p-' + (state.player || '');
+  chip.innerHTML = state.player ? `<i aria-hidden="true"></i>${esc(playerName(state.player))}` : '';
+  chip.setAttribute('aria-label', state.player ? `Spielerin/Spieler: ${playerName(state.player)} – wechseln` : '');
+}
+
+function localLearned() {
+  return Object.keys(MODES).reduce((sum, mode) => sum + masteredCount(mode)[0], 0);
+}
+
+function openChooser(canGoBack) {
+  const learned = localLearned();
+  const answered = Object.values(state.stats).reduce((n, items) => n + Object.keys(items || {}).length, 0);
+  $('#view-player').innerHTML = `
+    ${canGoBack && state.player ? '<button class="back" type="button" data-act="home">‹ Zurück</button>' : ''}
+    <h1 class="title">Weltquiz</h1>
+    <p class="subtitle">${state.player ? 'Wer spielt jetzt?' : 'Wer spielt?'}</p>
+    <div class="who">
+      ${PLAYERS.map(p => `<button type="button" class="who-btn p-${p.id}" data-player="${p.id}"${p.id === state.player ? ' aria-pressed="true"' : ''}>${esc(p.name)}</button>`).join('')}
+    </div>
+    ${!state.player && answered ? `<p class="hint who-note">Auf diesem Gerät wurde schon gespielt (${learned} gelernt). Dieser Fortschritt gehört dann zu dem Namen, den du antippst.</p>` : ''}
+    <p class="hint who-note">Euer Fortschritt wird online gespeichert. So seid ihr auf jedem Gerät auf dem gleichen Stand und seht euch gegenseitig im Duell.</p>`;
+  show('player');
+  map.showRegion('welt');
+}
+
+function choosePlayer(id) {
+  if (!PLAYERS.some(p => p.id === id)) return;
+  if (state.player && state.player !== id) {
+    // anderen Spieler auf dem Gerät parken
+    state.bench[state.player] = { stats: state.stats, round: state.round, dirty: state.dirty };
+    const b = state.bench[id] || {};
+    state.stats = b.stats || {};
+    state.round = b.round || null;
+    state.dirty = b.dirty || {};
+    delete state.bench[id];
+  } else if (!state.player) {
+    // erste Wahl: alles, was auf diesem Gerät schon gespielt wurde, gehört jetzt diesem Spieler
+    const answered = Object.values(state.stats).reduce((n, items) => n + Object.keys(items || {}).length, 0);
+    if (answered && !confirm(`Der bisherige Fortschritt auf diesem Gerät (${localLearned()} gelernt) gehört dann ${playerName(id)}. Stimmt das?`)) return;
+    for (const [mode, items] of Object.entries(state.stats)) for (const item of Object.keys(items || {})) (state.dirty[mode] ||= {})[item] = 1;
+  }
+  state.player = id;
+  if (state.remote?.players?.[id]) mergeRemoteIntoLocal(state.remote.players[id].stats);
+  save();
+  renderPlayerChip();
+  goHome();
+  push();
+  pull();
+}
+
+/* ---------- Duell ---------- */
+
+let duelMode = 'laender';
+
+function scoreOf(stats) {
+  const per = {};
+  let total = 0, answers = 0, correct = 0, last = 0;
+  for (const mode of Object.keys(MODES)) {
+    const ids = mode === 'gewaesser' ? WATER.map(w => w.id) : COUNTRIES.map(c => c.iso);
+    per[mode] = ids.filter(id => levelIn(stats, mode, id) === 3).length;
+    total += per[mode];
+    for (const v of Object.values(stats?.[mode] || {})) {
+      answers += v.n || 0; correct += v.c || 0;
+      if ((v.t || 0) > last) last = v.t;
+    }
+  }
+  return { per, total, answers, correct, last };
+}
+
+function ago(t) {
+  if (!t) return 'noch nie';
+  const min = Math.round((Date.now() - t) / 60000);
+  if (min < 2) return 'gerade eben';
+  if (min < 60) return `vor ${min} Min.`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `vor ${h} Std.`;
+  const d = Math.round(h / 24);
+  return d === 1 ? 'gestern' : `vor ${d} Tagen`;
+}
+
+function duelScores() {
+  return PLAYERS.map(p => ({ ...p, sc: scoreOf(statsOf(p.id)) }));
+}
+
+function duelStrip() {
+  if (!state.player) return '';
+  const [a, b] = duelScores();
+  const fa = a.sc.total || (b.sc.total ? 0 : 1), fb = b.sc.total || (a.sc.total ? 0 : 1);
+  return `<button class="duel-strip" type="button" data-go="duell" aria-label="Duell: ${esc(a.name)} ${a.sc.total}, ${esc(b.name)} ${b.sc.total}">
+    <span class="ds-name p-${a.id}">${esc(a.name)} <b>${a.sc.total}</b></span>
+    <span class="ds-bar"><i class="p-${a.id}" style="flex:${fa}"></i><i class="p-${b.id}" style="flex:${fb}"></i></span>
+    <span class="ds-name p-${b.id}"><b>${b.sc.total}</b> ${esc(b.name)}</span>
+  </button>`;
+}
+
+function openDuel() {
+  show('duel');
+  renderDuel(true);
+  pull();
+}
+
+function renderDuel(withMap = true) {
+  const [a, b] = duelScores();
+  const lead = a.sc.total === b.sc.total ? null : (a.sc.total > b.sc.total ? a : b);
+  const diff = Math.abs(a.sc.total - b.sc.total);
+  const verdict = !a.sc.total && !b.sc.total ? 'Noch hat niemand etwas gelernt. Wer fängt an?'
+    : !lead ? 'Gleichstand!' : `${esc(lead.name)} liegt ${diff} vorne.`;
+  const pct = sc => (sc.answers ? Math.round(sc.correct / sc.answers * 100) + ' %' : '–');
+  const tabs = [['laender', 'Länder'], ['hauptstaedte', 'Hauptstädte'], ['flaggen', 'Flaggen'], ['gewaesser', 'Gewässer']];
+  const total = mode => (mode === 'gewaesser' ? WATER.length : COUNTRIES.length);
+  $('#view-duel').innerHTML = `
+    <button class="back" type="button" data-act="home">‹ Zurück</button>
+    <h2 class="h2">Duell</h2>
+    <p class="lead">Gezählt wird, was gelernt ist: die letzten zwei Antworten waren richtig.</p>
+    <div class="duel-head">
+      ${[a, b].map(p => `<div class="duel-side p-${p.id}${lead && lead.id === p.id ? ' lead' : ''}">
+        <span class="duel-name">${esc(p.name)}${p.id === state.player ? ' <small>(du)</small>' : ''}</span>
+        <span class="duel-total">${p.sc.total}</span>
+        <span class="duel-sub">gelernt</span></div>`).join('<span class="duel-vs">gegen</span>')}
+    </div>
+    <p class="duel-verdict">${verdict}</p>
+    <div class="duel-rows">
+      ${tabs.map(([mode, label]) => `<div class="duel-row">
+        <span class="duel-mode">${label}</span>
+        <span class="duel-num p-${a.id}">${a.sc.per[mode]}</span>
+        <span class="duel-bars" title="von ${total(mode)}"><i class="p-${a.id}" style="width:${a.sc.per[mode] / Math.max(1, a.sc.per[mode], b.sc.per[mode]) * 100}%"></i><i class="p-${b.id}" style="width:${b.sc.per[mode] / Math.max(1, a.sc.per[mode], b.sc.per[mode]) * 100}%"></i></span>
+        <span class="duel-num p-${b.id}">${b.sc.per[mode]}</span>
+      </div>`).join('')}
+    </div>
+    <dl class="duel-stats">
+      <dt>Antworten</dt><dd>${a.sc.answers}</dd><dd>${b.sc.answers}</dd>
+      <dt>Trefferquote</dt><dd>${pct(a.sc)}</dd><dd>${pct(b.sc)}</dd>
+      <dt>Zuletzt gespielt</dt><dd>${ago(a.sc.last)}</dd><dd>${ago(b.sc.last)}</dd>
+    </dl>
+    <p class="field-label" style="margin-top:16px">Wer kann was? Auf der Karte:</p>
+    <div class="options">${tabs.map(([id, l]) => `<button type="button" class="opt" data-dmode="${id}" aria-pressed="${id === duelMode}">${l}</button>`).join('')}</div>
+    <div class="key"><span><i class="k-a"></i>nur ${esc(a.name)}</span><span><i class="k-b"></i>nur ${esc(b.name)}</span><span><i style="background:#86c895"></i>beide</span><span><i style="background:#e9e5de"></i>noch keiner</span></div>
+    <div class="actions">${PLAYERS.map(p => `<button class="btn" type="button" data-pplayer-open="${p.id}">Karte von ${esc(p.name)}</button>`).join('')}</div>
+    ${sync.online === false ? '<p class="hint" style="margin-top:10px">Gerade offline – der Stand wird nachgeholt, sobald wieder Internet da ist.</p>' : ''}`;
+  $('#view-duel').querySelectorAll('[data-pplayer-open]').forEach(btn => btn.addEventListener('click', () => openProgress(btn.dataset.pplayerOpen)));
+  // Vergleichskarte
+  const mode = duelMode;
+  const sa = statsOf(a.id), sb = statsOf(b.id);
+  const cls = id => {
+    const la = levelIn(sa, mode, id) === 3, lb = levelIn(sb, mode, id) === 3;
+    return la && lb ? 'ab' : la ? 'a' : lb ? 'b' : null;
+  };
+  map.clear();
+  if (mode === 'gewaesser') {
+    for (const w of WATER) { const k = cls(w.id); if (k) map.setWaterClass(w.id, 'cmp-' + k); }
+  } else {
+    map.setCompare(Object.fromEntries(COUNTRIES.map(c => [c.iso, cls(c.iso)])));
+  }
+  if (withMap) map.showRegion('welt');
 }
 
 /* ================= Ereignisse ================= */
@@ -1020,6 +1310,7 @@ function wire() {
       else if (g === 'entdecken') openExplore();
       else if (g === 'fakten') openFacts();
       else if (g === 'fortschritt') openProgress();
+      else if (g === 'duell') openDuel();
       return;
     }
     if (t.dataset.variant) { setup.variant = t.dataset.variant; renderSetup(); if (setup.mode === 'gewaesser') focusSetupRegion(); return; }
@@ -1031,6 +1322,9 @@ function wire() {
       return;
     }
     if (t.dataset.pmode) { progressMode = t.dataset.pmode; renderProgress(); return; }
+    if (t.dataset.pplayer) { progressPlayer = t.dataset.pplayer; renderProgress(); return; }
+    if (t.dataset.dmode) { duelMode = t.dataset.dmode; renderDuel(); return; }
+    if (t.dataset.player) { choosePlayer(t.dataset.player); return; }
     switch (t.dataset.act) {
       case 'home': goHome(); break;
       case 'resume': resumeRound(); break;
@@ -1048,15 +1342,12 @@ function wire() {
       }
       case 'again': openSetup(round.mode); break;
       case 'next-fact': factPos++; renderFact(); break;
-      case 'reset':
-        if (confirm('Wirklich den ganzen Fortschritt löschen? Das lässt sich nicht rückgängig machen.')) {
-          state.stats = {}; state.factIdx = {}; save(); renderProgress();
-        }
-        break;
+      case 'switch-player': openChooser(true); break;
     }
   });
 
   $('#brand').addEventListener('click', goHome);
+  $('#btn-player').addEventListener('click', () => openChooser(true));
   $('#btn-quit').addEventListener('click', () => {
     if (round && round.results.length) finishRound(); else goHome();
   });
@@ -1095,10 +1386,11 @@ async function main() {
   map = new WorldMap($('#map'), topo);
   map.getInsets = insets;
   wire();
-  renderHome();
-  show('home');
+  renderPlayerChip();
+  if (state.player) { renderHome(); show('home'); } else openChooser(false);
   map.showRegion('welt', { duration: 0 });
-  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, map, state };
+  startSync();
+  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, openDuel, choosePlayer, pull, push, map, state };
 }
 
 main();

@@ -347,12 +347,21 @@ export class WorldMap {
   // ---------- Hervorhebungen ----------
   clear() {
     this.landSel.classed('is-target is-right is-wrong is-pick is-out is-hover', false)
-      .classed('m0 m1 m2 m3', false);
-    this.waterSel.classed('is-target is-right is-wrong', false);
-    this.lakeSel.classed('is-target is-right is-wrong', false);
+      .classed('m0 m1 m2 m3', false).classed('cmp-a cmp-b cmp-ab', false);
+    this.waterSel.classed('is-target is-right is-wrong cmp-a cmp-b cmp-ab', false);
+    this.lakeSel.classed('is-target is-right is-wrong cmp-a cmp-b cmp-ab', false);
     this.overlay.selectAll('*').remove();
     this.overlayItems = [];
-    this.svg.classed('mastery', false);
+    this.svg.classed('mastery', false).classed('compare', false);
+  }
+
+  /** Duell-Karte: je Land 'a' (nur Spieler A), 'b' (nur B), 'ab' (beide) oder nichts. */
+  setCompare(kinds) {
+    this.svg.classed('compare', true);
+    this.landSel.each(function (f) {
+      const k = kinds[f.properties.c];
+      d3.select(this).classed('cmp-a', k === 'a').classed('cmp-b', k === 'b').classed('cmp-ab', k === 'ab');
+    });
   }
 
   setCountryClass(code, cls, on = true) {
