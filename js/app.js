@@ -650,7 +650,8 @@ function answer(ok, chosen) {
       }
       if (variant === 'capital') {
         const other = chosen && C.get(chosen.iso);
-        if (ok) detail = `<b>${esc(chosen.label)}</b> ist ${chosen.idx === 0 ? 'die Hauptstadt' : 'eine der Hauptstädte'} von ${esc(c.name)}.`;
+        if (ok && chosen.idx === 0) detail = `<b>${esc(chosen.label)}</b> ist die Hauptstadt von ${esc(c.name)}.`;
+        else if (ok) detail = `<b>${esc(chosen.label)}</b> zählt als richtig (${esc(capitalsOf(c)[chosen.idx].role || 'Regierungssitz')}). Als Hauptstadt gilt ${esc(c.capital.name)}.`;
         else if (!chosen) detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b>.`;
         else if (chosen.city && chosen.iso === id) detail = `${esc(chosen.label)} liegt zwar in ${esc(c.name)}, ist aber nicht die Hauptstadt. Die heißt <b>${esc(c.capital.name)}</b>.`;
         else if (chosen.city) detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b>. ${esc(chosen.label)} liegt in ${esc(other.name)} und ist dort keine Hauptstadt.`;
@@ -664,6 +665,8 @@ function answer(ok, chosen) {
       detail = ok ? `Genau, hier liegt <b>${esc(c.name)}</b>.` : `${esc(c.name)} ist grün markiert${wrongCode ? ` – du hast ${esc(nameOf(wrongCode, q.pick?.props))} angetippt` : ''}.`;
     } else if (mode === 'flaggen' && variant === 'pick') {
       detail = ok ? `Das ist die Flagge von <b>${esc(c.name)}</b>.` : `Grün umrandet ist die Flagge von <b>${esc(c.name)}</b>${chosen ? ` – du hast die von ${esc(chosen.label)} gewählt` : ''}.`;
+    } else if (mode === 'flaggen') {
+      detail = ok ? `Das ist die Flagge von <b>${esc(c.name)}</b>.` : `Das ist die Flagge von <b>${esc(c.name)}</b>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
     } else {
       detail = ok ? `Das ist <b>${esc(c.name)}</b>.` : `Gesucht war <b>${esc(c.name)}</b>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
     }
