@@ -1,9 +1,10 @@
-import { WorldMap, REGION_BOX, W } from './map.js';
-import { Searcher } from './search.js';
-import { COUNTRIES } from './data/countries.js';
-import { WATER } from './data/water.js';
-import { WORLD_FACTS } from './data/world-facts.js';
-import { CITIES } from './data/cities.js';
+import { WorldMap, REGION_BOX, W } from './map.js?v=2';
+import { Searcher } from './search.js?v=2';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=2';
+import { COUNTRIES } from './data/countries.js?v=2';
+import { WATER } from './data/water.js?v=2';
+import { WORLD_FACTS } from './data/world-facts.js?v=2';
+import { CITIES } from './data/cities.js?v=2';
 
 /* ================= Daten ================= */
 
@@ -76,11 +77,17 @@ const FLAG_GROUPS = [
 
 const KEY = 'weltquiz.v1';
 const state = (() => {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch { /* privat/blockiert */ }
   try {
-    const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && typeof s === 'object' && s.stats) return { sound: true, last: {}, factIdx: {}, ...s };
-  } catch { /* privat/blockiert */ }
-  return { stats: {}, sound: true, last: {}, factIdx: {} };
+    const s = JSON.parse(raw);
+    if (s && typeof s === 'object' && s.stats) {
+      // Sicherheitskopie des zuletzt gültigen Spielstands
+      try { localStorage.setItem(KEY + '.backup', raw); } catch { /* voll/blockiert */ }
+      return { sound: true, last: {}, factIdx: {}, round: null, ...s };
+    }
+  } catch { /* kaputter Eintrag: Sicherheitskopie bleibt unangetastet */ }
+  return { stats: {}, sound: true, last: {}, factIdx: {}, round: null };
 })();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* egal */ } };
 
@@ -169,30 +176,6 @@ CITIES.forEach((city, i) => capitalItems.push({ id: `city:${i}`, iso: city.iso, 
 const capitalSearch = new Searcher(capitalItems);
 const waterSearch = new Searcher(WATER.map(w => ({ id: w.id, label: w.name, terms: w.aliases })));
 
-/* ================= Ton ================= */
-
-let actx = null;
-function sound(ok) {
-  if (!state.sound) return;
-  try {
-    actx ||= new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume();
-    const t0 = actx.currentTime + 0.01;
-    const notes = ok ? [659.3, 987.8] : [233.1, 196];
-    notes.forEach((f, i) => {
-      const o = actx.createOscillator(), g = actx.createGain();
-      o.type = ok ? 'sine' : 'triangle';
-      o.frequency.value = f;
-      const t = t0 + i * 0.1;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(ok ? 0.13 : 0.09, t + 0.015);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
-      o.connect(g).connect(actx.destination);
-      o.start(t); o.stop(t + 0.3);
-    });
-  } catch { /* kein Audio */ }
-}
-
 /* ================= Karte ================= */
 
 let map = null;
@@ -258,6 +241,7 @@ const SWATCH = {
   flaggen: '<svg viewBox="0 0 34 24"><rect width="34" height="8" fill="#2a2833"/><rect y="8" width="34" height="8" fill="#e0442a"/><rect y="16" width="34" height="8" fill="#f5c542"/></svg>',
   entdecken: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><circle cx="17" cy="12" r="8.5" fill="none" stroke="#2a2833" stroke-width="1.3"/><path d="M17 4.5l2.2 7.5-2.2 7.5-2.2-7.5z" fill="#d6246e"/><path d="M17 12l2.2 0-2.2 7.5z" fill="#2a2833"/></svg>',
   fakten: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d8cbea"/><text x="17" y="18.5" text-anchor="middle" font-family="Spectral, Georgia, serif" font-style="italic" font-size="17" font-weight="500" fill="#2a2833">i</text></svg>',
+  resume: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d6246e"/><path d="M13 6l10 6-10 6z" fill="#fff"/></svg>',
   fortschritt: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><rect x="0" y="0" width="12" height="24" fill="#86c895"/><rect x="12" y="0" width="9" height="24" fill="#f4d88a"/><rect x="21" y="0" width="6" height="24" fill="#f3b3a1"/></svg>',
 };
 
@@ -289,6 +273,17 @@ function factSubject(f) {
   return { label: f.world ? `Rund um die Welt – ${c.name}` : c.name, flag: f.world ? null : c.iso };
 }
 
+function resumeRow() {
+  const r = savedRound();
+  if (!r) return '';
+  const def = MODES[r.mode];
+  const where = r.mode === 'gewaesser' ? '' : ` – ${regionLabel(r.region)}`;
+  return `<li><button class="legend-row resume-row" data-act="resume" type="button">
+    <span class="swatch">${SWATCH.resume}</span>
+    <span><span class="name">Runde fortsetzen</span><span class="desc">${esc(def.title)}${esc(where)}: weiter mit Frage ${r.results.length + 1} von ${r.items.length}</span></span>
+  </button></li>`;
+}
+
 function renderHome() {
   const rows = [
     ['laender', MODES.laender.title, MODES.laender.desc],
@@ -305,6 +300,7 @@ function renderHome() {
     <h1 class="title">Weltquiz</h1>
     <p class="subtitle">Die Welt, Land für Land.</p>
     <ul class="legend-list">
+      ${resumeRow()}
       ${rows.map(([id, name, desc]) => {
         let count = '';
         if (MODES[id]) { const [m, n] = masteredCount(id); count = `<span class="count" title="gelernt">${m}/${n}</span>`; }
@@ -408,7 +404,32 @@ function startRound(cfg, items) {
   items = items || pickItems(buildPool(cfg), cfg.count, cfg.mode);
   round = { ...cfg, items, i: 0, results: [], streak: 0, best: 0 };
   state.last[cfg.mode] = { variant: cfg.variant, region: cfg.region, count: cfg.count };
+  persistRound();
+  show('quiz');
+  nextQuestion();
+}
+
+// Die laufende Runde wird mitgespeichert – nach einem Neuladen geht es an derselben Stelle weiter.
+function persistRound() {
+  if (!round) return;
+  const { mode, variant, region, count, items, i, results, streak, best } = round;
+  state.round = { mode, variant, region, count, items, i, results, streak, best, t: Date.now() };
   save();
+}
+
+function savedRound() {
+  const r = state.round;
+  if (!r || !Array.isArray(r.items) || !Array.isArray(r.results) || !MODES[r.mode]) return null;
+  const known = id => (r.mode === 'gewaesser' ? WB.has(id) : C.has(id));
+  if (!r.items.length || !r.items.every(known) || r.results.length >= r.items.length) return null;
+  return r;
+}
+
+function resumeRound() {
+  const r = savedRound();
+  if (!r) { state.round = null; save(); renderHome(); return; }
+  round = { ...r, streak: r.streak || 0, best: r.best || 0 };
+  round.i = Math.max(r.i || 0, r.results.length);
   show('quiz');
   nextQuestion();
 }
@@ -433,6 +454,7 @@ function renderHud() {
 
 function nextQuestion() {
   if (round.i >= round.items.length) return finishRound();
+  sfx.whoosh();
   const id = round.items[round.i];
   const { mode, variant } = round;
   q = { id, mode, variant, answered: false, hinted: false, pick: null };
@@ -549,7 +571,7 @@ function wireCombobox() {
     else if (e.key === 'Escape') { close(); }
     else if (e.key === 'Enter') {
       e.stopPropagation();   // sonst springt der globale Enter-Handler direkt zur nächsten Frage
-      if (!list.hidden && active >= 0 && results[active] && results[active].item !== q.chosen) { e.preventDefault(); choose(results[active]); }
+      if (!list.hidden && active >= 0 && results[active] && results[active].item !== q.chosen) { e.preventDefault(); choose(results[active]); sfx.select(); }
       else if (!list.hidden && active >= 0 && results[active]) { e.preventDefault(); choose(results[active]); submitText(); }
     }
   });
@@ -558,6 +580,7 @@ function wireCombobox() {
     if (!li) return;
     e.preventDefault();
     choose(results[+li.dataset.i]);
+    sfx.select();
     input.focus({ preventScroll: true });
   });
   input.addEventListener('blur', () => setTimeout(close, 120));
@@ -594,6 +617,7 @@ function findQuestion(c) {
     if (q.pick) map.setCountryClass(q.pick.code, 'is-pick', false);
     q.pick = { code: hit.code, props: hit.props };
     map.setCountryClass(hit.code, 'is-pick', true);
+    sfx.select();
     $('#find-state').textContent = 'Auswahl getroffen. Passt? Dann OK – oder tippe ein anderes Land an.';
     $('[data-act="confirm-pick"]').disabled = false;
   };
@@ -629,10 +653,13 @@ function answer(ok, chosen) {
   q.answered = true;
   const { mode, variant, id } = q;
   record(mode, id, ok, q.hinted);
-  sound(ok);
+  if (ok) sfx.correct(); else sfx.wrong();
   round.results.push({ id, ok, chosen: chosen ? chosenLabel(chosen) : null });
   round.streak = ok ? round.streak + 1 : 0;
   round.best = Math.max(round.best, round.streak);
+  const streakNow = round.streak;
+  if (ok && (streakNow === 3 || streakNow === 5 || (streakNow >= 10 && streakNow % 5 === 0))) setTimeout(() => sfx.streak(streakNow), 450);
+  persistRound();
   renderHud();
   map.onClick = null;
   $('#map').classList.remove('pickable');
@@ -769,6 +796,7 @@ function nextFact(key, facts) {
 function useHint() {
   if (!q || q.answered) return;
   q.hinted = true;
+  sfx.hint();
   if (q.mode === 'laender' && q.variant === 'find') {
     const b = map.countryBox(q.id);
     const cx = (b[0][0] + b[1][0]) / 2 + (Math.random() - 0.5) * 30, cy = (b[0][1] + b[1][1]) / 2 + (Math.random() - 0.5) * 20;
@@ -792,6 +820,7 @@ function skip() {
 function next() {
   if (!round) return;
   round.i++;
+  persistRound();
   nextQuestion();
 }
 
@@ -801,6 +830,9 @@ function finishRound() {
   const r = round;
   const right = r.results.filter(x => x.ok).length;
   const n = r.results.length;
+  state.round = null;
+  save();
+  if (n) sfx.fanfare(right / n);
   const missed = r.results.filter(x => !x.ok);
   const def = MODES[r.mode];
   const variantLabel = def.variants.find(v => v.id === r.variant)?.label;
@@ -1001,6 +1033,7 @@ function wire() {
     if (t.dataset.pmode) { progressMode = t.dataset.pmode; renderProgress(); return; }
     switch (t.dataset.act) {
       case 'home': goHome(); break;
+      case 'resume': resumeRound(); break;
       case 'start': startRound({ ...setup }); break;
       case 'hint': useHint(); break;
       case 'skip': skip(); break;
@@ -1030,7 +1063,13 @@ function wire() {
   const snd = $('#btn-sound');
   const syncSound = () => snd.setAttribute('aria-pressed', String(!!state.sound));
   syncSound();
-  snd.addEventListener('click', () => { state.sound = !state.sound; save(); syncSound(); if (state.sound) sound(true); });
+  snd.addEventListener('click', () => {
+    state.sound = !state.sound;
+    save();
+    syncSound();
+    setSoundEnabled(state.sound);
+    if (state.sound) sfx.correct();
+  });
 
   document.addEventListener('keydown', e => {
     if (e.key !== 'Enter' || e.target.closest?.('input, button, textarea, select, label')) return;
@@ -1043,6 +1082,7 @@ function wire() {
 
 async function main() {
   watchKeyboard();
+  setupSound(() => !!state.sound);
   let topo;
   try {
     const res = await fetch('data/world.json?v=3');
