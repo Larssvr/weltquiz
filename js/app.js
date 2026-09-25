@@ -442,8 +442,7 @@ function nextQuestion() {
 }
 
 function flyCountry(code, ring) {
-  const box = map.countryBox(code);
-  return map.flyToCountry(code).then(() => { if (ring && q && q.id === code && !q.answered) map.ringFor(box); });
+  return map.flyToCountry(code).then(() => { if (ring && q && q.id === code && !q.answered) map.ringsForCountry(code); });
 }
 
 /* ----- Text-Frage mit Vorschlagsliste ----- */
@@ -886,7 +885,7 @@ function renderFact() {
       <button class="btn primary" type="button" data-act="next-fact">Nächster Fakt</button>
     </div>`;
   if (f.water) { map.setWaterClass(f.water, 'is-target'); map.flyToWater(f.water); }
-  else if (f.iso) { map.setCountryClass(f.iso, 'is-target'); map.flyToCountry(f.iso).then(() => map.ringFor(map.countryBox(f.iso))); }
+  else if (f.iso) { map.setCountryClass(f.iso, 'is-target'); map.flyToCountry(f.iso).then(() => map.ringsForCountry(f.iso)); }
   else map.showRegion('welt');
   $('[data-act="next-fact"]').focus({ preventScroll: true });
 }
@@ -1002,7 +1001,7 @@ async function main() {
   watchKeyboard();
   let topo;
   try {
-    const res = await fetch('data/world.json?v=2');
+    const res = await fetch('data/world.json?v=3');
     if (!res.ok) throw new Error(res.status);
     topo = await res.json();
   } catch (err) {

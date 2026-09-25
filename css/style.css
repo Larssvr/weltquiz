@@ -73,9 +73,10 @@ button { cursor: pointer; }
 .land .c5 { fill: var(--land-5); }
 .land .ice { fill: #f6f8fa; }
 .land path.is-out { fill: var(--land-out); }
-.land path.is-target, .land path.is-pick { fill: var(--target); }
-.land path.is-right { fill: var(--right); }
-.land path.is-wrong { fill: var(--wrong); }
+.land path.is-target, .land path.is-pick { fill: var(--target); stroke: var(--target); }
+.land path.is-right { fill: var(--right); stroke: var(--right); }
+.land path.is-wrong { fill: var(--wrong); stroke: var(--wrong); }
+.land path.is-target, .land path.is-pick, .land path.is-right, .land path.is-wrong { stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .mastery .land path { fill: #e9e5de; }
 .mastery .land path.m1 { fill: #f3b3a1; }
 .mastery .land path.m2 { fill: #f4d88a; }

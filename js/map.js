@@ -159,7 +159,8 @@ export class WorldMap {
     if (!this._initialized) {
       this._initialized = true;
       this.showRegion('welt', { duration: 0 });
-    } else {
+    } else if (!this._flying) {
+      // während eines Kameraflugs nicht eingreifen – der Flug normalisiert am Ende selbst
       this.svg.call(this.zoom.transform, this._constrain(this.transform, [[0, 0], [this.vw, this.vh]]));
     }
   }
@@ -218,10 +219,12 @@ export class WorldMap {
       this.svg.call(this.zoom.transform, t);
       return Promise.resolve();
     }
+    this._flying = true;
     return new Promise(resolve => {
       this.svg.transition().duration(d).ease(d3.easeCubicInOut)
         .call(this.zoom.transform, t)
         .on('end interrupt', () => {
+          this._flying = false;
           this.svg.call(this.zoom.transform, this._constrain(this.transform, [[0, 0], [this.vw, this.vh]]));
           resolve();
         });
@@ -386,6 +389,30 @@ export class WorldMap {
     g.append('circle').attr('r', 17).attr('class', 'ring-line');
     this.overlayItems.push({ x, y, el: g, kind: 'ring', box, force });
     this._placeOverlay();
+  }
+
+  /** Ringe um jede kleine Inselgruppe eines Landes (für Staaten aus winzigen, verstreuten Inseln). */
+  ringsForCountry(code, max = 8) {
+    const pieces = this._pieces(this.hit.filter(h => h.c === code)).sort((a, b) => b.a - a.a);
+    const k = this.transform.k;
+    const clusters = [];
+    for (const p of pieces) {
+      const c = clusters.find(c => {
+        let dx = p.cx - c.cx;
+        if (Math.abs(dx) > W / 2) dx -= Math.sign(dx) * W;
+        return Math.hypot(dx * k, (p.cy - c.cy) * k) < 70;
+      });
+      if (c) {
+        let shift = 0;
+        if (Math.abs(p.cx - c.cx) > W / 2) shift = -Math.sign(p.cx - c.cx) * W;
+        c.x0 = Math.min(c.x0, p.box[0][0] + shift); c.x1 = Math.max(c.x1, p.box[1][0] + shift);
+        c.y0 = Math.min(c.y0, p.box[0][1]); c.y1 = Math.max(c.y1, p.box[1][1]);
+        c.cx = (c.x0 + c.x1) / 2; c.cy = (c.y0 + c.y1) / 2;
+      } else {
+        clusters.push({ x0: p.box[0][0], y0: p.box[0][1], x1: p.box[1][0], y1: p.box[1][1], cx: p.cx, cy: p.cy });
+      }
+    }
+    for (const c of clusters.slice(0, max)) this.ringFor([[c.x0, c.y0], [c.x1, c.y1]]);
   }
 
   pin(lon, lat, text, kind = 'capital') {
