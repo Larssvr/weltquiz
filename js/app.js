@@ -138,6 +138,7 @@ function sound(ok) {
   if (!state.sound) return;
   try {
     actx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
     const t0 = actx.currentTime + 0.01;
     const notes = ok ? [659.3, 987.8] : [233.1, 196];
     notes.forEach((f, i) => {
@@ -331,8 +332,6 @@ function renderSetup() {
 function focusSetupRegion() {
   map.clear();
   if (setup.mode === 'gewaesser') {
-    const ids = waterIn(setup.variant).map(w => w.id);
-    ids.forEach(id => map.setWaterClass(id, 'is-target'));
     map.showRegion('welt');
     return;
   }
@@ -512,6 +511,7 @@ function wireCombobox() {
     else if (e.key === 'ArrowUp' && results.length) { e.preventDefault(); active = (active - 1 + results.length) % results.length; render(); }
     else if (e.key === 'Escape') { close(); }
     else if (e.key === 'Enter') {
+      e.stopPropagation();   // sonst springt der globale Enter-Handler direkt zur nächsten Frage
       if (!list.hidden && active >= 0 && results[active] && results[active].item !== q.chosen) { e.preventDefault(); choose(results[active]); }
       else if (!list.hidden && active >= 0 && results[active]) { e.preventDefault(); choose(results[active]); submitText(); }
     }
@@ -987,8 +987,9 @@ function wire() {
   snd.addEventListener('click', () => { state.sound = !state.sound; save(); syncSound(); if (state.sound) sound(true); });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && view === 'quiz' && q?.answered && e.target.tagName !== 'BUTTON') { e.preventDefault(); next(); }
-    if (e.key === 'Enter' && view === 'facts' && e.target.tagName !== 'BUTTON') { factPos++; renderFact(); }
+    if (e.key !== 'Enter' || e.target.closest?.('input, button, textarea, select, label')) return;
+    if (view === 'quiz' && q?.answered) { e.preventDefault(); next(); }
+    else if (view === 'facts') { factPos++; renderFact(); }
   });
 }
 
