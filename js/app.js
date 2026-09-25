@@ -1,0 +1,1017 @@
+import { WorldMap, REGION_BOX, W } from './map.js';
+import { Searcher } from './search.js';
+import { COUNTRIES } from './data/countries.js';
+import { WATER } from './data/water.js';
+import { WORLD_FACTS } from './data/world-facts.js';
+import { CITIES } from './data/cities.js';
+
+/* ================= Daten ================= */
+
+const C = new Map(COUNTRIES.map(c => [c.iso, c]));
+const WB = new Map(WATER.map(w => [w.id, w]));
+
+const REGIONS = [
+  { id: 'welt', label: 'Welt' },
+  { id: 'europa', label: 'Europa' },
+  { id: 'asien', label: 'Asien' },
+  { id: 'afrika', label: 'Afrika' },
+  { id: 'nordamerika', label: 'Nord- & Mittelamerika' },
+  { id: 'suedamerika', label: 'Südamerika' },
+  { id: 'ozeanien', label: 'Ozeanien' },
+];
+const regionLabel = id => REGIONS.find(r => r.id === id)?.label || 'Welt';
+
+const MODES = {
+  laender: {
+    title: 'Länder erkennen', desc: 'Welches Land ist markiert?',
+    variantLabel: 'Wie willst du spielen?',
+    variants: [
+      { id: 'name', label: 'Land benennen', hint: 'Ein Land ist markiert, du schreibst den Namen.' },
+      { id: 'find', label: 'Land finden', hint: 'Du bekommst den Namen und tippst auf die Karte.' },
+    ],
+    regions: true,
+  },
+  hauptstaedte: {
+    title: 'Hauptstädte', desc: 'Welche Stadt gehört zu welchem Land?',
+    variantLabel: 'Wie willst du spielen?',
+    variants: [
+      { id: 'capital', label: 'Hauptstadt nennen', hint: 'Du siehst das Land und schreibst die Hauptstadt.' },
+      { id: 'country', label: 'Land zur Hauptstadt', hint: 'Du siehst die Hauptstadt und schreibst das Land.' },
+    ],
+    regions: true,
+  },
+  gewaesser: {
+    title: 'Meere, Seen & Ozeane', desc: 'Welches Gewässer ist markiert?',
+    variantLabel: 'Welche Gewässer?',
+    variants: [
+      { id: 'alle', label: 'Alle Gewässer' },
+      { id: 'meere', label: 'Ozeane & Meere' },
+      { id: 'seen', label: 'Seen' },
+    ],
+    regions: false,
+  },
+  flaggen: {
+    title: 'Flaggen', desc: 'Zu welchem Land gehört die Flagge?',
+    variantLabel: 'Wie willst du spielen?',
+    variants: [
+      { id: 'flag', label: 'Flagge erkennen', hint: 'Du siehst eine Flagge und schreibst das Land.' },
+      { id: 'pick', label: 'Flagge auswählen', hint: 'Du siehst ein Land und wählst aus vier Flaggen.' },
+    ],
+    regions: true,
+  },
+};
+
+// Flaggen, die sich zum Verwechseln ähneln – gute Ablenker für „Flagge auswählen“
+const FLAG_GROUPS = [
+  ['TD', 'RO', 'AD', 'MD'], ['ID', 'MC', 'PL', 'SG'], ['IE', 'CI', 'IT'], ['NL', 'LU', 'HR', 'PY', 'FR', 'RU'],
+  ['AU', 'NZ', 'FJ', 'TV'], ['NO', 'IS', 'DK', 'FI', 'SE'], ['SN', 'ML', 'GN', 'CM'], ['RU', 'SK', 'SI', 'RS'],
+  ['CO', 'EC', 'VE'], ['NE', 'IN', 'CI'], ['QA', 'BH'], ['AR', 'UY', 'SV', 'NI', 'HN', 'GT'],
+  ['JO', 'PS', 'SD', 'KW', 'AE'], ['SY', 'IQ', 'EG', 'YE'], ['HT', 'LI'], ['BE', 'DE'], ['AT', 'LV', 'LB'],
+  ['MY', 'US', 'LR'], ['CZ', 'PH', 'SS', 'BS'], ['GH', 'BO', 'ET', 'LT'], ['KP', 'KR'], ['CN', 'VN'],
+  ['JP', 'BD', 'PW'], ['CH', 'TO', 'GE'], ['TN', 'TR'], ['PE', 'CA', 'LV'], ['MR', 'PK', 'DZ'], ['GW', 'BF', 'ST'],
+  ['BA', 'XK', 'CY'], ['DO', 'DM'], ['CR', 'TH', 'CU'], ['UA', 'KZ', 'PW'], ['BY', 'MG', 'HU', 'BG'],
+];
+
+/* ================= Speicher ================= */
+
+const KEY = 'weltquiz.v1';
+const state = (() => {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && typeof s === 'object' && s.stats) return { sound: true, last: {}, factIdx: {}, ...s };
+  } catch { /* privat/blockiert */ }
+  return { stats: {}, sound: true, last: {}, factIdx: {} };
+})();
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* egal */ } };
+
+function stat(mode, id) { return state.stats[mode]?.[id]; }
+function level(mode, id) {
+  const s = stat(mode, id);
+  if (!s || !s.n) return 0;
+  if (s.s >= 2) return 3;
+  if (s.s === 1) return 2;
+  return 1;
+}
+function record(mode, id, ok, hinted) {
+  const m = state.stats[mode] ||= {};
+  const s = m[id] ||= { n: 0, c: 0, s: 0 };
+  s.n++; s.t = Date.now();
+  if (ok) { s.c++; if (!hinted) s.s++; } else s.s = 0;
+  save();
+}
+
+/* ================= Hilfen ================= */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+const flagUrl = iso => `flags/${iso.toLowerCase()}.svg`;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ICON_OK = '<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="currentColor"/><path d="M8 14.5l4 4 8-9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_NO = '<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="13" fill="currentColor"/><path d="M9.5 9.5l9 9M18.5 9.5l-9 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>';
+
+function nameOf(code, props) {
+  return C.get(code)?.name || props?.n || code;
+}
+function inRegion(c, region) { return region === 'welt' || c.regions.includes(region); }
+function countriesIn(region) { return COUNTRIES.filter(c => inRegion(c, region)); }
+function waterIn(variant) {
+  if (variant === 'meere') return WATER.filter(w => w.group === 'meer');
+  if (variant === 'seen') return WATER.filter(w => w.group === 'see');
+  return WATER;
+}
+function capitalsOf(c) { return [c.capital, ...(c.otherCapitals || [])]; }
+function letters(s) { return [...s.replace(/[^\p{L}]/gu, '')].length; }
+
+/* ================= Suche ================= */
+
+const countrySearch = new Searcher(COUNTRIES.map(c => ({ id: c.iso, label: c.name, terms: c.aliases })));
+const capitalItems = [];
+for (const c of COUNTRIES) capitalsOf(c).forEach((cap, i) => capitalItems.push({ id: `${c.iso}:${i}`, iso: c.iso, idx: i, label: cap.name, terms: cap.aliases || [], lat: cap.lat, lon: cap.lon }));
+CITIES.forEach((city, i) => capitalItems.push({ id: `city:${i}`, iso: city.iso, city: true, label: city.name, terms: city.aliases || [], lat: city.lat, lon: city.lon }));
+const capitalSearch = new Searcher(capitalItems);
+const waterSearch = new Searcher(WATER.map(w => ({ id: w.id, label: w.name, terms: w.aliases })));
+
+/* ================= Ton ================= */
+
+let actx = null;
+function sound(ok) {
+  if (!state.sound) return;
+  try {
+    actx ||= new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = actx.currentTime + 0.01;
+    const notes = ok ? [659.3, 987.8] : [233.1, 196];
+    notes.forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = ok ? 'sine' : 'triangle';
+      o.frequency.value = f;
+      const t = t0 + i * 0.1;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(ok ? 0.13 : 0.09, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      o.connect(g).connect(actx.destination);
+      o.start(t); o.stop(t + 0.3);
+    });
+  } catch { /* kein Audio */ }
+}
+
+/* ================= Karte ================= */
+
+let map = null;
+let kbHeight = 0;
+
+function insets() {
+  const top = $('.topbar').getBoundingClientRect();
+  const r = { top: Math.max(0, top.bottom - 4), left: 0, right: 0, bottom: 0 };
+  for (const el of document.querySelectorAll('.panel:not([hidden]), .card:not([hidden])')) {
+    const b = el.getBoundingClientRect();
+    const dock = getComputedStyle(el).getPropertyValue('--dock').trim();
+    if (dock === 'left') r.left = Math.max(r.left, b.right + 12);
+    else if (dock === 'bottom') r.bottom = Math.max(r.bottom, window.innerHeight - b.top + 12);
+    else if (dock === 'top') r.top = Math.max(r.top, b.bottom + 12);
+  }
+  r.bottom = Math.max(r.bottom, kbHeight + 8);
+  return r;
+}
+
+function watchKeyboard() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const update = () => {
+    kbHeight = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    document.documentElement.style.setProperty('--kb', kbHeight + 'px');
+  };
+  vv.addEventListener('resize', update);
+  vv.addEventListener('scroll', update);
+  update();
+}
+
+/* ================= Ansichten ================= */
+
+const VIEWS = ['home', 'setup', 'quiz', 'summary', 'explore', 'facts', 'progress'];
+let view = 'home';
+
+function show(v) {
+  view = v;
+  document.body.dataset.view = v;
+  for (const id of VIEWS) $('#view-' + id).hidden = id !== v;
+  $('#hud').hidden = v !== 'quiz';
+  $('#btn-quit').hidden = v !== 'quiz';
+  map.onClick = null;
+  map.lakeFirst = false;
+  $('#map').classList.remove('pickable');
+  if (v !== 'explore') map.setLabelMode(false, {});
+}
+
+function goHome() {
+  round = null;
+  map.clear();
+  renderHome();
+  show('home');
+  map.showRegion('welt');
+}
+
+/* ---------- Start ---------- */
+
+const SWATCH = {
+  laender: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#a9d3ea"/><path d="M0 0h13l4 7-5 7 3 10H0z" fill="#f3d29b"/><path d="M13 0h21v11l-9 4-8-8z" fill="#cfe1a9"/><path d="M17 7l8 8 9-4v13H15l-3-10z" fill="#f2c0c7"/><path d="M13 0l4 7-5 7 3 10M17 7l8 8 9-4" fill="none" stroke="#85766a" stroke-width="1"/></svg>',
+  hauptstaedte: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#f5e79b"/><path d="M17 5l2.1 4.6 5 .5-3.8 3.4 1.1 4.9-4.4-2.6-4.4 2.6 1.1-4.9-3.8-3.4 5-.5z" fill="#d6246e" stroke="#fff" stroke-width="1"/></svg>',
+  gewaesser: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#86bddc"/><path d="M-2 7q4.5-3 9 0t9 0 9 0 9 0 9 0M-2 14q4.5-3 9 0t9 0 9 0 9 0 9 0M-2 21q4.5-3 9 0t9 0 9 0 9 0 9 0" fill="none" stroke="#e8f4fb" stroke-width="1.6"/></svg>',
+  flaggen: '<svg viewBox="0 0 34 24"><rect width="34" height="8" fill="#2a2833"/><rect y="8" width="34" height="8" fill="#e0442a"/><rect y="16" width="34" height="8" fill="#f5c542"/></svg>',
+  entdecken: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><circle cx="17" cy="12" r="8.5" fill="none" stroke="#2a2833" stroke-width="1.3"/><path d="M17 4.5l2.2 7.5-2.2 7.5-2.2-7.5z" fill="#d6246e"/><path d="M17 12l2.2 0-2.2 7.5z" fill="#2a2833"/></svg>',
+  fakten: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d8cbea"/><text x="17" y="18.5" text-anchor="middle" font-family="Spectral, Georgia, serif" font-style="italic" font-size="17" font-weight="500" fill="#2a2833">i</text></svg>',
+  fortschritt: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><rect x="0" y="0" width="12" height="24" fill="#86c895"/><rect x="12" y="0" width="9" height="24" fill="#f4d88a"/><rect x="21" y="0" width="6" height="24" fill="#f3b3a1"/></svg>',
+};
+
+function masteredCount(mode) {
+  const pool = mode === 'gewaesser' ? WATER.map(w => w.id) : COUNTRIES.map(c => c.iso);
+  return [pool.filter(id => level(mode, id) === 3).length, pool.length];
+}
+
+let deck = null;
+function factDeck() {
+  if (deck) return deck;
+  deck = [];
+  for (const c of COUNTRIES) c.facts.forEach(t => deck.push({ text: t, iso: c.iso }));
+  for (const w of WATER) w.facts.forEach(t => deck.push({ text: t, water: w.id }));
+  for (const f of WORLD_FACTS) deck.push({ text: f.text, iso: f.focus || null, world: true });
+  return deck;
+}
+
+function factOfTheDay() {
+  const d = factDeck();
+  const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5);
+  return d[(day * 7919) % d.length];
+}
+
+function factSubject(f) {
+  if (f.water) { const w = WB.get(f.water); return { label: w.name, flag: null, kind: w.kind }; }
+  if (f.world && !f.iso) return { label: 'Rund um die Welt', flag: null };
+  const c = C.get(f.iso);
+  return { label: f.world ? `Rund um die Welt – ${c.name}` : c.name, flag: f.world ? null : c.iso };
+}
+
+function renderHome() {
+  const rows = [
+    ['laender', MODES.laender.title, MODES.laender.desc],
+    ['hauptstaedte', MODES.hauptstaedte.title, MODES.hauptstaedte.desc],
+    ['gewaesser', MODES.gewaesser.title, MODES.gewaesser.desc],
+    ['flaggen', MODES.flaggen.title, MODES.flaggen.desc],
+    ['entdecken', 'Entdecken', 'Frei auf der Karte stöbern'],
+    ['fakten', 'Fakten', 'Überraschendes über die Welt'],
+    ['fortschritt', 'Fortschritt', 'Was du schon sicher weißt'],
+  ];
+  const fotd = factOfTheDay();
+  const subj = factSubject(fotd);
+  $('#view-home').innerHTML = `
+    <h1 class="title">Weltquiz</h1>
+    <p class="subtitle">Die Welt, Land für Land.</p>
+    <ul class="legend-list">
+      ${rows.map(([id, name, desc]) => {
+        let count = '';
+        if (MODES[id]) { const [m, n] = masteredCount(id); count = `<span class="count" title="gelernt">${m}/${n}</span>`; }
+        return `<li><button class="legend-row" data-go="${id}" type="button">
+          <span class="swatch">${SWATCH[id]}</span>
+          <span><span class="name">${name}</span><span class="desc">${desc}</span></span>${count}
+        </button></li>`;
+      }).join('')}
+    </ul>
+    <div class="daily">
+      <div class="daily-head">${subj.flag ? `<img src="${flagUrl(subj.flag)}" alt="">` : ''}Fakt des Tages: ${esc(subj.label)}</div>
+      <p class="fact-text">${esc(fotd.text)}</p>
+    </div>`;
+}
+
+/* ---------- Einstellungen ---------- */
+
+let setup = null;
+
+function openSetup(mode) {
+  const def = MODES[mode];
+  const last = state.last[mode] || {};
+  setup = {
+    mode,
+    variant: def.variants.some(v => v.id === last.variant) ? last.variant : def.variants[0].id,
+    region: last.region || 'welt',
+    count: last.count || 10,
+  };
+  renderSetup();
+  show('setup');
+  focusSetupRegion();
+}
+
+function poolSize(s) {
+  if (s.mode === 'gewaesser') return waterIn(s.variant).length;
+  return countriesIn(s.region).length;
+}
+
+function renderSetup() {
+  const def = MODES[setup.mode];
+  const n = poolSize(setup);
+  const counts = [10, 20, 'alle'];
+  $('#view-setup').innerHTML = `
+    <button class="back" type="button" data-act="home">‹ Zurück</button>
+    <h2 class="h2">${def.title}</h2>
+    <div class="field">
+      <p class="field-label">${def.variantLabel}</p>
+      <div class="${def.variants[0].hint ? 'variant' : 'options'}">
+        ${def.variants.map(v => `<button type="button" class="opt" data-variant="${v.id}" aria-pressed="${v.id === setup.variant}">${v.label}${v.hint ? `<small>${v.hint}</small>` : ''}</button>`).join('')}
+      </div>
+    </div>
+    ${def.regions ? `<div class="field">
+      <p class="field-label">Welche Region?</p>
+      <div class="options">${REGIONS.map(r => `<button type="button" class="opt" data-region="${r.id}" aria-pressed="${r.id === setup.region}">${r.label}</button>`).join('')}</div>
+    </div>` : ''}
+    <div class="field">
+      <p class="field-label">Wie viele Fragen?</p>
+      <div class="options">${counts.map(c => `<button type="button" class="opt" data-count="${c}" aria-pressed="${String(c) === String(setup.count)}">${c === 'alle' ? `Alle <span class="n">${n}</span>` : c}</button>`).join('')}</div>
+    </div>
+    <div class="actions"><button class="btn primary wide" type="button" data-act="start">Runde starten</button></div>`;
+}
+
+function focusSetupRegion() {
+  map.clear();
+  if (setup.mode === 'gewaesser') {
+    const ids = waterIn(setup.variant).map(w => w.id);
+    ids.forEach(id => map.setWaterClass(id, 'is-target'));
+    map.showRegion('welt');
+    return;
+  }
+  if (setup.region !== 'welt') map.dimOutside(countriesIn(setup.region).map(c => c.iso));
+  map.showRegion(setup.region);
+}
+
+/* ---------- Runde ---------- */
+
+let round = null;
+let q = null;           // aktuelle Frage
+
+function buildPool(cfg) {
+  if (cfg.mode === 'gewaesser') return waterIn(cfg.variant).map(w => w.id);
+  return countriesIn(cfg.region).map(c => c.iso);
+}
+
+function pickItems(pool, count, mode) {
+  if (count === 'alle' || count >= pool.length) return shuffle(pool);
+  const weight = id => {
+    const s = stat(mode, id);
+    if (!s || !s.n) return 3;
+    if (s.s === 0) return 5;
+    if (s.s === 1) return 2;
+    const age = (Date.now() - (s.t || 0)) / 864e5;
+    return Math.min(1.5, 0.3 + age * 0.08);
+  };
+  return pool
+    .map(id => ({ id, key: Math.pow(Math.random(), 1 / weight(id)) }))
+    .sort((a, b) => b.key - a.key)
+    .slice(0, count)
+    .map(x => x.id);
+}
+
+function startRound(cfg, items) {
+  items = items || pickItems(buildPool(cfg), cfg.count, cfg.mode);
+  round = { ...cfg, items, i: 0, results: [], streak: 0, best: 0 };
+  state.last[cfg.mode] = { variant: cfg.variant, region: cfg.region, count: cfg.count };
+  save();
+  show('quiz');
+  nextQuestion();
+}
+
+function renderHud() {
+  const n = round.items.length;
+  const done = round.results.length;
+  const bar = $('#scalebar');
+  if (n <= 30) {
+    bar.innerHTML = round.items.map((_, i) => {
+      const r = round.results[i];
+      return `<i class="${r ? (r.ok ? 'r' : 'w') : i === round.i ? 'now' : ''}"></i>`;
+    }).join('');
+  } else {
+    const right = round.results.filter(r => r.ok).length;
+    bar.innerHTML = `<i class="r" style="flex:${right}"></i><i class="w" style="flex:${done - right}"></i><i style="flex:${n - done}"></i>`;
+  }
+  const cur = Math.min(round.i + 1, n);
+  const streak = round.streak >= 3 ? `<span class="streak">${round.streak} in Folge</span>` : '';
+  $('#hud-text').innerHTML = `<span class="long">Frage ${cur} von ${n}</span><span class="short">${cur}/${n}</span>${streak}`;
+}
+
+function nextQuestion() {
+  if (round.i >= round.items.length) return finishRound();
+  const id = round.items[round.i];
+  const { mode, variant } = round;
+  q = { id, mode, variant, answered: false, hinted: false, pick: null };
+  map.clear();
+  if (mode !== 'gewaesser' && round.region !== 'welt') map.dimOutside(countriesIn(round.region).map(c => c.iso));
+  renderHud();
+
+  if (mode === 'laender' && variant === 'name') {
+    const c = C.get(id);
+    textQuestion({ prompt: 'Welches Land ist markiert?', placeholder: 'Land eingeben …', searcher: countrySearch, answer: c.name, emptyText: 'Kein Land gefunden – anders schreiben?' });
+    map.setCountryClass(id, 'is-target');
+    flyCountry(id, true);
+  } else if (mode === 'laender' && variant === 'find') {
+    const c = C.get(id);
+    findQuestion(c);
+    map.showRegion(round.region);
+  } else if (mode === 'hauptstaedte' && variant === 'capital') {
+    const c = C.get(id);
+    textQuestion({ prompt: `Wie heißt die Hauptstadt von <em>${esc(c.name)}</em>?`, placeholder: 'Stadt eingeben …', searcher: capitalSearch, answer: c.capital.name, emptyText: 'Keine Stadt gefunden – anders schreiben?' });
+    map.setCountryClass(id, 'is-target');
+    flyCountry(id, true);
+  } else if (mode === 'hauptstaedte' && variant === 'country') {
+    const c = C.get(id);
+    textQuestion({ prompt: `Zu welchem Land gehört die Hauptstadt <em>${esc(c.capital.name)}</em>?`, placeholder: 'Land eingeben …', searcher: countrySearch, answer: c.name, emptyText: 'Kein Land gefunden – anders schreiben?' });
+    if (c.capital.lat != null) {
+      map.pin(c.capital.lon, c.capital.lat, '', 'target');
+      map.flyToPoint(c.capital.lon, c.capital.lat, { size: 150 });
+    } else {
+      map.setCountryClass(id, 'is-target'); flyCountry(id, true);
+    }
+  } else if (mode === 'gewaesser') {
+    const w = WB.get(id);
+    textQuestion({ prompt: 'Wie heißt dieses Gewässer?', placeholder: 'Meer, See oder Ozean eingeben …', searcher: waterSearch, answer: w.name, emptyText: 'Kein Gewässer gefunden – anders schreiben?' });
+    map.setWaterClass(id, 'is-target');
+    const box = map.waterBox(id);
+    map.flyToWater(id).then(() => { if (q && q.id === id && !q.answered) map.ringFor(box); });
+  } else if (mode === 'flaggen' && variant === 'flag') {
+    textQuestion({ prompt: 'Zu welchem Land gehört diese Flagge?', placeholder: 'Land eingeben …', searcher: countrySearch, answer: C.get(id).name, bigFlag: id, emptyText: 'Kein Land gefunden – anders schreiben?' });
+    map.showRegion(round.region);
+  } else if (mode === 'flaggen' && variant === 'pick') {
+    flagPickQuestion(C.get(id));
+    map.setCountryClass(id, 'is-target');
+    flyCountry(id, true);
+  }
+}
+
+function flyCountry(code, ring) {
+  const box = map.countryBox(code);
+  return map.flyToCountry(code).then(() => { if (ring && q && q.id === code && !q.answered) map.ringFor(box); });
+}
+
+/* ----- Text-Frage mit Vorschlagsliste ----- */
+
+function textQuestion({ prompt, placeholder, searcher, answer, bigFlag, emptyText }) {
+  q.searcher = searcher;
+  q.emptyText = emptyText || 'Nichts gefunden – anders schreiben?';
+  q.answerText = answer;
+  $('#view-quiz').innerHTML = `
+    ${bigFlag ? `<img class="flag-big" src="${flagUrl(bigFlag)}" alt="Gesuchte Flagge">` : ''}
+    <div class="q-head">
+      <h2 class="q-prompt">${prompt}</h2>
+      <div class="q-tools"><button class="chip-btn" type="button" data-act="hint">Tipp</button></div>
+    </div>
+    <p class="hint" id="hint" hidden></p>
+    <form class="answer" id="answer-form" autocomplete="off">
+      <input id="answer" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest"
+        placeholder="${esc(placeholder)}" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Antwort">
+      <button class="btn primary ok" type="submit" disabled>OK</button>
+      <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+    </form>
+    <div class="below"><button class="chip-btn" type="button" data-act="skip">Weiß ich nicht</button></div>`;
+  wireCombobox();
+  const input = $('#answer');
+  if (!matchMedia('(pointer: coarse)').matches || document.activeElement?.dataset?.act === 'next') input.focus({ preventScroll: true });
+}
+
+function wireCombobox() {
+  const input = $('#answer'), list = $('#suggest'), ok = $('#answer-form .ok');
+  let results = [], active = -1;
+
+  const choose = r => {
+    q.chosen = r.item;
+    input.value = r.item.label;
+    input.classList.add('chosen');
+    ok.disabled = false;
+    close();
+  };
+  const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); };
+  const render = () => {
+    if (!input.value.trim()) { close(); return; }
+    if (!results.length) {
+      list.innerHTML = `<li class="empty" role="option" aria-disabled="true">${esc(q.emptyText)}</li>`;
+    } else {
+      list.innerHTML = results.map((r, i) => `<li id="s${i}" role="option" data-i="${i}" aria-selected="${i === active}"><b>${esc(r.item.label)}</b>${r.via ? `<span class="via">${esc(r.via)}</span>` : ''}</li>`).join('');
+    }
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    if (active >= 0) input.setAttribute('aria-activedescendant', 's' + active);
+    list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+  };
+
+  input.addEventListener('input', () => {
+    q.chosen = null;
+    input.classList.remove('chosen');
+    ok.disabled = true;
+    results = q.searcher.search(input.value);
+    active = results.length ? 0 : -1;
+    const exact = q.searcher.exact(input.value);
+    if (exact) { q.chosen = exact; ok.disabled = false; active = results.findIndex(r => r.item === exact); }
+    render();
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' && results.length) { e.preventDefault(); active = (active + 1) % results.length; render(); }
+    else if (e.key === 'ArrowUp' && results.length) { e.preventDefault(); active = (active - 1 + results.length) % results.length; render(); }
+    else if (e.key === 'Escape') { close(); }
+    else if (e.key === 'Enter') {
+      if (!list.hidden && active >= 0 && results[active] && results[active].item !== q.chosen) { e.preventDefault(); choose(results[active]); }
+      else if (!list.hidden && active >= 0 && results[active]) { e.preventDefault(); choose(results[active]); submitText(); }
+    }
+  });
+  list.addEventListener('pointerdown', e => {
+    const li = e.target.closest('li[data-i]');
+    if (!li) return;
+    e.preventDefault();
+    choose(results[+li.dataset.i]);
+    input.focus({ preventScroll: true });
+  });
+  input.addEventListener('blur', () => setTimeout(close, 120));
+  input.addEventListener('focus', () => { if (input.value && !q.chosen) render(); setTimeout(() => window.scrollTo(0, 0), 60); });
+  $('#answer-form').addEventListener('submit', e => { e.preventDefault(); submitText(); });
+}
+
+function submitText() {
+  if (!q || q.answered || !q.chosen) return;
+  const { mode, variant, id } = q;
+  let ok;
+  let pickId = q.chosen.id;
+  if (mode === 'hauptstaedte' && variant === 'capital') ok = q.chosen.iso === id && !q.chosen.city;
+  else ok = pickId === id;
+  answer(ok, q.chosen);
+}
+
+/* ----- Land finden (Tippen auf Karte) ----- */
+
+function findQuestion(c) {
+  $('#view-quiz').innerHTML = `
+    <div class="q-head">
+      <h2 class="q-prompt">Wo liegt <em>${esc(c.name)}</em>?</h2>
+      <div class="q-tools"><button class="chip-btn" type="button" data-act="hint">Tipp</button></div>
+    </div>
+    <p class="hint" id="find-state">Tippe auf der Karte auf das Land und bestätige mit OK.</p>
+    <div class="below">
+      <button class="chip-btn" type="button" data-act="skip">Weiß ich nicht</button>
+      <button class="btn primary ok" type="button" data-act="confirm-pick" disabled>OK</button>
+    </div>`;
+  $('#map').classList.add('pickable');
+  map.onClick = hit => {
+    if (!q || q.answered || !hit || hit.type !== 'country' || hit.code === 'AQ') return;
+    if (q.pick) map.setCountryClass(q.pick.code, 'is-pick', false);
+    q.pick = { code: hit.code, props: hit.props };
+    map.setCountryClass(hit.code, 'is-pick', true);
+    $('#find-state').textContent = 'Auswahl getroffen. Passt? Dann OK – oder tippe ein anderes Land an.';
+    $('[data-act="confirm-pick"]').disabled = false;
+  };
+}
+
+/* ----- Flagge auswählen ----- */
+
+function flagOptions(iso) {
+  const out = new Set([iso]);
+  const groups = FLAG_GROUPS.filter(g => g.includes(iso));
+  for (const g of shuffle(groups.flat())) { if (out.size >= 3) break; if (g !== iso && C.has(g)) out.add(g); }
+  const c = C.get(iso);
+  const sameRegion = shuffle(COUNTRIES.filter(x => x.iso !== iso && x.regions.some(r => c.regions.includes(r))));
+  for (const x of sameRegion) { if (out.size >= 4) break; out.add(x.iso); }
+  for (const x of shuffle(COUNTRIES)) { if (out.size >= 4) break; out.add(x.iso); }
+  return shuffle([...out]);
+}
+
+function flagPickQuestion(c) {
+  const opts = flagOptions(c.iso);
+  $('#view-quiz').innerHTML = `
+    <div class="q-head"><h2 class="q-prompt">Welche Flagge gehört zu <em>${esc(c.name)}</em>?</h2></div>
+    <div class="flag-grid" id="flag-grid">
+      ${opts.map((iso, i) => `<button class="flag-opt" type="button" data-flag="${iso}" aria-label="Flagge ${i + 1}"><img src="${flagUrl(iso)}" alt=""></button>`).join('')}
+    </div>
+    <div class="below"><button class="chip-btn" type="button" data-act="skip">Weiß ich nicht</button></div>`;
+}
+
+/* ----- Auswertung einer Antwort ----- */
+
+function answer(ok, chosen) {
+  if (q.answered) return;
+  q.answered = true;
+  const { mode, variant, id } = q;
+  record(mode, id, ok, q.hinted);
+  sound(ok);
+  round.results.push({ id, ok, chosen: chosen ? chosenLabel(chosen) : null });
+  round.streak = ok ? round.streak + 1 : 0;
+  round.best = Math.max(round.best, round.streak);
+  renderHud();
+  map.onClick = null;
+  $('#map').classList.remove('pickable');
+  map.overlay.selectAll('.ring, .pin.target').remove();
+  map.overlayItems = map.overlayItems.filter(it => it.kind !== 'ring' && !it.el.classed('target'));
+
+  // Karte: richtige Lösung grün, falsche Wahl rot. Der Kamera-Schwenk folgt, wenn die Karte ihre neue Höhe hat.
+  let detail = '', note = '', fact = '', fly = null;
+  if (mode === 'gewaesser') {
+    const w = WB.get(id);
+    map.setWaterClass(id, 'is-target', false);
+    map.setWaterClass(id, 'is-right');
+    map.labelWater(id, w.name, 'water right');
+    if (!ok && chosen) {
+      map.setWaterClass(chosen.id, 'is-wrong');
+      map.labelWater(chosen.id, WB.get(chosen.id).name, 'water wrong');
+    }
+    detail = ok ? `Das ist <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>.`
+      : `Gesucht war <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
+    fact = nextFact('w:' + id, w.facts);
+    const tb = map.waterBox(id);
+    if (!ok && chosen) {
+      const u = unionBox(tb, map.waterBox(chosen.id));
+      fly = (u[1][0] - u[0][0] < 420 && u[1][1] - u[0][1] < 330) ? () => map.flyToBox(u, { pad: 1.25, minSize: 30 }) : () => map.flyToWater(id);
+    } else fly = () => map.flyToWater(id);
+  } else {
+    const c = C.get(id);
+    map.setCountryClass(id, 'is-target', false);
+    map.setCountryClass(id, 'is-pick', false);
+    map.setCountryClass(id, 'is-right');
+    map.labelCountry(id, c.name, 'right');
+    let wrongCode = null;
+    if (!ok) {
+      if (mode === 'laender' && variant === 'find' && q.pick) wrongCode = q.pick.code;
+      else if (mode === 'hauptstaedte' && variant === 'capital') wrongCode = null;
+      else if (chosen && C.has(chosen.id)) wrongCode = chosen.id;
+    }
+    if (wrongCode && wrongCode !== id) {
+      map.setCountryClass(wrongCode, 'is-pick', false);
+      map.setCountryClass(wrongCode, 'is-wrong');
+      map.labelCountry(wrongCode, nameOf(wrongCode, q.pick?.props), 'wrong');
+    }
+    let extraBox = null;
+    if (mode === 'hauptstaedte') {
+      capitalsOf(c).forEach(cap => { if (cap.lat != null) map.pin(cap.lon, cap.lat, cap.name, 'right'); });
+      if (!ok && variant === 'capital' && chosen) {
+        if (chosen.lat != null) {
+          map.pin(chosen.lon, chosen.lat, chosen.label, 'wrong');
+          const [x, y] = map.projection([chosen.lon, chosen.lat]);
+          extraBox = [[x - 4, y - 4], [x + 4, y + 4]];
+        }
+      }
+      if (variant === 'capital') {
+        const other = chosen && C.get(chosen.iso);
+        if (ok) detail = `<b>${esc(chosen.label)}</b> ist ${chosen.idx === 0 ? 'die Hauptstadt' : 'eine der Hauptstädte'} von ${esc(c.name)}.`;
+        else if (!chosen) detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b>.`;
+        else if (chosen.city && chosen.iso === id) detail = `${esc(chosen.label)} liegt zwar in ${esc(c.name)}, ist aber nicht die Hauptstadt. Die heißt <b>${esc(c.capital.name)}</b>.`;
+        else if (chosen.city) detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b>. ${esc(chosen.label)} liegt in ${esc(other.name)} und ist dort keine Hauptstadt.`;
+        else detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b> – ${esc(chosen.label)} ist die Hauptstadt von ${esc(other.name)}.`;
+      } else {
+        detail = ok ? `${esc(c.capital.name)} ist die Hauptstadt von <b>${esc(c.name)}</b>.`
+          : `${esc(c.capital.name)} ist die Hauptstadt von <b>${esc(c.name)}</b>${chosen ? ` – nicht von ${esc(chosen.label)}` : ''}.`;
+      }
+      note = c.capitalNote || '';
+    } else if (mode === 'laender' && variant === 'find') {
+      detail = ok ? `Genau, hier liegt <b>${esc(c.name)}</b>.` : `${esc(c.name)} ist grün markiert${wrongCode ? ` – du hast ${esc(nameOf(wrongCode, q.pick?.props))} angetippt` : ''}.`;
+    } else if (mode === 'flaggen' && variant === 'pick') {
+      detail = ok ? `Das ist die Flagge von <b>${esc(c.name)}</b>.` : `Grün umrandet ist die Flagge von <b>${esc(c.name)}</b>${chosen ? ` – du hast die von ${esc(chosen.label)} gewählt` : ''}.`;
+    } else {
+      detail = ok ? `Das ist <b>${esc(c.name)}</b>.` : `Gesucht war <b>${esc(c.name)}</b>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
+    }
+    fact = nextFact('c:' + id, c.facts);
+    const tb = map.countryBox(id);
+    const other = extraBox || (wrongCode && wrongCode !== id && wrongCode !== 'AQ' ? map.countryBox(wrongCode) : null);
+    if (other) {
+      const u = unionBox(tb, other);
+      fly = (u[1][0] - u[0][0] < 300 && u[1][1] - u[0][1] < 220) ? () => map.flyToBox(u, { pad: 1.35, minSize: 30 }) : () => map.flyToCountry(id);
+    } else fly = () => map.flyToCountry(id);
+  }
+
+  const body = `
+    <div class="result ${ok ? 'right' : 'wrong'}">${ok ? ICON_OK : ICON_NO}${ok ? (q.hinted ? 'Richtig – mit Tipp' : 'Richtig!') : 'Falsch'}</div>
+    <p class="result-detail">${detail}</p>
+    ${note ? `<p class="note">${esc(note)}</p>` : ''}
+    ${fact ? `<div class="fact"><div class="fact-head">Wusstest du?</div><p class="fact-text">${esc(fact)}</p></div>` : ''}
+    <div class="next-row"><button class="btn primary" type="button" data-act="next">${round.i + 1 >= round.items.length ? 'Zur Auswertung' : 'Weiter'}</button></div>`;
+
+  const card = $('#view-quiz');
+  if (mode === 'flaggen' && variant === 'pick') {
+    const grid = card.querySelector('.flag-grid');
+    grid.classList.add('answered');
+    grid.querySelectorAll('.flag-opt').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.flag === id) b.classList.add('is-right');
+      else if (chosen && b.dataset.flag === chosen.id) b.classList.add('is-wrong');
+      b.insertAdjacentHTML('beforeend', `<span class="cap">${esc(C.get(b.dataset.flag).name)}</span>`);
+    });
+    card.querySelector('.below')?.remove();
+    card.insertAdjacentHTML('beforeend', `<div class="fb">${body}</div>`);
+  } else {
+    const keepFlag = card.querySelector('.flag-big');
+    card.innerHTML = (keepFlag ? keepFlag.outerHTML : '') + body;
+  }
+  card.querySelector('[data-act="next"]').focus({ preventScroll: true });
+  requestAnimationFrame(() => fly && fly());
+}
+
+function chosenLabel(ch) { return ch.label || ch.name || ''; }
+
+function unionBox(a, b) {
+  // b so verschieben, dass es neben a liegt (Datumsgrenze)
+  let dx = ((b[0][0] + b[1][0]) - (a[0][0] + a[1][0])) / 2;
+  const shift = Math.abs(dx) > W / 2 ? -Math.sign(dx) * W : 0;
+  return [[Math.min(a[0][0], b[0][0] + shift), Math.min(a[0][1], b[0][1])], [Math.max(a[1][0], b[1][0] + shift), Math.max(a[1][1], b[1][1])]];
+}
+
+function nextFact(key, facts) {
+  if (!facts || !facts.length) return '';
+  const i = (state.factIdx[key] ?? -1) + 1;
+  state.factIdx[key] = i % facts.length;
+  save();
+  return facts[i % facts.length];
+}
+
+function useHint() {
+  if (!q || q.answered) return;
+  q.hinted = true;
+  if (q.mode === 'laender' && q.variant === 'find') {
+    const b = map.countryBox(q.id);
+    const cx = (b[0][0] + b[1][0]) / 2 + (Math.random() - 0.5) * 30, cy = (b[0][1] + b[1][1]) / 2 + (Math.random() - 0.5) * 20;
+    const s = Math.max(110, (b[1][0] - b[0][0]) * 3.2);
+    map.flyToBox([[cx - s / 2, cy - s * 0.3], [cx + s / 2, cy + s * 0.3]], { pad: 1, minSize: 10 });
+    $('#find-state').textContent = 'Tipp: Das Land liegt in diesem Ausschnitt.';
+    return;
+  }
+  const a = q.answerText || '';
+  const el = $('#hint');
+  el.hidden = false;
+  el.textContent = `Tipp: beginnt mit „${a.charAt(0)}“ und hat ${letters(a)} Buchstaben.`;
+  $('#answer')?.focus({ preventScroll: true });
+}
+
+function skip() {
+  if (!q || q.answered) return;
+  answer(false, null);
+}
+
+function next() {
+  if (!round) return;
+  round.i++;
+  nextQuestion();
+}
+
+/* ---------- Auswertung ---------- */
+
+function finishRound() {
+  const r = round;
+  const right = r.results.filter(x => x.ok).length;
+  const n = r.results.length;
+  const missed = r.results.filter(x => !x.ok);
+  const def = MODES[r.mode];
+  const variantLabel = def.variants.find(v => v.id === r.variant)?.label;
+  const sub = r.mode === 'gewaesser' ? variantLabel : `${variantLabel} – ${regionLabel(r.region)}`;
+  const nameFor = id => r.mode === 'gewaesser' ? WB.get(id).name
+    : r.mode === 'hauptstaedte' && r.variant === 'capital' ? `${C.get(id).capital.name} (${C.get(id).name})`
+    : r.mode === 'hauptstaedte' ? `${C.get(id).name} (${C.get(id).capital.name})` : C.get(id).name;
+  const verdict = n === 0 ? '' : right === n ? 'Alles richtig. Stark!' : right / n >= 0.8 ? 'Richtig gut.' : right / n >= 0.5 ? 'Solide – die Fehler unten lohnen einen zweiten Blick.' : 'Wiederhol die Fehler gleich noch einmal – so bleibt es hängen.';
+  $('#view-summary').innerHTML = `
+    <button class="back" type="button" data-act="home">‹ Zum Start</button>
+    <h2 class="h2">Runde geschafft</h2>
+    <p class="lead">${esc(def.title)}: ${esc(sub)}</p>
+    <div class="big-score">${right}<small> von ${n} richtig</small></div>
+    <div class="scalebar summary-bar">${n <= 30 ? r.results.map(x => `<i class="${x.ok ? 'r' : 'w'}"></i>`).join('') : `<i class="r" style="flex:${right}"></i><i class="w" style="flex:${n - right}"></i>`}</div>
+    <p>${verdict}${r.best >= 3 ? ` Längste Serie: ${r.best} am Stück.` : ''}</p>
+    ${missed.length ? `<p class="field-label" style="margin-top:14px">Zum Wiederholen</p>
+      <ul class="miss-list">${missed.map(x => `<li><span>${esc(nameFor(x.id))}</span>${x.chosen ? `<span class="yours">${esc(x.chosen)}</span>` : ''}</li>`).join('')}</ul>` : ''}
+    <div class="actions">
+      ${missed.length ? '<button class="btn primary" type="button" data-act="retry">Fehler wiederholen</button>' : ''}
+      <button class="btn ${missed.length ? '' : 'primary'}" type="button" data-act="again">Neue Runde</button>
+    </div>`;
+  show('summary');
+  // Ergebniskarte
+  map.clear();
+  if (r.mode === 'gewaesser') {
+    for (const x of r.results) map.setWaterClass(x.id, x.ok ? 'is-right' : 'is-wrong');
+    map.showRegion('welt');
+  } else {
+    if (r.region !== 'welt') map.dimOutside(countriesIn(r.region).map(c => c.iso));
+    for (const x of r.results) map.setCountryClass(x.id, x.ok ? 'is-right' : 'is-wrong');
+    map.showRegion(r.region);
+  }
+}
+
+/* ---------- Entdecken ---------- */
+
+let explorePick = null;
+
+function openExplore() {
+  show('explore');
+  map.clear();
+  $('#view-explore').innerHTML = `
+    <div class="explore-bar">
+      <h2 class="q-prompt" style="margin:0">Entdecken</h2>
+      <label class="toggle"><input type="checkbox" id="labels-toggle"> Namen zeigen</label>
+    </div>
+    <div id="explore-info"><p class="hint" style="margin:8px 0 0">Tippe auf ein Land, ein Meer oder einen See.</p></div>
+    <div class="below"><button class="chip-btn" type="button" data-act="home">‹ Zurück zum Start</button></div>`;
+  $('#labels-toggle').addEventListener('change', e => {
+    map.setLabelMode(e.target.checked, Object.fromEntries(COUNTRIES.map(c => [c.iso, c.name])));
+  });
+  $('#map').classList.add('pickable');
+  map.onClick = hit => exploreHit(hit);
+  map.lakeFirst = true;
+  explorePick = null;
+  map.showRegion('welt');
+}
+
+function exploreHit(hit) {
+  if (explorePick) {
+    if (explorePick.type === 'country') map.setCountryClass(explorePick.code, 'is-target', false);
+    else explorePick.ids.forEach(id => map.setWaterClass(id, 'is-target', false));
+  }
+  explorePick = hit;
+  const box = $('#explore-info');
+  if (!hit) { box.innerHTML = '<p class="hint" style="margin:8px 0 0">Tippe auf ein Land, ein Meer oder einen See.</p>'; return; }
+  if (hit.type === 'country') {
+    map.setCountryClass(hit.code, 'is-target', true);
+    requestAnimationFrame(() => map.ensureVisible(map.countryBox(hit.code)));
+    const c = C.get(hit.code);
+    if (!c) {
+      const owner = hit.props.s && C.get(hit.props.s);
+      box.innerHTML = `<div class="card-scroll"><h3 class="q-prompt" style="margin:10px 0 4px">${esc(hit.props.n || hit.code)}</h3>
+        <p class="hint" style="margin:0">${owner ? `Gehört zu ${esc(owner.name)} – kein eigener Staat.` : hit.code === 'AQ' ? 'Ein Kontinent ohne Staat: Antarktika wird durch den Antarktisvertrag gemeinsam verwaltet.' : 'Kein eigenständiger, allgemein anerkannter Staat.'}</p></div>`;
+      return;
+    }
+    const caps = capitalsOf(c);
+    box.innerHTML = `<div class="card-scroll">
+      <div class="info-head" style="margin-top:10px"><img src="${flagUrl(c.iso)}" alt="Flagge von ${esc(c.name)}"><h3 class="q-prompt" style="margin:0">${esc(c.name)}</h3></div>
+      <dl class="info-grid">
+        <dt>Hauptstadt</dt><dd>${esc(caps[0].name)}${caps.length > 1 ? ` <span style="font-weight:400">(außerdem ${caps.slice(1).map(x => esc(x.name)).join(', ')})</span>` : ''}</dd>
+        <dt>Sprache${c.languages.length > 1 ? 'n' : ''}</dt><dd>${esc(c.languages.join(', '))}${c.moreLanguages ? ' u. a.' : ''}</dd>
+        <dt>Währung</dt><dd>${esc(c.currency)}</dd>
+        <dt>Kontinent</dt><dd>${esc(c.regions.map(regionLabel).join(', '))}</dd>
+      </dl>
+      ${c.capitalNote ? `<p class="note">${esc(c.capitalNote)}</p>` : ''}
+      <div class="fact"><div class="fact-head">Wusstest du?</div><ul class="facts-list">${c.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div></div>`;
+  } else {
+    // bei geteilten Flächen (z. B. Bottnischer Meerbusen als Teil der Ostsee) das speziellere Gewässer zeigen
+    const ids = hit.ids.filter(id => WB.has(id));
+    const main = WB.get(ids[ids.length - 1]);
+    if (!main) return;
+    const partOf = ids.length > 1 ? WB.get(ids[0]) : null;
+    hit.ids = [main.id];
+    map.setWaterClass(main.id, 'is-target', true);
+    requestAnimationFrame(() => map.ensureVisible(map.waterBox(main.id)));
+    const anr = (main.borders || []).filter(i => C.has(i)).map(i => C.get(i).name);
+    box.innerHTML = `<div class="card-scroll">
+      <h3 class="q-prompt" style="margin:10px 0 0">${esc(main.name)}</h3>
+      <div class="kind">${esc(main.kind || '')}${partOf ? `, Teil der ${esc(partOf.name)}` : ''}</div>
+      ${anr.length ? `<dl class="info-grid"><dt>Anrainer</dt><dd>${esc(anr.join(', '))}</dd></dl>` : ''}
+      <div class="fact"><div class="fact-head">Wusstest du?</div><ul class="facts-list">${main.facts.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div></div>`;
+  }
+}
+
+/* ---------- Fakten ---------- */
+
+let factOrder = null, factPos = 0;
+
+function openFacts() {
+  show('facts');
+  if (!factOrder) { factOrder = shuffle(factDeck()); factPos = 0; }
+  renderFact();
+}
+
+function renderFact() {
+  const f = factOrder[factPos % factOrder.length];
+  const subj = factSubject(f);
+  map.clear();
+  $('#view-facts').innerHTML = `
+    <div class="info-head">${subj.flag ? `<img src="${flagUrl(subj.flag)}" alt="" style="height:30px">` : ''}<h2 class="q-prompt" style="margin:0">${esc(subj.label)}</h2></div>
+    ${subj.kind ? `<div class="kind">${esc(subj.kind)}</div>` : ''}
+    <p class="fact-text" style="font-size:20px;margin-top:10px">${esc(f.text)}</p>
+    <div class="next-row">
+      <button class="btn" type="button" data-act="home">Zurück</button>
+      <button class="btn primary" type="button" data-act="next-fact">Nächster Fakt</button>
+    </div>`;
+  if (f.water) { map.setWaterClass(f.water, 'is-target'); map.flyToWater(f.water); }
+  else if (f.iso) { map.setCountryClass(f.iso, 'is-target'); map.flyToCountry(f.iso).then(() => map.ringFor(map.countryBox(f.iso))); }
+  else map.showRegion('welt');
+  $('[data-act="next-fact"]').focus({ preventScroll: true });
+}
+
+/* ---------- Fortschritt ---------- */
+
+let progressMode = 'laender';
+
+function openProgress() {
+  show('progress');
+  renderProgress();
+}
+
+function renderProgress() {
+  const m = progressMode;
+  const tabs = [['laender', 'Länder'], ['hauptstaedte', 'Hauptstädte'], ['flaggen', 'Flaggen'], ['gewaesser', 'Gewässer']];
+  let rows;
+  if (m === 'gewaesser') {
+    rows = [['Ozeane & Meere', WATER.filter(w => w.group === 'meer').map(w => w.id)], ['Seen', WATER.filter(w => w.group === 'see').map(w => w.id)]];
+  } else {
+    rows = REGIONS.filter(r => r.id !== 'welt').map(r => [r.label, countriesIn(r.id).map(c => c.iso)]);
+    rows.unshift(['Ganze Welt', COUNTRIES.map(c => c.iso)]);
+  }
+  $('#view-progress').innerHTML = `
+    <button class="back" type="button" data-act="home">‹ Zurück</button>
+    <h2 class="h2">Dein Fortschritt</h2>
+    <p class="lead">Grün heißt gelernt: die letzten zwei Antworten waren richtig.</p>
+    <div class="options" style="margin-top:14px">${tabs.map(([id, l]) => `<button type="button" class="opt" data-pmode="${id}" aria-pressed="${id === m}">${l}</button>`).join('')}</div>
+    <div class="progress-rows">${rows.map(([label, ids]) => {
+      const lv = [0, 0, 0, 0];
+      ids.forEach(id => lv[level(m, id)]++);
+      const n = ids.length;
+      return `<div class="progress-row"><div class="top"><span>${esc(label)}</span><span>${lv[3]} von ${n}</span></div>
+        <div class="meter"><i class="m3" style="width:${lv[3] / n * 100}%"></i><i class="m2" style="width:${lv[2] / n * 100}%"></i><i class="m1" style="width:${lv[1] / n * 100}%"></i></div></div>`;
+    }).join('')}</div>
+    <div class="key"><span><i style="background:#86c895"></i>gelernt</span><span><i style="background:#f4d88a"></i>einmal richtig</span><span><i style="background:#f3b3a1"></i>zuletzt falsch</span><span><i style="background:#e9e5de"></i>noch nicht gefragt</span></div>
+    <div class="actions"><button class="btn danger" type="button" data-act="reset">Fortschritt zurücksetzen</button></div>`;
+  map.clear();
+  if (m === 'gewaesser') {
+    for (const w of WATER) { const l = level(m, w.id); if (l === 3) map.setWaterClass(w.id, 'is-right'); else if (l === 1) map.setWaterClass(w.id, 'is-wrong'); }
+  } else {
+    map.setMastery(Object.fromEntries(COUNTRIES.map(c => [c.iso, level(m, c.iso)])));
+  }
+  map.showRegion('welt');
+}
+
+/* ================= Ereignisse ================= */
+
+function wire() {
+  document.addEventListener('click', e => {
+    const t = e.target.closest('button');
+    if (!t) return;
+    if (t.dataset.go) {
+      const g = t.dataset.go;
+      if (MODES[g]) openSetup(g);
+      else if (g === 'entdecken') openExplore();
+      else if (g === 'fakten') openFacts();
+      else if (g === 'fortschritt') openProgress();
+      return;
+    }
+    if (t.dataset.variant) { setup.variant = t.dataset.variant; renderSetup(); if (setup.mode === 'gewaesser') focusSetupRegion(); return; }
+    if (t.dataset.region) { setup.region = t.dataset.region; renderSetup(); focusSetupRegion(); return; }
+    if (t.dataset.count) { setup.count = t.dataset.count === 'alle' ? 'alle' : +t.dataset.count; renderSetup(); return; }
+    if (t.dataset.flag && q && !q.answered) {
+      const ok = t.dataset.flag === q.id;
+      answer(ok, { id: t.dataset.flag, label: C.get(t.dataset.flag).name });
+      return;
+    }
+    if (t.dataset.pmode) { progressMode = t.dataset.pmode; renderProgress(); return; }
+    switch (t.dataset.act) {
+      case 'home': goHome(); break;
+      case 'start': startRound({ ...setup }); break;
+      case 'hint': useHint(); break;
+      case 'skip': skip(); break;
+      case 'next': next(); break;
+      case 'confirm-pick':
+        if (q && q.pick && !q.answered) answer(q.pick.code === q.id, { id: q.pick.code, label: nameOf(q.pick.code, q.pick.props) });
+        break;
+      case 'retry': {
+        const missed = round.results.filter(x => !x.ok).map(x => x.id);
+        startRound({ mode: round.mode, variant: round.variant, region: round.region, count: missed.length }, shuffle(missed));
+        break;
+      }
+      case 'again': openSetup(round.mode); break;
+      case 'next-fact': factPos++; renderFact(); break;
+      case 'reset':
+        if (confirm('Wirklich den ganzen Fortschritt löschen? Das lässt sich nicht rückgängig machen.')) {
+          state.stats = {}; state.factIdx = {}; save(); renderProgress();
+        }
+        break;
+    }
+  });
+
+  $('#brand').addEventListener('click', goHome);
+  $('#btn-quit').addEventListener('click', () => {
+    if (round && round.results.length) finishRound(); else goHome();
+  });
+  const snd = $('#btn-sound');
+  const syncSound = () => snd.setAttribute('aria-pressed', String(!!state.sound));
+  syncSound();
+  snd.addEventListener('click', () => { state.sound = !state.sound; save(); syncSound(); if (state.sound) sound(true); });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && view === 'quiz' && q?.answered && e.target.tagName !== 'BUTTON') { e.preventDefault(); next(); }
+    if (e.key === 'Enter' && view === 'facts' && e.target.tagName !== 'BUTTON') { factPos++; renderFact(); }
+  });
+}
+
+/* ================= Start ================= */
+
+async function main() {
+  watchKeyboard();
+  let topo;
+  try {
+    const res = await fetch('data/world.json?v=2');
+    if (!res.ok) throw new Error(res.status);
+    topo = await res.json();
+  } catch (err) {
+    $('#view-home').innerHTML = '<h1 class="title">Weltquiz</h1><p class="lead">Die Weltkarte konnte nicht geladen werden. Prüf die Internetverbindung und lade die Seite neu.</p>';
+    return;
+  }
+  map = new WorldMap($('#map'), topo);
+  map.getInsets = insets;
+  wire();
+  renderHome();
+  show('home');
+  map.showRegion('welt', { duration: 0 });
+  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, map, state };
+}
+
+main();

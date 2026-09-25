@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#a9d3ea">
+  <title>Weltquiz</title>
+  <meta name="description" content="Länder, Hauptstädte, Meere und Flaggen der Welt spielerisch lernen – mit Karte, Tippfehler-toleranter Suche und Fun Facts.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23a9d3ea'/%3E%3Cpath d='M14 18h14l4 8-6 8 4 12H16l-4-14z' fill='%23f3d29b' stroke='%237d6c5f' stroke-width='2'/%3E%3Cpath d='M36 14h14l2 12-8 6 4 14-10 4-4-18z' fill='%23cfe1a9' stroke='%237d6c5f' stroke-width='2'/%3E%3Ccircle cx='44' cy='24' r='5' fill='%23d6246e'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="map" class="map"></div>
+
+  <header class="topbar">
+    <button class="brand" id="brand" type="button" aria-label="Zur Startseite">Weltquiz</button>
+    <div class="hud" id="hud" hidden>
+      <div class="scalebar" id="scalebar" aria-hidden="true"></div>
+      <span class="hud-text" id="hud-text"></span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btn-sound" type="button" aria-pressed="true" title="Ton an/aus">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="mute" d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="sr-only">Ton</span>
+      </button>
+      <button class="text-btn" id="btn-quit" type="button" hidden>Beenden</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" id="view-home" data-dock="left" aria-label="Start"></section>
+    <section class="panel" id="view-setup" data-dock="left" hidden aria-label="Runde einstellen"></section>
+    <section class="card" id="view-quiz" data-dock="bottom" hidden aria-live="polite"></section>
+    <section class="panel" id="view-summary" data-dock="left" hidden aria-label="Auswertung"></section>
+    <section class="card" id="view-explore" data-dock="bottom" hidden></section>
+    <section class="card" id="view-facts" data-dock="bottom" hidden aria-live="polite"></section>
+    <section class="panel" id="view-progress" data-dock="left" hidden aria-label="Fortschritt"></section>
+  </main>
+
+  <noscript><p class="noscript">Das Weltquiz braucht JavaScript.</p></noscript>
+  <script src="vendor/d3.min.js"></script>
+  <script src="vendor/topojson-client.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
