@@ -1,10 +1,10 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=4';
-import { Searcher } from './search.js?v=4';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=4';
-import { COUNTRIES } from './data/countries.js?v=4';
-import { WATER } from './data/water.js?v=4';
-import { WORLD_FACTS } from './data/world-facts.js?v=4';
-import { CITIES } from './data/cities.js?v=4';
+import { WorldMap, REGION_BOX, W } from './map.js?v=5';
+import { Searcher } from './search.js?v=5';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=5';
+import { COUNTRIES } from './data/countries.js?v=5';
+import { WATER } from './data/water.js?v=5';
+import { WORLD_FACTS } from './data/world-facts.js?v=5';
+import { CITIES } from './data/cities.js?v=5';
 
 /* ================= Daten ================= */
 
@@ -106,7 +106,7 @@ function record(mode, id, ok, hinted) {
   const m = state.stats[mode] ||= {};
   const s = m[id] ||= { n: 0, c: 0, s: 0 };
   s.n++; s.t = Date.now();
-  if (ok) { s.c++; if (!hinted) s.s++; } else s.s = 0;
+  if (ok) { s.c++; s.s = hinted ? Math.max(s.s, 1) : s.s + 1; } else s.s = 0;
   markDirty(mode, id);
   save();
 }
@@ -202,9 +202,15 @@ function insets() {
 function watchKeyboard() {
   const vv = window.visualViewport;
   if (!vv) return;
+  let refitTimer = null;
   const update = () => {
+    const prev = kbHeight;
     kbHeight = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
     document.documentElement.style.setProperty('--kb', kbHeight + 'px');
+    if (Math.abs(kbHeight - prev) > 60) {
+      clearTimeout(refitTimer);
+      refitTimer = setTimeout(refitQuestion, 180);
+    }
   };
   vv.addEventListener('resize', update);
   vv.addEventListener('scroll', update);
@@ -216,21 +222,26 @@ function watchKeyboard() {
 const VIEWS = ['home', 'setup', 'quiz', 'summary', 'explore', 'facts', 'progress', 'player', 'duel'];
 let view = 'home';
 
+let flightSeq = 0;   // jede Ansicht/Frage bekommt eine neue Nummer; alte Kamera-Rückrufe verfallen
+
 function show(v) {
   view = v;
+  flightSeq++;
   document.body.dataset.view = v;
   syncUpdateBar();
   for (const id of VIEWS) $('#view-' + id).hidden = id !== v;
   $('#hud').hidden = v !== 'quiz';
   $('#btn-quit').hidden = v !== 'quiz';
   map.onClick = null;
-  map.lakeFirst = false;
+  map.hitOptions = null;
+  $('#view-quiz').classList.remove('asking');
   $('#map').classList.remove('pickable');
   if (v !== 'explore') map.setLabelMode(false, {});
 }
 
 function goHome() {
   round = null;
+  q = null;
   map.clear();
   renderHome();
   show('home');
@@ -335,7 +346,7 @@ function openSetup(mode) {
     mode,
     variant: def.variants.some(v => v.id === last.variant) ? last.variant : def.variants[0].id,
     region: last.region || 'welt',
-    count: last.count || 10,
+    count: [10, 20, 'alle'].includes(last.count) ? last.count : 10,
   };
   renderSetup();
   show('setup');
@@ -408,10 +419,10 @@ function pickItems(pool, count, mode) {
     .map(x => x.id);
 }
 
-function startRound(cfg, items) {
+function startRound(cfg, items, { remember = true } = {}) {
   items = items || pickItems(buildPool(cfg), cfg.count, cfg.mode);
   round = { ...cfg, items, i: 0, results: [], streak: 0, best: 0 };
-  state.last[cfg.mode] = { variant: cfg.variant, region: cfg.region, count: cfg.count };
+  if (remember) state.last[cfg.mode] = { variant: cfg.variant, region: cfg.region, count: cfg.count };
   persistRound();
   show('quiz');
   nextQuestion();
@@ -465,7 +476,7 @@ function nextQuestion() {
   sfx.whoosh();
   const id = round.items[round.i];
   const { mode, variant } = round;
-  q = { id, mode, variant, answered: false, hinted: false, pick: null };
+  q = { id, mode, variant, answered: false, hinted: false, pick: null, seq: ++flightSeq };
   map.clear();
   if (mode !== 'gewaesser' && round.region !== 'welt') map.dimOutside(countriesIn(round.region).map(c => c.iso));
   renderHud();
@@ -497,8 +508,8 @@ function nextQuestion() {
     const w = WB.get(id);
     textQuestion({ prompt: 'Wie heißt dieses Gewässer?', placeholder: 'Meer, See oder Ozean eingeben …', searcher: waterSearch, answer: w.name, emptyText: 'Kein Gewässer gefunden – anders schreiben?' });
     map.setWaterClass(id, 'is-target');
-    const box = map.waterBox(id);
-    map.flyToWater(id).then(() => { if (q && q.id === id && !q.answered) map.ringFor(box); });
+    const box = map.waterBox(id), seq = q.seq;
+    map.flyToWater(id).then(() => { if (q && q.seq === seq && flightSeq === seq && !q.answered) map.ringFor(box); });
   } else if (mode === 'flaggen' && variant === 'flag') {
     textQuestion({ prompt: 'Zu welchem Land gehört diese Flagge?', placeholder: 'Land eingeben …', searcher: countrySearch, answer: C.get(id).name, bigFlag: id, emptyText: 'Kein Land gefunden – anders schreiben?' });
     map.showRegion(round.region);
@@ -510,7 +521,21 @@ function nextQuestion() {
 }
 
 function flyCountry(code, ring) {
-  return map.flyToCountry(code).then(() => { if (ring && q && q.id === code && !q.answered) map.ringsForCountry(code); });
+  const seq = q?.seq;
+  return map.flyToCountry(code).then(() => { if (ring && q && q.seq === seq && flightSeq === seq && !q.answered) map.ringsForCountry(code); });
+}
+
+/** Aktuelles Ziel neu in den freien Kartenbereich setzen (z. B. wenn die Tastatur aufgeht). */
+function refitQuestion() {
+  if (view !== 'quiz' || !q || q.answered) return;
+  const { mode, variant, id } = q;
+  if (mode === 'gewaesser') map.flyToWater(id, { duration: 350 });
+  else if (mode === 'hauptstaedte' && variant === 'country') {
+    const c = C.get(id);
+    if (c.capital.lat != null) map.flyToPoint(c.capital.lon, c.capital.lat, { size: 150, duration: 350 });
+  } else if ((mode === 'laender' && variant === 'name') || mode === 'hauptstaedte' || (mode === 'flaggen' && variant === 'pick')) {
+    map.flyToCountry(id, { duration: 350 });
+  }
 }
 
 /* ----- Text-Frage mit Vorschlagsliste ----- */
@@ -533,9 +558,11 @@ function textQuestion({ prompt, placeholder, searcher, answer, bigFlag, emptyTex
       <ul class="suggest" id="suggest" role="listbox" hidden></ul>
     </form>
     <div class="below"><button class="chip-btn" type="button" data-act="skip">Weiß ich nicht</button></div>`;
+  $('#view-quiz').classList.add('asking');
   wireCombobox();
   const input = $('#answer');
-  if (!matchMedia('(pointer: coarse)').matches || document.activeElement?.dataset?.act === 'next') input.focus({ preventScroll: true });
+  if (!matchMedia('(pointer: coarse)').matches || focusAfterNext) input.focus({ preventScroll: true });
+  focusAfterNext = false;
 }
 
 function wireCombobox() {
@@ -611,7 +638,7 @@ function submitText() {
 function findQuestion(c) {
   $('#view-quiz').innerHTML = `
     <div class="q-head">
-      <h2 class="q-prompt">Wo liegt ${emph(nom(c))}?</h2>
+      <h2 class="q-prompt">Wo ${pl(c, 'liegt', 'liegen')} ${emph(nom(c))}?</h2>
       <div class="q-tools"><button class="chip-btn" type="button" data-act="hint">Tipp</button></div>
     </div>
     <p class="hint" id="find-state">Tippe auf der Karte auf das Land und bestätige mit OK.</p>
@@ -620,6 +647,8 @@ function findQuestion(c) {
       <button class="btn primary ok" type="button" data-act="confirm-pick" disabled>OK</button>
     </div>`;
   $('#map').classList.add('pickable');
+  // nur Länder zählen; winzige Zielländer lassen sich auch knapp daneben antippen
+  map.hitOptions = { water: false, prefer: c.iso };
   map.onClick = hit => {
     if (!q || q.answered || !hit || hit.type !== 'country' || hit.code === 'AQ') return;
     if (q.pick) map.setCountryClass(q.pick.code, 'is-pick', false);
@@ -682,8 +711,11 @@ function answer(ok, chosen) {
     map.setWaterClass(id, 'is-right');
     map.labelWater(id, w.name, 'water right');
     if (!ok && chosen) {
-      map.setWaterClass(chosen.id, 'is-wrong');
+      map.setWaterClass(chosen.id, 'is-wrong', true, id);
       map.labelWater(chosen.id, WB.get(chosen.id).name, 'water wrong');
+      const rel = map.waterRelation(id, chosen.id);
+      if (rel === 'inside') note = `Nah dran: ${chosen.label} ist das größere Gewässer drumherum. Gefragt war genau der markierte Teil.`;
+      else if (rel === 'contains') note = `Nah dran: ${chosen.label} ist nur ein Teil davon. Gefragt war das ganze markierte Gewässer.`;
     }
     detail = ok ? `Genau: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>`
       : `Gesucht war: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>${chosen ? `. Deine Antwort: ${esc(chosen.label)}.` : ''}`;
@@ -765,6 +797,7 @@ function answer(ok, chosen) {
     <div class="next-row"><button class="btn primary" type="button" data-act="next">${round.i + 1 >= round.items.length ? 'Zur Auswertung' : 'Weiter'}</button></div>`;
 
   const card = $('#view-quiz');
+  card.classList.remove('asking');
   if (mode === 'flaggen' && variant === 'pick') {
     const grid = card.querySelector('.flag-grid');
     grid.classList.add('answered');
@@ -825,8 +858,11 @@ function skip() {
   answer(false, null);
 }
 
+let focusAfterNext = false;
+
 function next() {
   if (!round) return;
+  focusAfterNext = true;
   round.i++;
   persistRound();
   nextQuestion();
@@ -894,7 +930,7 @@ function openExplore() {
   });
   $('#map').classList.add('pickable');
   map.onClick = hit => exploreHit(hit);
-  map.lakeFirst = true;
+  map.hitOptions = { lakesFirst: true };
   explorePick = null;
   map.showRegion('welt');
 }
@@ -969,7 +1005,11 @@ function renderFact() {
       <button class="btn primary" type="button" data-act="next-fact">Nächster Fakt</button>
     </div>`;
   if (f.water) { map.setWaterClass(f.water, 'is-target'); map.flyToWater(f.water); }
-  else if (f.iso) { map.setCountryClass(f.iso, 'is-target'); map.flyToCountry(f.iso).then(() => map.ringsForCountry(f.iso)); }
+  else if (f.iso) {
+    const seq = ++flightSeq;
+    map.setCountryClass(f.iso, 'is-target');
+    map.flyToCountry(f.iso).then(() => { if (flightSeq === seq && view === 'facts') map.ringsForCountry(f.iso); });
+  }
   else map.showRegion('welt');
   $('[data-act="next-fact"]').focus({ preventScroll: true });
 }
@@ -1069,46 +1109,58 @@ function mergeRemoteIntoLocal(remote) {
 }
 
 async function push(opts = {}) {
-  const player = state.player;
-  if (!player || sync.pushing) return;
-  const payload = {};
-  let count = 0;
-  for (const [mode, ids] of Object.entries(state.dirty || {})) {
-    for (const id of Object.keys(ids)) {
-      const v = state.stats[mode]?.[id];
-      if (v) { (payload[mode] ||= {})[id] = v; count++; }
-    }
+  if (sync.pushing) return;
+  // aktive Spielerin/aktiver Spieler plus auf diesem Gerät geparkte Spieler mit offenen Antworten
+  const jobs = [];
+  if (state.player) jobs.push({ player: state.player, stats: state.stats, dirty: state.dirty });
+  for (const [pid, b] of Object.entries(state.bench || {})) {
+    if (pid !== state.player && b?.dirty && Object.keys(b.dirty).length) jobs.push({ player: pid, stats: b.stats || {}, dirty: b.dirty });
   }
-  if (!count) { state.dirty = {}; return; }
-  const sending = state.dirty;
-  state.dirty = {};
+  if (!jobs.length) return;
   sync.pushing = true;
+  let failed = false;
   try {
-    const body = JSON.stringify({ stats: payload });
-    const res = await fetch(`${API}/api/players/${player}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
-      keepalive: !!opts.keepalive && body.length < 60000,
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    sync.online = true;
-    if (state.player === player) {
-      state.remote ||= { players: {} };
-      state.remote.players[player] = { ...(state.remote.players[player] || {}), name: playerName(player), stats: data.stats, updatedAt: data.updatedAt };
-      if (mergeRemoteIntoLocal(data.stats)) onRemoteUpdate();
+    for (const job of jobs) {
+      const payload = {}, sent = [];
+      for (const [mode, ids] of Object.entries(job.dirty)) {
+        for (const id of Object.keys(ids)) {
+          const v = job.stats[mode]?.[id];
+          if (v) { (payload[mode] ||= {})[id] = v; sent.push([mode, id, v.t]); } else delete ids[id];
+        }
+        if (!Object.keys(ids).length) delete job.dirty[mode];
+      }
+      if (!sent.length) continue;
+      const body = JSON.stringify({ stats: payload });
+      const res = await fetch(`${API}/api/players/${job.player}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
+        keepalive: !!opts.keepalive && body.length < 60000,
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      // bestätigte Antworten aus der Warteschlange nehmen – außer sie wurden inzwischen neu beantwortet
+      for (const [mode, id, t] of sent) {
+        if (job.dirty[mode] && job.stats[mode]?.[id]?.t === t) {
+          delete job.dirty[mode][id];
+          if (!Object.keys(job.dirty[mode]).length) delete job.dirty[mode];
+        }
+      }
+      if (job.player === state.player && job.stats === state.stats) {
+        state.remote ||= { players: {} };
+        state.remote.players[job.player] = { ...(state.remote.players[job.player] || {}), name: playerName(job.player), stats: data.stats, updatedAt: data.updatedAt };
+        if (mergeRemoteIntoLocal(data.stats)) onRemoteUpdate();
+      }
     }
+    sync.online = true;
   } catch {
-    // Warteschlange behalten und später erneut versuchen
-    const target = state.player === player ? state.dirty : ((state.bench[player] ||= { stats: {} }).dirty ||= {});
-    for (const [mode, ids] of Object.entries(sending)) for (const id of Object.keys(ids)) (target[mode] ||= {})[id] = 1;
+    failed = true;
     sync.online = false;
     clearTimeout(sync.retry);
     sync.retry = setTimeout(() => push(), 20000);
   } finally {
     sync.pushing = false;
     save();
-    // was während der Übertragung dazukam, gleich hinterherschicken
-    if (sync.online && Object.keys(state.dirty || {}).length) {
+    const pending = Object.keys(state.dirty || {}).length || Object.values(state.bench || {}).some(b => b?.dirty && Object.keys(b.dirty).length);
+    if (!failed && pending) {
       clearTimeout(sync.pushTimer);
       sync.pushTimer = setTimeout(() => push(), 1200);
     }
@@ -1125,7 +1177,7 @@ async function pull() {
     if (state.player && data.players[state.player]) mergeRemoteIntoLocal(data.players[state.player].stats);
     save();
     onRemoteUpdate();
-    if (Object.keys(state.dirty || {}).length) push();
+    push();
   } catch {
     sync.online = false;
   }
@@ -1145,7 +1197,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 4;
+const APP_VERSION = 5;
 let updateReady = false;
 
 async function checkUpdate() {
@@ -1159,7 +1211,7 @@ async function checkUpdate() {
 
 function syncUpdateBar() {
   const bar = $('#update-bar');
-  if (bar) bar.hidden = !(updateReady && view !== 'quiz');
+  if (bar) bar.hidden = !(updateReady && ['home', 'setup', 'summary', 'progress', 'duel', 'player'].includes(view));
 }
 
 function applyUpdateIfIdle() {
@@ -1169,6 +1221,7 @@ function applyUpdateIfIdle() {
 function startSync() {
   pull();
   setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 45000);
+  setTimeout(checkUpdate, 5000);
   setInterval(checkUpdate, 120000);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') push({ keepalive: true });
@@ -1379,7 +1432,7 @@ function wire() {
         break;
       case 'retry': {
         const missed = round.results.filter(x => !x.ok).map(x => x.id);
-        startRound({ mode: round.mode, variant: round.variant, region: round.region, count: missed.length }, shuffle(missed));
+        startRound({ mode: round.mode, variant: round.variant, region: round.region, count: missed.length }, shuffle(missed), { remember: false });
         break;
       }
       case 'again': openSetup(round.mode); break;
@@ -1433,7 +1486,7 @@ async function main() {
   if (state.player) { renderHome(); show('home'); } else openChooser(false);
   map.showRegion('welt', { duration: 0 });
   startSync();
-  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, openDuel, choosePlayer, pull, push, checkUpdate, map, state };
+  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, openDuel, choosePlayer, pull, push, checkUpdate, refitQuestion, map, state, get q() { return q; } };
 }
 
 main();

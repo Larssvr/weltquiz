@@ -91,7 +91,7 @@ export class WorldMap {
     // Projektionen für Klick-Erkennung und Zuschnitt vorberechnen
     this.hit = countries.map(f => {
       const rings = this._rings(f);
-      return { f, c: f.properties.c, rings, box: ringsBox(rings) };
+      return { f, c: f.properties.c, rings, box: ringsBox(rings), ringBoxes: rings.map(r => ringsBox([r])) };
     });
     this.waterHit = this.waterFeatures.map(w => {
       const rings = this._rings(w.f);
@@ -188,6 +188,9 @@ export class WorldMap {
 
   /** Fliegt so, dass box (Karteneinheiten) in das Rechteck rect (Bildschirm) passt. */
   flyToBox(box, { rect, pad = 1.35, minSize = 26, maxK = 40, duration } = {}) {
+    // laufenden Flug zuerst beenden (er rückt die Kamera dabei um eine Weltbreite zurecht),
+    // erst danach das Ziel berechnen – sonst fliegt die Kamera einmal um die Welt
+    this._stopFlight();
     rect = rect || this.freeRect();
     let [[x0, y0], [x1, y1]] = box;
     let bw = x1 - x0, bh = y1 - y0;
@@ -212,22 +215,30 @@ export class WorldMap {
     return this._go(t, duration);
   }
 
+  _stopFlight() {
+    if (this._flying) this.svg.interrupt();
+  }
+
   _go(t, duration) {
     const d = REDUCED_MOTION ? 0 : duration ?? this._durationTo(t);
     this.svg.interrupt();
     if (!d) {
-      this.svg.call(this.zoom.transform, t);
+      this.svg.call(this.zoom.transform, this._constrain(t, [[0, 0], [this.vw, this.vh]]));
       return Promise.resolve();
     }
     this._flying = true;
     return new Promise(resolve => {
+      let done = false;
+      const finish = () => {
+        if (done) return;          // zoom.transform unten löst selbst noch ein „cancel“ aus
+        done = true;
+        this._flying = false;
+        this.svg.call(this.zoom.transform, this._constrain(this.transform, [[0, 0], [this.vw, this.vh]]));
+        resolve();
+      };
       this.svg.transition().duration(d).ease(d3.easeCubicInOut)
         .call(this.zoom.transform, t)
-        .on('end interrupt', () => {
-          this._flying = false;
-          this.svg.call(this.zoom.transform, this._constrain(this.transform, [[0, 0], [this.vw, this.vh]]));
-          resolve();
-        });
+        .on('end interrupt cancel', finish);
     });
   }
 
@@ -254,6 +265,7 @@ export class WorldMap {
 
   /** Schiebt die Karte nur, wenn der Mittelpunkt von box hinter einem Panel liegt (Zoom bleibt). */
   ensureVisible(box) {
+    this._stopFlight();
     const rect = this.freeRect();
     const t = this.transform;
     const cxW = (box[0][0] + box[1][0]) / 2, cyW = (box[0][1] + box[1][1]) / 2;
@@ -373,7 +385,23 @@ export class WorldMap {
     this.landSel.classed('is-out', f => !!keep && !keep.has(f.properties.c) && !keep.has(f.properties.s));
   }
 
-  setWaterClass(id, cls, on = true) {
+  /** Welche Beziehung haben zwei Gewässer? 'inside' = a liegt ganz in b, 'contains' = b liegt ganz in a */
+  waterRelation(a, b) {
+    const A = this.byWater.get(a) || [], B = this.byWater.get(b) || [];
+    if (!A.length || !B.length) return null;
+    if (A.every(f => B.includes(f))) return 'inside';
+    if (B.every(f => A.includes(f))) return 'contains';
+    return null;
+  }
+
+  setWaterClass(id, cls, on = true, except = null) {
+    if (except) {
+      const set = new Set(this.byWater.get(id) || []);
+      const skip = new Set(this.byWater.get(except) || []);
+      this.waterSel.filter(w => set.has(w) && !skip.has(w)).classed(cls, on);
+      this.lakeSel.filter(w => set.has(w) && !skip.has(w)).classed(cls, on);
+      return;
+    }
     const set = new Set(this.byWater.get(id) || []);
     this.waterSel.filter(w => set.has(w)).classed(cls, on);
     this.lakeSel.filter(w => set.has(w)).classed(cls, on);
@@ -551,52 +579,54 @@ export class WorldMap {
     let [x, y] = this.transform.invert([sx, sy]);
     x = ((x % W) + W) % W;
     const tol = 14 / this.transform.k;
-    this.onClick(this.lakeFirst ? this.hitTestLakeFirst(x, y, tol) : this.hitTest(x, y, tol), e);
+    this.onClick(this.hitTest(x, y, tol, this.hitOptions || {}), e);
   }
 
-  hitTest(x, y, tol) {
-    for (const h of this.hit) {
-      const [[x0, y0], [x1, y1]] = h.box;
-      if (x < x0 || x > x1 || y < y0 || y > y1) continue;
-      if (pointInRings(x, y, h.rings)) return { type: 'country', code: h.c, props: h.f.properties };
-    }
-    // Wasser: Seen zuerst (liegen über Land), dann Meere
-    const lakes = this.waterHit.filter(h => h.w.lake);
-    const seas = this.waterHit.filter(h => !h.w.lake);
-    for (const list of [lakes, seas]) {
-      for (const h of list) {
-        const [[x0, y0], [x1, y1]] = h.box;
-        if (x < x0 || x > x1 || y < y0 || y > y1) continue;
-        if (pointInRings(x, y, h.rings)) {
-          const ids = (h.w.f.properties.w || '').split(' ').filter(Boolean);
-          if (ids.length) return { type: 'water', ids };
-        }
-      }
-    }
-    // kleine Länder in der Nähe (Toleranz in Karteneinheiten)
-    let best = null, bestD = Infinity;
-    for (const h of this.hit) {
-      const [[x0, y0], [x1, y1]] = h.box;
-      const dx = Math.max(x0 - x, 0, x - x1), dy = Math.max(y0 - y, 0, y - y1);
-      const d = Math.hypot(dx, dy);
-      if (d < tol && d < bestD) { best = h; bestD = d; }
-    }
-    if (best) return { type: 'country', code: best.c, props: best.f.properties };
-    return null;
-  }
-
-  // Klick-Erkennung prüft auch Seen, die über Land liegen: Land hat Vorrang,
-  // außer der Punkt liegt in einem Quiz-See.
-  hitTestLakeFirst(x, y, tol) {
-    for (const h of this.waterHit.filter(h => h.w.lake)) {
-      const [[x0, y0], [x1, y1]] = h.box;
-      if (x < x0 || x > x1 || y < y0 || y > y1) continue;
-      if (pointInRings(x, y, h.rings)) {
+  /**
+   * Was liegt unter dem Punkt (Karteneinheiten)?
+   * water: Meere/Seen melden · lakesFirst: Seen vor Land (Entdecken) · prefer: winziges Ziel darf knapp daneben getroffen werden
+   */
+  hitTest(x, y, tol, { water = true, lakesFirst = false, prefer = null } = {}) {
+    const k = this.transform.k;
+    const tiny = b => Math.max(b[1][0] - b[0][0], b[1][1] - b[0][1]) * k < 20;
+    const boxDist = b => Math.hypot(Math.max(b[0][0] - x, 0, x - b[1][0]), Math.max(b[0][1] - y, 0, y - b[1][1]));
+    const inBox = b => x >= b[0][0] && x <= b[1][0] && y >= b[0][1] && y <= b[1][1];
+    const asCountry = h => ({ type: 'country', code: h.c, props: h.f.properties });
+    const waterAt = lakes => {
+      for (const h of this.waterHit) {
+        if (h.w.lake !== lakes || !inBox(h.box) || !pointInRings(x, y, h.rings)) continue;
         const ids = (h.w.f.properties.w || '').split(' ').filter(Boolean);
         if (ids.length) return { type: 'water', ids };
       }
+      return null;
+    };
+
+    // 1. winziges Zielland (Vatikan, Nauru …) knapp daneben zählt als Treffer
+    if (prefer) {
+      for (const h of this.hit) {
+        if (h.c !== prefer) continue;
+        if (h.ringBoxes.some(b => tiny(b) && boxDist(b) < tol)) return asCountry(h);
+      }
     }
-    return this.hitTest(x, y, tol);
+    // 2. Seen über dem Land (nur im Entdecken-Modus zuerst)
+    if (water && lakesFirst) { const w = waterAt(true); if (w) return w; }
+    // 3. Land unter dem Finger
+    for (const h of this.hit) {
+      if (inBox(h.box) && pointInRings(x, y, h.rings)) return asCountry(h);
+    }
+    // 4. kleine Inseln und Kleinststaaten knapp daneben – gemessen an der einzelnen Insel, nicht am ganzen Land
+    let best = null, bestD = tol;
+    for (const h of this.hit) {
+      for (const b of h.ringBoxes) {
+        if (!tiny(b)) continue;
+        const d = boxDist(b);
+        if (d < bestD) { best = h; bestD = d; }
+      }
+    }
+    if (best) return asCountry(best);
+    // 5. Gewässer
+    if (water) return (lakesFirst ? null : waterAt(true)) || waterAt(false);
+    return null;
   }
 }
 

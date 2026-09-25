@@ -428,7 +428,9 @@ p.who-note { margin: 14px 0 0; }
   .legend-row .desc { display: none; }
   .resume-row .desc { display: block; }
   .q-prompt { font-size: 21px; margin-bottom: 10px; }
-  .suggest { top: calc(100% + 6px); bottom: auto; right: 0; max-height: 40vh; }
+  .suggest { top: calc(100% + 6px); bottom: auto; right: 0; max-height: max(140px, min(40vh, calc(100vh - var(--kb) - 260px))); }
+  /* solange gefragt wird, darf die Vorschlagsliste über die Karte hinausragen */
+  .card.asking { overflow: visible; }
   .flag-big { height: 96px; margin-bottom: 10px; }
   .flag-opt { height: 84px; }
   .flag-opt img { max-height: 64px; }
