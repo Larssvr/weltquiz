@@ -1,10 +1,10 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=3';
-import { Searcher } from './search.js?v=3';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=3';
-import { COUNTRIES } from './data/countries.js?v=3';
-import { WATER } from './data/water.js?v=3';
-import { WORLD_FACTS } from './data/world-facts.js?v=3';
-import { CITIES } from './data/cities.js?v=3';
+import { WorldMap, REGION_BOX, W } from './map.js?v=4';
+import { Searcher } from './search.js?v=4';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=4';
+import { COUNTRIES } from './data/countries.js?v=4';
+import { WATER } from './data/water.js?v=4';
+import { WORLD_FACTS } from './data/world-facts.js?v=4';
+import { CITIES } from './data/cities.js?v=4';
 
 /* ================= Daten ================= */
 
@@ -100,6 +100,8 @@ function levelIn(stats, mode, id) {
   return 1;
 }
 function level(mode, id) { return levelIn(state.stats, mode, id); }
+// Stufen: 0 = noch nie gefragt, 1 = zuletzt falsch, 2 = gewusst (zuletzt richtig), 3 = sicher (zweimal in Folge richtig)
+const KNOWN = 2, SURE = 3;
 function record(mode, id, ok, hinted) {
   const m = state.stats[mode] ||= {};
   const s = m[id] ||= { n: 0, c: 0, s: 0 };
@@ -217,6 +219,7 @@ let view = 'home';
 function show(v) {
   view = v;
   document.body.dataset.view = v;
+  syncUpdateBar();
   for (const id of VIEWS) $('#view-' + id).hidden = id !== v;
   $('#hud').hidden = v !== 'quiz';
   $('#btn-quit').hidden = v !== 'quiz';
@@ -245,12 +248,12 @@ const SWATCH = {
   fakten: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d8cbea"/><text x="17" y="18.5" text-anchor="middle" font-family="Spectral, Georgia, serif" font-style="italic" font-size="17" font-weight="500" fill="#2a2833">i</text></svg>',
   duell: '<svg viewBox="0 0 34 24"><rect width="17" height="24" fill="#7c5cf0"/><rect x="17" width="17" height="24" fill="#e0761b"/><path d="M11 7l12 10M23 7L11 17" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>',
   resume: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#d6246e"/><path d="M13 6l10 6-10 6z" fill="#fff"/></svg>',
-  fortschritt: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><rect x="0" y="0" width="12" height="24" fill="#86c895"/><rect x="12" y="0" width="9" height="24" fill="#f4d88a"/><rect x="21" y="0" width="6" height="24" fill="#f3b3a1"/></svg>',
+  fortschritt: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#fff"/><rect x="0" y="0" width="12" height="24" fill="#4fae68"/><rect x="12" y="0" width="9" height="24" fill="#b9e3a8"/><rect x="21" y="0" width="6" height="24" fill="#f3b3a1"/></svg>',
 };
 
 function masteredCount(mode) {
   const pool = mode === 'gewaesser' ? WATER.map(w => w.id) : COUNTRIES.map(c => c.iso);
-  return [pool.filter(id => level(mode, id) === 3).length, pool.length];
+  return [pool.filter(id => level(mode, id) >= KNOWN).length, pool.length];
 }
 
 let deck = null;
@@ -308,7 +311,7 @@ function renderHome() {
       ${resumeRow()}
       ${rows.map(([id, name, desc]) => {
         let count = '';
-        if (MODES[id]) { const [m, n] = masteredCount(id); count = `<span class="count" title="gelernt">${m}/${n}</span>`; }
+        if (MODES[id]) { const [m, n] = masteredCount(id); count = `<span class="count" title="gewusst">${m}/${n}</span>`; }
         return `<li><button class="legend-row" data-go="${id}" type="button">
           <span class="swatch">${SWATCH[id]}</span>
           <span><span class="name">${name}</span><span class="desc">${desc}</span></span>${count}
@@ -394,7 +397,7 @@ function pickItems(pool, count, mode) {
     const s = stat(mode, id);
     if (!s || !s.n) return 3;
     if (s.s === 0) return 5;
-    if (s.s === 1) return 2;
+    if (s.s === 1) return 2.5;
     const age = (Date.now() - (s.t || 0)) / 864e5;
     return Math.min(1.5, 0.3 + age * 0.08);
   };
@@ -999,21 +1002,21 @@ function renderProgress() {
   $('#view-progress').innerHTML = `
     <button class="back" type="button" data-act="home">‹ Zurück</button>
     <h2 class="h2">${own ? 'Dein Fortschritt' : `Fortschritt von ${esc(playerName(pid))}`}</h2>
-    <p class="lead">Grün heißt gelernt: die letzten zwei Antworten waren richtig.</p>
+    <p class="lead">Hellgrün: zuletzt richtig gewusst. Dunkelgrün: sicher, zweimal hintereinander richtig.</p>
     ${state.player ? `<div class="options who-tabs" style="margin-top:14px">${PLAYERS.map(p => `<button type="button" class="opt p-${p.id}" data-pplayer="${p.id}" aria-pressed="${p.id === pid}">${esc(p.name)}</button>`).join('')}</div>` : ''}
     <div class="options" style="margin-top:10px">${tabs.map(([id, l]) => `<button type="button" class="opt" data-pmode="${id}" aria-pressed="${id === m}">${l}</button>`).join('')}</div>
     <div class="progress-rows">${rows.map(([label, ids]) => {
       const lv = [0, 0, 0, 0];
       ids.forEach(id => lv[level(m, id)]++);
       const n = ids.length;
-      return `<div class="progress-row"><div class="top"><span>${esc(label)}</span><span>${lv[3]} von ${n}</span></div>
+      return `<div class="progress-row"><div class="top"><span>${esc(label)}</span><span>${lv[2] + lv[3]} von ${n} gewusst</span></div>
         <div class="meter"><i class="m3" style="width:${lv[3] / n * 100}%"></i><i class="m2" style="width:${lv[2] / n * 100}%"></i><i class="m1" style="width:${lv[1] / n * 100}%"></i></div></div>`;
     }).join('')}</div>
-    <div class="key"><span><i style="background:#86c895"></i>gelernt</span><span><i style="background:#f4d88a"></i>einmal richtig</span><span><i style="background:#f3b3a1"></i>zuletzt falsch</span><span><i style="background:#e9e5de"></i>noch nicht gefragt</span></div>
+    <div class="key"><span><i style="background:#4fae68"></i>sicher</span><span><i style="background:#b9e3a8"></i>gewusst</span><span><i style="background:#f3b3a1"></i>zuletzt falsch</span><span><i style="background:#e9e5de"></i>noch nicht gefragt</span></div>
     ${!own && !state.remote ? '<p class="hint" style="margin-top:12px">Der Stand von ' + esc(playerName(pid)) + ' wird gerade geladen …</p>' : ''}`;
   map.clear();
   if (m === 'gewaesser') {
-    for (const w of WATER) { const l = level(m, w.id); if (l === 3) map.setWaterClass(w.id, 'is-right'); else if (l === 1) map.setWaterClass(w.id, 'is-wrong'); }
+    for (const w of WATER) { const l = level(m, w.id); if (l >= KNOWN) map.setWaterClass(w.id, 'is-right'); else if (l === 1) map.setWaterClass(w.id, 'is-wrong'); }
   } else {
     map.setMastery(Object.fromEntries(COUNTRIES.map(c => [c.iso, level(m, c.iso)])));
   }
@@ -1104,6 +1107,11 @@ async function push(opts = {}) {
   } finally {
     sync.pushing = false;
     save();
+    // was während der Übertragung dazukam, gleich hinterherschicken
+    if (sync.online && Object.keys(state.dirty || {}).length) {
+      clearTimeout(sync.pushTimer);
+      sync.pushTimer = setTimeout(() => push(), 1200);
+    }
   }
 }
 
@@ -1123,16 +1131,48 @@ async function pull() {
   }
 }
 
+let remoteSig = '';
 function onRemoteUpdate() {
-  if (view === 'home') renderHome();
-  else if (view === 'duel') renderDuel(false);
+  // nur neu zeichnen, wenn sich Zahlen geändert haben – und dabei die Scrollposition behalten
+  const sig = JSON.stringify(duelScores().map(p => [p.sc.total, p.sc.sure, p.sc.answers, p.sc.last]));
+  if (sig === remoteSig) return;
+  remoteSig = sig;
+  const redraw = (el, fn) => { const top = el.scrollTop; fn(); el.scrollTop = top; };
+  if (view === 'home') redraw($('#view-home'), renderHome);
+  else if (view === 'duel') redraw($('#view-duel'), () => renderDuel(false));
+}
+
+/* ---------- Updates ohne Unterbrechung ---------- */
+
+// Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
+const APP_VERSION = 4;
+let updateReady = false;
+
+async function checkUpdate() {
+  try {
+    const res = await fetch('version.json?cb=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return;
+    const { v } = await res.json();
+    if (+v > APP_VERSION) { updateReady = true; syncUpdateBar(); }
+  } catch { /* offline */ }
+}
+
+function syncUpdateBar() {
+  const bar = $('#update-bar');
+  if (bar) bar.hidden = !(updateReady && view !== 'quiz');
+}
+
+function applyUpdateIfIdle() {
+  if (updateReady && view !== 'quiz') { push({ keepalive: true }); location.reload(); }
 }
 
 function startSync() {
   pull();
   setInterval(() => { if (document.visibilityState === 'visible') pull(); }, 45000);
+  setInterval(checkUpdate, 120000);
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') push({ keepalive: true }); else pull();
+    if (document.visibilityState === 'hidden') push({ keepalive: true });
+    else { applyUpdateIfIdle(); pull(); checkUpdate(); }
   });
   window.addEventListener('online', () => { push(); pull(); });
 }
@@ -1161,7 +1201,7 @@ function openChooser(canGoBack) {
     <div class="who">
       ${PLAYERS.map(p => `<button type="button" class="who-btn p-${p.id}" data-player="${p.id}"${p.id === state.player ? ' aria-pressed="true"' : ''}>${esc(p.name)}</button>`).join('')}
     </div>
-    ${!state.player && answered ? `<p class="hint who-note">Auf diesem Gerät wurde schon gespielt (${learned} gelernt). Dieser Fortschritt gehört dann zu dem Namen, den du antippst.</p>` : ''}
+    ${!state.player && answered ? `<p class="hint who-note">Auf diesem Gerät wurde schon gespielt (${learned} gewusst). Dieser Fortschritt gehört dann zu dem Namen, den du antippst.</p>` : ''}
     <p class="hint who-note">Euer Fortschritt wird online gespeichert. So seid ihr auf jedem Gerät auf dem gleichen Stand und seht euch gegenseitig im Duell.</p>`;
   show('player');
   map.showRegion('welt');
@@ -1180,7 +1220,7 @@ function choosePlayer(id) {
   } else if (!state.player) {
     // erste Wahl: alles, was auf diesem Gerät schon gespielt wurde, gehört jetzt diesem Spieler
     const answered = Object.values(state.stats).reduce((n, items) => n + Object.keys(items || {}).length, 0);
-    if (answered && !confirm(`Der bisherige Fortschritt auf diesem Gerät (${localLearned()} gelernt) gehört dann ${playerName(id)}. Stimmt das?`)) return;
+    if (answered && !confirm(`Der bisherige Fortschritt auf diesem Gerät (${localLearned()} gewusst) gehört dann ${playerName(id)}. Stimmt das?`)) return;
     for (const [mode, items] of Object.entries(state.stats)) for (const item of Object.keys(items || {})) (state.dirty[mode] ||= {})[item] = 1;
   }
   state.player = id;
@@ -1198,17 +1238,18 @@ let duelMode = 'laender';
 
 function scoreOf(stats) {
   const per = {};
-  let total = 0, answers = 0, correct = 0, last = 0;
+  let total = 0, sure = 0, answers = 0, correct = 0, last = 0;
   for (const mode of Object.keys(MODES)) {
     const ids = mode === 'gewaesser' ? WATER.map(w => w.id) : COUNTRIES.map(c => c.iso);
-    per[mode] = ids.filter(id => levelIn(stats, mode, id) === 3).length;
+    per[mode] = ids.filter(id => levelIn(stats, mode, id) >= KNOWN).length;
+    sure += ids.filter(id => levelIn(stats, mode, id) === SURE).length;
     total += per[mode];
     for (const v of Object.values(stats?.[mode] || {})) {
       answers += v.n || 0; correct += v.c || 0;
       if ((v.t || 0) > last) last = v.t;
     }
   }
-  return { per, total, answers, correct, last };
+  return { per, total, sure, answers, correct, last };
 }
 
 function ago(t) {
@@ -1247,7 +1288,7 @@ function renderDuel(withMap = true) {
   const [a, b] = duelScores();
   const lead = a.sc.total === b.sc.total ? null : (a.sc.total > b.sc.total ? a : b);
   const diff = Math.abs(a.sc.total - b.sc.total);
-  const verdict = !a.sc.total && !b.sc.total ? 'Noch hat niemand etwas gelernt. Wer fängt an?'
+  const verdict = !a.sc.total && !b.sc.total ? 'Noch hat niemand etwas gewusst. Wer fängt an?'
     : !lead ? 'Gleichstand!' : `${esc(lead.name)} liegt ${diff} vorne.`;
   const pct = sc => (sc.answers ? Math.round(sc.correct / sc.answers * 100) + ' %' : '–');
   const tabs = [['laender', 'Länder'], ['hauptstaedte', 'Hauptstädte'], ['flaggen', 'Flaggen'], ['gewaesser', 'Gewässer']];
@@ -1255,12 +1296,12 @@ function renderDuel(withMap = true) {
   $('#view-duel').innerHTML = `
     <button class="back" type="button" data-act="home">‹ Zurück</button>
     <h2 class="h2">Duell</h2>
-    <p class="lead">Gezählt wird, was gelernt ist: die letzten zwei Antworten waren richtig.</p>
+    <p class="lead">Gezählt wird, was du gerade weißt: die letzte Antwort war richtig. Eine falsche Antwort zieht es wieder ab.</p>
     <div class="duel-head">
       ${[a, b].map(p => `<div class="duel-side p-${p.id}${lead && lead.id === p.id ? ' lead' : ''}">
         <span class="duel-name">${esc(p.name)}${p.id === state.player ? ' <small>(du)</small>' : ''}</span>
         <span class="duel-total">${p.sc.total}</span>
-        <span class="duel-sub">gelernt</span></div>`).join('<span class="duel-vs">gegen</span>')}
+        <span class="duel-sub">gewusst</span></div>`).join('<span class="duel-vs">gegen</span>')}
     </div>
     <p class="duel-verdict">${verdict}</p>
     <div class="duel-rows">
@@ -1272,6 +1313,7 @@ function renderDuel(withMap = true) {
       </div>`).join('')}
     </div>
     <dl class="duel-stats">
+      <dt>Davon sicher</dt><dd>${a.sc.sure}</dd><dd>${b.sc.sure}</dd>
       <dt>Antworten</dt><dd>${a.sc.answers}</dd><dd>${b.sc.answers}</dd>
       <dt>Trefferquote</dt><dd>${pct(a.sc)}</dd><dd>${pct(b.sc)}</dd>
       <dt>Zuletzt gespielt</dt><dd>${ago(a.sc.last)}</dd><dd>${ago(b.sc.last)}</dd>
@@ -1286,7 +1328,7 @@ function renderDuel(withMap = true) {
   const mode = duelMode;
   const sa = statsOf(a.id), sb = statsOf(b.id);
   const cls = id => {
-    const la = levelIn(sa, mode, id) === 3, lb = levelIn(sb, mode, id) === 3;
+    const la = levelIn(sa, mode, id) >= KNOWN, lb = levelIn(sb, mode, id) >= KNOWN;
     return la && lb ? 'ab' : la ? 'a' : lb ? 'b' : null;
   };
   map.clear();
@@ -1348,6 +1390,7 @@ function wire() {
 
   $('#brand').addEventListener('click', goHome);
   $('#btn-player').addEventListener('click', () => openChooser(true));
+  $('#btn-update').addEventListener('click', () => { push({ keepalive: true }); location.reload(); });
   $('#btn-quit').addEventListener('click', () => {
     if (round && round.results.length) finishRound(); else goHome();
   });
@@ -1390,7 +1433,7 @@ async function main() {
   if (state.player) { renderHome(); show('home'); } else openChooser(false);
   map.showRegion('welt', { duration: 0 });
   startSync();
-  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, openDuel, choosePlayer, pull, push, map, state };
+  if (new URLSearchParams(location.search).has('debug')) window.__wq = { startRound, openExplore, openFacts, openProgress, openDuel, choosePlayer, pull, push, checkUpdate, map, state };
 }
 
 main();

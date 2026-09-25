@@ -91,8 +91,8 @@ button { cursor: pointer; }
 .water-hl path.cmp-ab, .lakes path.cmp-ab { fill: #86c895; }
 .mastery .land path { fill: #e9e5de; }
 .mastery .land path.m1 { fill: #f3b3a1; }
-.mastery .land path.m2 { fill: #f4d88a; }
-.mastery .land path.m3 { fill: #86c895; }
+.mastery .land path.m2 { fill: #b9e3a8; }
+.mastery .land path.m3 { fill: #4fae68; }
 .borders { fill: none; stroke: var(--border); stroke-width: 0.75; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .coast { fill: none; stroke: var(--coast); stroke-width: 0.8; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .lakes path { fill: var(--sea); stroke: var(--coast); stroke-width: 0.6; vector-effect: non-scaling-stroke; transition: fill 0.35s ease; }
@@ -205,6 +205,14 @@ h1, h2, h3 { margin: 0; font-weight: 700; }
 .daily-head img { height: 14px; border: 1px solid rgba(0,0,0,.15); }
 .fact-text { font-family: var(--font-serif); font-style: italic; font-size: 18px; line-height: 1.5; margin: 6px 0 0; }
 .linkish { background: none; border: 0; padding: 0; color: var(--focus); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; margin-top: 8px; }
+
+/* Update-Hinweis */
+.update-bar {
+  position: fixed; z-index: 25; right: calc(20px + env(safe-area-inset-right)); top: calc(var(--top) + 18px);
+  display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 14px;
+  background: var(--paper); box-shadow: var(--frame), var(--lift); font-weight: 600;
+}
+.update-bar .btn { height: 38px; padding: 0 14px; font-size: 15px; }
 
 /* Spieler */
 .player-chip {
@@ -376,8 +384,8 @@ p.who-note { margin: 14px 0 0; }
 .progress-row .top span:last-child { font-family: var(--font-cond); color: var(--muted); font-variant-numeric: tabular-nums; }
 .meter { height: 10px; border: 1.5px solid var(--ink); margin-top: 6px; display: flex; background: #fff; }
 .meter i { display: block; height: 100%; }
-.meter .m3 { background: #86c895; }
-.meter .m2 { background: #f4d88a; }
+.meter .m3 { background: #4fae68; }
+.meter .m2 { background: #b9e3a8; }
 .meter .m1 { background: #f3b3a1; }
 .key { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: 14px; color: var(--muted); }
 .key span { display: inline-flex; align-items: center; gap: 6px; }
@@ -388,6 +396,7 @@ p.who-note { margin: 14px 0 0; }
 @media (max-width: 700px) {
   :root { --top: 58px; }
   body[data-view="quiz"] .brand { display: none; }
+  .update-bar { left: 10px; right: 10px; top: calc(var(--top) + 8px); justify-content: space-between; }
   body[data-view="quiz"] .player-chip { display: none; }
   .player-chip { height: 34px; padding: 0 10px; font-size: 14px; }
   .who-btn { height: 76px; font-size: 26px; }
