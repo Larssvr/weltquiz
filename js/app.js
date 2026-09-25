@@ -112,6 +112,44 @@ const ICON_NO = '<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="tr
 function nameOf(code, props) {
   return C.get(code)?.name || props?.n || code;
 }
+
+// Länder, die im Deutschen einen Artikel brauchen: [Nominativ, Dativ, Genitiv, Akkusativ (nur wenn abweichend)]
+const ART = {
+  TR: ['die Türkei', 'der Türkei', 'der Türkei'], CH: ['die Schweiz', 'der Schweiz', 'der Schweiz'],
+  SK: ['die Slowakei', 'der Slowakei', 'der Slowakei'], UA: ['die Ukraine', 'der Ukraine', 'der Ukraine'],
+  MN: ['die Mongolei', 'der Mongolei', 'der Mongolei'], CI: ['die Elfenbeinküste', 'der Elfenbeinküste', 'der Elfenbeinküste'],
+  CF: ['die Zentralafrikanische Republik', 'der Zentralafrikanischen Republik', 'der Zentralafrikanischen Republik'],
+  DO: ['die Dominikanische Republik', 'der Dominikanischen Republik', 'der Dominikanischen Republik'],
+  CD: ['die Demokratische Republik Kongo', 'der Demokratischen Republik Kongo', 'der Demokratischen Republik Kongo'],
+  CG: ['die Republik Kongo', 'der Republik Kongo', 'der Republik Kongo'], MD: ['die Republik Moldau', 'der Republik Moldau', 'der Republik Moldau'],
+  VA: ['die Vatikanstadt', 'der Vatikanstadt', 'der Vatikanstadt'],
+  IR: ['der Iran', 'dem Iran', 'des Iran', 'den Iran'], IQ: ['der Irak', 'dem Irak', 'des Irak', 'den Irak'],
+  YE: ['der Jemen', 'dem Jemen', 'des Jemen', 'den Jemen'], LB: ['der Libanon', 'dem Libanon', 'des Libanon', 'den Libanon'],
+  SD: ['der Sudan', 'dem Sudan', 'des Sudan', 'den Sudan'], SS: ['der Südsudan', 'dem Südsudan', 'des Südsudan', 'den Südsudan'],
+  TD: ['der Tschad', 'dem Tschad', 'des Tschad', 'den Tschad'], NE: ['der Niger', 'dem Niger', 'des Niger', 'den Niger'],
+  SN: ['der Senegal', 'dem Senegal', 'des Senegal', 'den Senegal'],
+  GB: ['das Vereinigte Königreich', 'dem Vereinigten Königreich', 'des Vereinigten Königreichs'],
+  US: ['die USA', 'den USA', 'der USA'], NL: ['die Niederlande', 'den Niederlanden', 'der Niederlande'],
+  PH: ['die Philippinen', 'den Philippinen', 'der Philippinen'], MV: ['die Malediven', 'den Malediven', 'der Malediven'],
+  SC: ['die Seychellen', 'den Seychellen', 'der Seychellen'], KM: ['die Komoren', 'den Komoren', 'der Komoren'],
+  SB: ['die Salomonen', 'den Salomonen', 'der Salomonen'], MH: ['die Marshallinseln', 'den Marshallinseln', 'der Marshallinseln'],
+  BS: ['die Bahamas', 'den Bahamas', 'der Bahamas'],
+  AE: ['die Vereinigten Arabischen Emirate', 'den Vereinigten Arabischen Emiraten', 'der Vereinigten Arabischen Emirate'],
+};
+const art = (c, i) => c && ART[c.iso]?.[i];
+const nom = c => art(c, 0) || c.name;                                  // „die Türkei“, „Deutschland“
+const acc = c => art(c, 3) || art(c, 0) || c.name;                     // „den Iran“
+const gen = c => art(c, 2) || 'von ' + c.name;                         // Hauptstadt „der Türkei“ / „von Deutschland“
+const inDat = c => { const d = art(c, 1); return !d ? 'in ' + c.name : d.startsWith('dem ') ? 'im ' + d.slice(4) : 'in ' + d; };
+const zuDat = c => { const d = art(c, 1); return !d ? 'zu ' + c.name : d.startsWith('der ') ? 'zur ' + d.slice(4) : d.startsWith('dem ') ? 'zum ' + d.slice(4) : 'zu ' + d; };
+const capFirst = t => t.charAt(0).toUpperCase() + t.slice(1);
+const PLURAL = new Set(['US', 'NL', 'PH', 'MV', 'SC', 'KM', 'SB', 'MH', 'BS', 'AE']);
+const pl = (c, one, many) => (PLURAL.has(c.iso) ? many : one);
+// Hebt nur den Namen hervor, nicht Artikel oder Präposition
+const emph = (phrase, tag = 'em') => {
+  const m = phrase.match(/^(der|die|das|dem|den|des|von|zu|zur|zum|im|in) (.+)$/);
+  return m ? `${m[1]} <${tag}>${esc(m[2])}</${tag}>` : `<${tag}>${esc(phrase)}</${tag}>`;
+};
 function inRegion(c, region) { return region === 'welt' || c.regions.includes(region); }
 function countriesIn(region) { return COUNTRIES.filter(c => inRegion(c, region)); }
 function waterIn(variant) {
@@ -413,7 +451,7 @@ function nextQuestion() {
     map.showRegion(round.region);
   } else if (mode === 'hauptstaedte' && variant === 'capital') {
     const c = C.get(id);
-    textQuestion({ prompt: `Wie heißt die Hauptstadt von <em>${esc(c.name)}</em>?`, placeholder: 'Stadt eingeben …', searcher: capitalSearch, answer: c.capital.name, emptyText: 'Keine Stadt gefunden – anders schreiben?' });
+    textQuestion({ prompt: `Wie heißt die Hauptstadt ${emph(gen(c))}?`, placeholder: 'Stadt eingeben …', searcher: capitalSearch, answer: c.capital.name, emptyText: 'Keine Stadt gefunden – anders schreiben?' });
     map.setCountryClass(id, 'is-target');
     flyCountry(id, true);
   } else if (mode === 'hauptstaedte' && variant === 'country') {
@@ -542,7 +580,7 @@ function submitText() {
 function findQuestion(c) {
   $('#view-quiz').innerHTML = `
     <div class="q-head">
-      <h2 class="q-prompt">Wo liegt <em>${esc(c.name)}</em>?</h2>
+      <h2 class="q-prompt">Wo liegt ${emph(nom(c))}?</h2>
       <div class="q-tools"><button class="chip-btn" type="button" data-act="hint">Tipp</button></div>
     </div>
     <p class="hint" id="find-state">Tippe auf der Karte auf das Land und bestätige mit OK.</p>
@@ -577,7 +615,7 @@ function flagOptions(iso) {
 function flagPickQuestion(c) {
   const opts = flagOptions(c.iso);
   $('#view-quiz').innerHTML = `
-    <div class="q-head"><h2 class="q-prompt">Welche Flagge gehört zu <em>${esc(c.name)}</em>?</h2></div>
+    <div class="q-head"><h2 class="q-prompt">Welche Flagge gehört ${emph(zuDat(c))}?</h2></div>
     <div class="flag-grid" id="flag-grid">
       ${opts.map((iso, i) => `<button class="flag-opt" type="button" data-flag="${iso}" aria-label="Flagge ${i + 1}"><img src="${flagUrl(iso)}" alt=""></button>`).join('')}
     </div>
@@ -612,8 +650,8 @@ function answer(ok, chosen) {
       map.setWaterClass(chosen.id, 'is-wrong');
       map.labelWater(chosen.id, WB.get(chosen.id).name, 'water wrong');
     }
-    detail = ok ? `Das ist <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>.`
-      : `Gesucht war <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
+    detail = ok ? `Genau: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>`
+      : `Gesucht war: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>${chosen ? `. Deine Antwort: ${esc(chosen.label)}.` : ''}`;
     fact = nextFact('w:' + id, w.facts);
     const tb = map.waterBox(id);
     if (!ok && chosen) {
@@ -649,25 +687,30 @@ function answer(ok, chosen) {
       }
       if (variant === 'capital') {
         const other = chosen && C.get(chosen.iso);
-        if (ok && chosen.idx === 0) detail = `<b>${esc(chosen.label)}</b> ist die Hauptstadt von ${esc(c.name)}.`;
+        if (ok && chosen.idx === 0) detail = `<b>${esc(chosen.label)}</b> ist die Hauptstadt ${esc(gen(c))}.`;
         else if (ok) detail = `<b>${esc(chosen.label)}</b> zählt als richtig (${esc(capitalsOf(c)[chosen.idx].role || 'Regierungssitz')}). Als Hauptstadt gilt ${esc(c.capital.name)}.`;
-        else if (!chosen) detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b>.`;
-        else if (chosen.city && chosen.iso === id) detail = `${esc(chosen.label)} liegt zwar in ${esc(c.name)}, ist aber nicht die Hauptstadt. Die heißt <b>${esc(c.capital.name)}</b>.`;
-        else if (chosen.city) detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b>. ${esc(chosen.label)} liegt in ${esc(other.name)} und ist dort keine Hauptstadt.`;
-        else detail = `Die Hauptstadt von ${esc(c.name)} ist <b>${esc(c.capital.name)}</b> – ${esc(chosen.label)} ist die Hauptstadt von ${esc(other.name)}.`;
+        else if (!chosen) detail = `Die Hauptstadt ${esc(gen(c))} ist <b>${esc(c.capital.name)}</b>.`;
+        else if (chosen.city && chosen.iso === id) detail = `${esc(chosen.label)} liegt zwar ${esc(inDat(c))}, ist aber nicht die Hauptstadt. Die heißt <b>${esc(c.capital.name)}</b>.`;
+        else if (chosen.city) detail = `Die Hauptstadt ${esc(gen(c))} ist <b>${esc(c.capital.name)}</b>. ${esc(chosen.label)} liegt ${esc(inDat(other))} und ist dort keine Hauptstadt.`;
+        else detail = `Die Hauptstadt ${esc(gen(c))} ist <b>${esc(c.capital.name)}</b> – ${esc(chosen.label)} ist die Hauptstadt ${esc(gen(other))}.`;
       } else {
-        detail = ok ? `${esc(c.capital.name)} ist die Hauptstadt von <b>${esc(c.name)}</b>.`
-          : `${esc(c.capital.name)} ist die Hauptstadt von <b>${esc(c.name)}</b>${chosen ? ` – nicht von ${esc(chosen.label)}` : ''}.`;
+        const picked = chosen && C.get(chosen.id);
+        detail = ok ? `${esc(c.capital.name)} ist die Hauptstadt ${emph(gen(c), 'b')}.`
+          : `${esc(c.capital.name)} ist die Hauptstadt ${emph(gen(c), 'b')}${picked ? ` – nicht ${esc(gen(picked))}` : ''}.`;
       }
       note = c.capitalNote || '';
     } else if (mode === 'laender' && variant === 'find') {
-      detail = ok ? `Genau, hier liegt <b>${esc(c.name)}</b>.` : `${esc(c.name)} ist grün markiert${wrongCode ? ` – du hast ${esc(nameOf(wrongCode, q.pick?.props))} angetippt` : ''}.`;
+      const tapped = wrongCode && (C.get(wrongCode) ? acc(C.get(wrongCode)) : nameOf(wrongCode, q.pick?.props));
+      detail = ok ? `Genau, hier ${pl(c, 'liegt', 'liegen')} ${emph(nom(c), 'b')}.` : `${esc(capFirst(nom(c)))} ${pl(c, 'ist', 'sind')} grün markiert${tapped ? ` – du hast ${esc(tapped)} angetippt` : ''}.`;
     } else if (mode === 'flaggen' && variant === 'pick') {
-      detail = ok ? `Das ist die Flagge von <b>${esc(c.name)}</b>.` : `Grün umrandet ist die Flagge von <b>${esc(c.name)}</b>${chosen ? ` – du hast die von ${esc(chosen.label)} gewählt` : ''}.`;
+      const pc = chosen && C.get(chosen.id);
+      detail = ok ? `Das ist die Flagge ${emph(gen(c), 'b')}.` : `Grün umrandet ist die Flagge ${emph(gen(c), 'b')}${pc ? ` – du hast die Flagge ${esc(gen(pc))} gewählt` : ''}.`;
     } else if (mode === 'flaggen') {
-      detail = ok ? `Das ist die Flagge von <b>${esc(c.name)}</b>.` : `Das ist die Flagge von <b>${esc(c.name)}</b>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
+      const pc = chosen && C.get(chosen.id);
+      detail = `Das ist die Flagge ${emph(gen(c), 'b')}${!ok && pc ? ` – du hast ${esc(acc(pc))} gewählt` : ''}.`;
     } else {
-      detail = ok ? `Das ist <b>${esc(c.name)}</b>.` : `Gesucht war <b>${esc(c.name)}</b>${chosen ? ` – du hast ${esc(chosen.label)} gewählt` : ''}.`;
+      const pc = chosen && C.get(chosen.id);
+      detail = ok ? `Das ${pl(c, 'ist', 'sind')} ${emph(nom(c), 'b')}.` : `Gesucht ${pl(c, 'war', 'waren')} ${emph(nom(c), 'b')}${pc ? ` – du hast ${esc(acc(pc))} gewählt` : ''}.`;
     }
     fact = nextFact('c:' + id, c.facts);
     const tb = map.countryBox(id);
@@ -678,6 +721,7 @@ function answer(ok, chosen) {
     } else fly = () => map.flyToCountry(id);
   }
 
+  detail = detail.replace(/\.(<\/b>)?\.$/, '.$1');   // „D.C.“ nicht doppelt punkten
   const body = `
     <div class="result ${ok ? 'right' : 'wrong'}">${ok ? ICON_OK : ICON_NO}${ok ? (q.hinted ? 'Richtig – mit Tipp' : 'Richtig!') : 'Falsch'}</div>
     <p class="result-detail">${detail}</p>
@@ -830,7 +874,7 @@ function exploreHit(hit) {
     if (!c) {
       const owner = hit.props.s && C.get(hit.props.s);
       box.innerHTML = `<div class="card-scroll"><h3 class="q-prompt" style="margin:10px 0 4px">${esc(hit.props.n || hit.code)}</h3>
-        <p class="hint" style="margin:0">${owner ? `Gehört zu ${esc(owner.name)} – kein eigener Staat.` : hit.code === 'AQ' ? 'Ein Kontinent ohne Staat: Antarktika wird durch den Antarktisvertrag gemeinsam verwaltet.' : 'Kein eigenständiger, allgemein anerkannter Staat.'}</p></div>`;
+        <p class="hint" style="margin:0">${owner ? `Gehört ${esc(zuDat(owner))} – kein eigener Staat.` : hit.code === 'AQ' ? 'Ein Kontinent ohne Staat: Antarktika wird durch den Antarktisvertrag gemeinsam verwaltet.' : 'Kein eigenständiger, allgemein anerkannter Staat.'}</p></div>`;
       return;
     }
     const caps = capitalsOf(c);

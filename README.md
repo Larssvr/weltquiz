@@ -11,7 +11,7 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 - **Meere, Seen & Ozeane** – 136 Gewässer
 - **Flaggen** – Flagge → Land oder Land → eine von vier (ähnlichen) Flaggen
 - **Entdecken** – freie Karte mit Infos zu jedem Land und Gewässer
-- **Fakten** – Hunderte überraschende Fakten zu Ländern, Meeren und der Welt
+- **Fakten** – über 900 überraschende Fakten zu Ländern, Meeren und der Welt
 - **Fortschritt** – was du sicher weißt (wird nur im eigenen Browser gespeichert)
 
 ## Technik

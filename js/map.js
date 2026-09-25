@@ -427,20 +427,21 @@ export class WorldMap {
     this._placeOverlay();
   }
 
-  labelAt(x, y, text, kind = 'country') {
+  labelAt(x, y, text, kind = 'country', box = null) {
     const g = this.overlay.append('g').attr('class', 'maplabel ' + kind);
     g.append('text').attr('class', 'halo').attr('text-anchor', 'middle').attr('dy', '0.35em').text(text);
     g.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').text(text);
-    this.overlayItems.push({ x, y, el: g, kind: 'label' });
+    this.overlayItems.push({ x, y, el: g, kind: 'label', box });
     this._placeOverlay();
   }
 
   labelCountry(code, text, kind) {
     const f = this.countryFeatures.find(f => f.properties.c === code && f.properties.lx != null);
     let x, y;
+    const b = this.countryBox(code);
     if (f) [x, y] = this.projection([f.properties.lx, f.properties.ly]);
-    else { const b = this.countryBox(code); x = (b[0][0] + b[1][0]) / 2; y = (b[0][1] + b[1][1]) / 2; }
-    this.labelAt(x, y, text, kind);
+    else { x = (b[0][0] + b[1][0]) / 2; y = (b[0][1] + b[1][1]) / 2; }
+    this.labelAt(x, y, text, kind, b);
   }
 
   labelWater(id, text, kind) {
@@ -450,7 +451,7 @@ export class WorldMap {
     const p = pieces[0];
     const inner = WATER_LABEL[id];
     const [x, y] = inner ? this.projection(inner) : [p.cx, p.cy];
-    this.labelAt(x, y, text, kind);
+    this.labelAt(x, y, text, kind, p.box);
   }
 
   _placeOverlay() {
@@ -467,7 +468,13 @@ export class WorldMap {
         it.el.select('.ring-line').attr('r', Math.max(15, s / 2 + 8));
         it.el.select('.ring-pulse').attr('r', Math.max(15, s / 2 + 8));
       }
-      it.el.attr('transform', `translate(${sx.toFixed(1)},${sy.toFixed(1)})`);
+      let dy = 0;
+      if (it.kind === 'label' && it.box) {
+        // kleine Ziele nicht verdecken: Schild unter die Fläche setzen
+        const w = (it.box[1][0] - it.box[0][0]) * t.k, h = (it.box[1][1] - it.box[0][1]) * t.k;
+        if (Math.max(w, h) < 80) dy = (it.box[1][1] - it.y) * t.k + 14;
+      }
+      it.el.attr('transform', `translate(${sx.toFixed(1)},${(sy + dy).toFixed(1)})`);
     }
   }
 
