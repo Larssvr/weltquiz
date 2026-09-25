@@ -1,0 +1,226 @@
+[
+  {
+    "iso": "AU",
+    "name": "Australien",
+    "aliases": ["Australia", "Commonwealth of Australia", "Australischer Bund", "Down Under"],
+    "capital": { "name": "Canberra", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist Canberra, nicht Sydney oder Melbourne: Die Stadt wurde eigens als Kompromiss zwischen den beiden rivalisierenden Metropolen geplant.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Australischer Dollar",
+    "facts": [
+      "Vor der Nordostküste erstreckt sich über rund 2.300 Kilometer das Great Barrier Reef – das größte Korallenriffsystem der Erde.",
+      "Schnabeltier und Ameisenigel sind die einzigen Säugetiere, die Eier legen. Sie kommen nur in Australien und auf Neuguinea vor.",
+      "Seit 1924 gilt bei Bundeswahlen Wahlpflicht: Wer ohne triftigen Grund nicht abstimmt, muss ein Bußgeld zahlen."
+    ]
+  },
+  {
+    "iso": "FJ",
+    "name": "Fidschi",
+    "aliases": ["Fiji", "Republik Fidschi", "Fidschiinseln", "Fidschi-Inseln", "Viti"],
+    "capital": { "name": "Suva", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch", "Fidschianisch", "Fidschi-Hindi"],
+    "moreLanguages": false,
+    "currency": "Fidschi-Dollar",
+    "facts": [
+      "Der 180. Längengrad verläuft mitten über die Insel Taveuni. Die Datumsgrenze macht hier aber einen Bogen, damit ganz Fidschi dasselbe Datum hat.",
+      "Zwischen 1879 und 1916 holten die Briten rund 60.000 Vertragsarbeiter aus Indien auf die Zuckerrohrfelder. Deshalb ist Fidschi-Hindi bis heute weit verbreitet.",
+      "Die allgegenwärtige Begrüßung „Bula!“ bedeutet wörtlich „Leben“ – wer sie ausspricht, wünscht dem anderen Gesundheit und ein gutes Leben."
+    ]
+  },
+  {
+    "iso": "FM",
+    "name": "Mikronesien",
+    "aliases": ["Föderierte Staaten von Mikronesien", "Micronesia", "Federated States of Micronesia", "FSM"],
+    "capital": { "name": "Palikir", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Palikir auf der Insel Pohnpei ist seit 1989 Hauptstadt – vorher war es das wenige Kilometer entfernte Kolonia.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "Die vier Sterne der Flagge stehen für die Bundesstaaten Yap, Chuuk, Pohnpei und Kosrae. Ihre über 600 Inseln verteilen sich auf einer Strecke von mehr als 2.500 Kilometern.",
+      "Auf Yap gelten riesige Steinscheiben bis heute als traditionelles Zahlungsmittel. Die größte misst 3,6 Meter – gebrochen wurde der Kalkstein auf dem rund 400 Kilometer entfernten Palau.",
+      "Vor der Küste Pohnpeis liegen die Ruinen von Nan Madol: rund 100 künstliche Inseln aus mächtigen Basaltsäulen, seit 2016 UNESCO-Welterbe."
+    ]
+  },
+  {
+    "iso": "KI",
+    "name": "Kiribati",
+    "aliases": ["Republik Kiribati", "Gilbertinseln", "Gilbert Islands"],
+    "capital": { "name": "Süd-Tarawa", "aliases": ["South Tarawa", "Tarawa"] },
+    "otherCapitals": [],
+    "capitalNote": "Süd-Tarawa ist keine einzelne Stadt, sondern eine Kette schmaler, durch Dämme verbundener Inseln im Süden des Tarawa-Atolls.",
+    "languages": ["Kiribatisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Australischer Dollar",
+    "facts": [
+      "Die Inseln verteilen sich auf alle vier Erdhalbkugeln: nördlich und südlich des Äquators sowie zu beiden Seiten des 180. Längengrads.",
+      "Seit 1995 gilt auf den Line Islands die Zeitzone UTC+14 – dort beginnt jeder neue Tag früher als irgendwo sonst auf der Welt.",
+      "Ausgesprochen wird der Name „Kiribas“: Er ist die einheimische Form von „Gilberts“, nach den Gilbertinseln, der wichtigsten Inselgruppe des Landes."
+    ]
+  },
+  {
+    "iso": "MH",
+    "name": "Marshallinseln",
+    "aliases": ["Marshall Islands", "Republik Marshallinseln", "Republic of the Marshall Islands"],
+    "capital": { "name": "Majuro", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Marshallesisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "Die 29 Atolle und fünf Einzelinseln liegen etwa auf halbem Weg zwischen Hawaii und Australien, in zwei Ketten: Ratak („Sonnenaufgang“) und Ralik („Sonnenuntergang“).",
+      "Früher lernten Seefahrer hier mit Stabkarten navigieren: Palmrippen zeigten die Dünung, Muscheln die Inseln. Mit an Bord nahm man sie nicht – man lernte sie auswendig.",
+      "Der weiße Stern auf der Flagge hat 24 Zacken, eine für jede Gemeinde. Die vier längeren stehen für die Zentren Majuro, Jaluit, Wotje und Ebeye."
+    ]
+  },
+  {
+    "iso": "NR",
+    "name": "Nauru",
+    "aliases": ["Naoero", "Republik Naoero", "Republik Nauru"],
+    "capital": { "name": "Yaren", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Nauru hat offiziell keine Hauptstadt, Parlament und Regierung sitzen im Distrikt Yaren.",
+    "languages": ["Nauruisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Australischer Dollar",
+    "facts": [
+      "Mit rund 21 Quadratkilometern ist Nauru der kleinste Inselstaat der Welt – und nach Vatikanstadt und Monaco der drittkleinste Staat überhaupt.",
+      "Die Flagge ist eine kleine Landkarte: Der gelbe Streifen steht für den Äquator, der Stern darunter für die Insel knapp südlich davon. Seine zwölf Zacken stehen für die zwölf Stämme.",
+      "Seit 2026 heißt der Inselstaat offiziell Republik Naoero – das ist sein traditioneller Name, aus dem in der Kolonialzeit „Nauru“ wurde."
+    ]
+  },
+  {
+    "iso": "NZ",
+    "name": "Neuseeland",
+    "aliases": ["New Zealand", "Aotearoa", "NZ"],
+    "capital": { "name": "Wellington", "aliases": ["Te Whanganui-a-Tara"] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist Wellington, nicht die größere Stadt Auckland.",
+    "languages": ["Englisch", "Māori", "Neuseeländische Gebärdensprache"],
+    "moreLanguages": false,
+    "currency": "Neuseeland-Dollar",
+    "facts": [
+      "Als erstes selbstverwaltetes Land der Welt führte Neuseeland 1893 das Frauenwahlrecht für nationale Wahlen ein.",
+      "Nord- und Südinsel, getrennt durch die Cookstraße, liegen rund 2.000 Kilometer östlich des australischen Festlands, jenseits der Tasmansee.",
+      "Außer Fledermäusen gab es hier ursprünglich keine Landsäugetiere. Ihre Nischen besetzten Vögel – etwa der flugunfähige Kiwi."
+    ]
+  },
+  {
+    "iso": "PG",
+    "name": "Papua-Neuguinea",
+    "aliases": ["Papua New Guinea", "PNG", "Unabhängiger Staat Papua-Neuguinea", "Papua Niugini"],
+    "capital": { "name": "Port Moresby", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Tok Pisin", "Englisch", "Hiri Motu", "Papua-neuguineische Gebärdensprache"],
+    "moreLanguages": false,
+    "currency": "Kina",
+    "facts": [
+      "Mit über 800 Sprachen ist Papua-Neuguinea das sprachenreichste Land der Erde: Mehr als ein Zehntel aller Sprachen der Welt wird hier gesprochen.",
+      "Das Land nimmt die Osthälfte von Neuguinea ein, der zweitgrößten Insel der Welt. Die Grenze zum indonesischen Westteil folgt größtenteils dem 141. Längengrad.",
+      "Auf der Flagge prangt ein Paradiesvogel. Die meisten Arten dieser prächtig gefiederten Vögel leben auf Neuguinea."
+    ]
+  },
+  {
+    "iso": "PW",
+    "name": "Palau",
+    "aliases": ["Republik Palau", "Republic of Palau", "Belau"],
+    "capital": { "name": "Ngerulmud", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Ngerulmud ist seit 2006 Hauptstadt, vorher war es Koror, die größte Stadt des Landes.",
+    "languages": ["Palauisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "Palau liegt im Westpazifik östlich der Philippinen. Berühmt sind die Rock Islands: Hunderte pilzförmige, bewaldete Kalksteininselchen, seit 2012 UNESCO-Welterbe.",
+      "2009 erklärte Palau seine gesamten Gewässer zum weltweit ersten Schutzgebiet für Haie – kommerzieller Haifang ist dort seither verboten.",
+      "Im Bundesstaat Angaur ist laut Verfassung auch Japanisch Amtssprache – ein Erbe der rund 30 Jahre japanischer Verwaltung ab 1914."
+    ]
+  },
+  {
+    "iso": "SB",
+    "name": "Salomonen",
+    "aliases": ["Salomoninseln", "Solomon Islands"],
+    "capital": { "name": "Honiara", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Salomonen-Dollar",
+    "facts": [
+      "Die Inselkette liegt östlich von Papua-Neuguinea. Die Hauptstadt Honiara befindet sich auf Guadalcanal, der größten Insel des Landes.",
+      "Der Name geht auf die Reise des Spaniers Álvaro de Mendaña 1568 zurück: Danach glaubte man in Europa, hier lägen die sagenhaften Goldschätze des biblischen Königs Salomo.",
+      "Auffällig viele Einheimische haben von Natur aus blondes Haar. Verantwortlich ist eine eigene Genvariante, die mit dem Blond der Europäer nichts zu tun hat."
+    ]
+  },
+  {
+    "iso": "TO",
+    "name": "Tonga",
+    "aliases": ["Königreich Tonga", "Kingdom of Tonga", "Freundschaftsinseln", "Friendly Islands"],
+    "capital": { "name": "Nukuʻalofa", "aliases": ["Nuku'alofa", "Nukualofa"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Tongaisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Paʻanga",
+    "facts": [
+      "Der Name bedeutet in vielen polynesischen Sprachen „Süden“ – passend, denn die 171 Inseln bilden die südlichste Gruppe West-Polynesiens, direkt südlich von Samoa.",
+      "Von 1900 bis 1970 stand Tonga unter britischem Schutz, gab seine Souveränität aber nie auf – als einziger Pazifikstaat behielt es dabei sein eigenes Königshaus.",
+      "Von Juli bis Oktober ziehen Buckelwale aus der Antarktis in die warmen Gewässer um Vavaʻu, um sich zu paaren und ihre Jungen zur Welt zu bringen."
+    ]
+  },
+  {
+    "iso": "TV",
+    "name": "Tuvalu",
+    "aliases": ["Ellice-Inseln", "Elliceinseln", "Ellice Islands"],
+    "capital": { "name": "Funafuti", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Funafuti ist ein Atoll; Regierung und Parlament sitzen im Ort Vaiaku auf der Hauptinsel Fongafale.",
+    "languages": ["Tuvaluisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Australischer Dollar",
+    "facts": [
+      "Tuvalu bedeutet „acht, die zusammenstehen“ – nach den acht ursprünglich bewohnten Inseln. Tatsächlich sind es neun, wie die neun Sterne der Flagge zeigen.",
+      "Die Internetendung .tv ist bei Fernsehsendern und Streamingdiensten begehrt. Ihre Vermarktung bringt dem kleinen Land beträchtliche Einnahmen.",
+      "Mit rund 26 Quadratkilometern ist Tuvalu nach Vatikanstadt, Monaco und Nauru der viertkleinste Staat der Welt. Die neun Inseln liegen nördlich von Fidschi."
+    ]
+  },
+  {
+    "iso": "VU",
+    "name": "Vanuatu",
+    "aliases": ["Republik Vanuatu", "Republic of Vanuatu", "Neue Hebriden", "New Hebrides"],
+    "capital": { "name": "Port Vila", "aliases": ["Port-Vila"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Bislama", "Englisch", "Französisch"],
+    "moreLanguages": false,
+    "currency": "Vatu",
+    "facts": [
+      "Die Inseln bilden eine Y-förmige Kette rund 1.750 Kilometer östlich von Australien, zwischen Neukaledonien und Fidschi.",
+      "Auf der Insel Pentecost springen Männer beim Naghol-Ritual von bis zu 30 Meter hohen Holztürmen, nur Lianen an den Knöcheln – das Vorbild des Bungee-Jumpings.",
+      "Gemessen an der Einwohnerzahl hat kein Land so viele Sprachen: Neben Bislama, Englisch und Französisch werden über 100 einheimische Sprachen gesprochen."
+    ]
+  },
+  {
+    "iso": "WS",
+    "name": "Samoa",
+    "aliases": ["Unabhängiger Staat Samoa", "Independent State of Samoa", "Westsamoa", "Western Samoa"],
+    "capital": { "name": "Apia", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Samoanisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Tala",
+    "facts": [
+      "Das Land besteht vor allem aus den Inseln Upolu und Savaiʻi. Die kleineren Inseln weiter östlich bilden Amerikanisch-Samoa, das zu den USA gehört.",
+      "Ende 2011 sprang Samoa über die Datumsgrenze: Auf Donnerstag, den 29. Dezember, folgte direkt Samstag, der 31. – der 30. Dezember fiel aus.",
+      "„Schatzinsel“-Autor Robert Louis Stevenson verbrachte seine letzten Jahre bei Apia. Die Samoaner nannten ihn Tusitala, „Erzähler von Geschichten“."
+    ]
+  }
+]

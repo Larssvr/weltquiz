@@ -1,0 +1,562 @@
+[
+  {
+    "iso": "AG",
+    "name": "Antigua und Barbuda",
+    "aliases": ["Antigua and Barbuda", "Antigua"],
+    "capital": { "name": "St. John's", "aliases": ["Saint John's"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Ostkaribischer Dollar",
+    "facts": [
+      "Antigua wirbt damit, 365 Strände zu haben – angeblich einen für jeden Tag des Jahres.",
+      "In der Codrington-Lagune auf Barbuda brütet eine der größten Kolonien von Prachtfregattvögeln der Welt; zur Balz blähen die Männchen einen roten Kehlsack auf.",
+      "Der Inselstaat liegt im Nordosten der Kleinen Antillen. Neben den beiden Hauptinseln gehört auch die unbewohnte Felseninsel Redonda dazu."
+    ]
+  },
+  {
+    "iso": "BB",
+    "name": "Barbados",
+    "aliases": [],
+    "capital": { "name": "Bridgetown", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Barbados-Dollar",
+    "facts": [
+      "Barbados ist die östlichste Insel der Karibik und liegt etwas abseits des Inselbogens der Kleinen Antillen im offenen Atlantik.",
+      "Die Grapefruit entstand im 18. Jahrhundert auf Barbados – als zufällige Kreuzung aus Pomelo und Orange.",
+      "Seit dem 30. November 2021 ist das Land eine Republik; bis dahin war Königin Elizabeth II. auch Staatsoberhaupt von Barbados."
+    ]
+  },
+  {
+    "iso": "BS",
+    "name": "Bahamas",
+    "aliases": ["The Bahamas", "Commonwealth der Bahamas"],
+    "capital": { "name": "Nassau", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Bahama-Dollar",
+    "facts": [
+      "Die rund 700 Inseln liegen im Atlantik südöstlich von Florida und nördlich von Kuba – genau genommen also gar nicht im Karibischen Meer.",
+      "Auf den Bahamas landete Kolumbus 1492 zum ersten Mal in Amerika – auf einer Insel, die die Einheimischen Guanahani nannten und die er San Salvador taufte.",
+      "Am „Pig Beach“ auf Big Major Cay in den Exumas schwimmen frei lebende Schweine zu den Booten der Besucher hinaus."
+    ]
+  },
+  {
+    "iso": "BZ",
+    "name": "Belize",
+    "aliases": ["Britisch-Honduras", "British Honduras"],
+    "capital": { "name": "Belmopan", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Belmopan, nicht Belize City. Die Planstadt im Landesinneren löste die Küstenstadt 1970 als Hauptstadt ab.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Belize-Dollar",
+    "facts": [
+      "Belize ist das einzige Land Mittelamerikas mit Englisch als Amtssprache. Es grenzt im Norden an Mexiko, im Westen und Süden an Guatemala.",
+      "Das Great Blue Hole vor der Küste ist ein fast kreisrundes Unterwasserloch mit gut 300 Metern Durchmesser und rund 125 Metern Tiefe.",
+      "Bis 1973 hieß das Land Britisch-Honduras. Als letzte britische Kolonie auf dem amerikanischen Festland wurde es erst 1981 unabhängig."
+    ]
+  },
+  {
+    "iso": "CA",
+    "name": "Kanada",
+    "aliases": ["Canada"],
+    "capital": { "name": "Ottawa", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Ottawa, nicht Toronto oder Montreal.",
+    "languages": ["Englisch", "Französisch"],
+    "moreLanguages": false,
+    "currency": "Kanadischer Dollar",
+    "facts": [
+      "Nach Russland ist Kanada das zweitgrößte Land der Erde – und hat mit über 200.000 Kilometern die längste Küstenlinie aller Staaten.",
+      "Die Grenze zu den USA ist mit knapp 9.000 Kilometern die längste gemeinsame Grenze zweier Staaten weltweit.",
+      "Der Großteil des weltweit produzierten Ahornsirups stammt aus Kanada, vor allem aus Québec. Das Ahornblatt ist Nationalsymbol und ziert seit 1965 die Flagge."
+    ]
+  },
+  {
+    "iso": "CR",
+    "name": "Costa Rica",
+    "aliases": ["Republik Costa Rica"],
+    "capital": { "name": "San José", "aliases": ["San Jose"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Costa-Rica-Colón",
+    "facts": [
+      "Costa Rica hat 1948 seine Armee abgeschafft; seit 1949 verbietet die Verfassung ein stehendes Heer.",
+      "Das Land liegt zwischen Nicaragua und Panama und hat Küsten sowohl an der Karibik als auch am Pazifik.",
+      "„Pura vida“ – wörtlich „reines Leben“ – dient hier als Gruß, Dankeschön und Lebensmotto zugleich."
+    ]
+  },
+  {
+    "iso": "CU",
+    "name": "Kuba",
+    "aliases": ["Cuba", "Republik Kuba"],
+    "capital": { "name": "Havanna", "aliases": ["Havana", "La Habana"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Kubanischer Peso",
+    "facts": [
+      "Kuba ist die größte Insel der Karibik und liegt nur rund 150 Kilometer südlich der Florida Keys. Wegen ihrer lang gestreckten Form heißt sie auch „El Caimán“.",
+      "Die Bienenelfe, ein nur hier vorkommender Kolibri, ist mit gut fünf Zentimetern Länge der kleinste Vogel der Welt.",
+      "Der Cocktail Daiquirí ist nach einem Strand und Bergbauort bei Santiago de Cuba benannt, wo er um 1900 erfunden worden sein soll."
+    ]
+  },
+  {
+    "iso": "DM",
+    "name": "Dominica",
+    "aliases": ["Commonwealth Dominica", "Commonwealth of Dominica"],
+    "capital": { "name": "Roseau", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Roseau. Nicht verwechseln: Die Dominikanische Republik mit der Hauptstadt Santo Domingo ist ein anderes Land.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Ostkaribischer Dollar",
+    "facts": [
+      "Die kleine Vulkaninsel liegt in den Kleinen Antillen zwischen Guadeloupe und Martinique – weit entfernt von der Dominikanischen Republik, mit der sie oft verwechselt wird.",
+      "Im Regenwald liegt der Boiling Lake, einer der größten heißen Seen der Welt – sein graublaues Wasser brodelt meist wie in einem Kochtopf.",
+      "Auf der Flagge prangt die Kaiseramazone (Sisserou), ein Papagei, der nur auf Dominica lebt. Dank ihm gehört die Flagge zu den ganz wenigen der Welt mit der Farbe Lila."
+    ]
+  },
+  {
+    "iso": "DO",
+    "name": "Dominikanische Republik",
+    "aliases": ["Dominican Republic", "República Dominicana", "DomRep"],
+    "capital": { "name": "Santo Domingo", "aliases": ["Santo Domingo de Guzmán"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Dominikanischer Peso",
+    "facts": [
+      "Das Land nimmt die östlichen zwei Drittel der Insel Hispaniola ein; das westliche Drittel gehört zu Haiti.",
+      "Hier liegen sowohl der höchste Berg der Karibik, der über 3.000 Meter hohe Pico Duarte, als auch ihr tiefster Punkt: der salzige Enriquillo-See unter dem Meeresspiegel.",
+      "Sowohl Merengue als auch Bachata stammen aus der Dominikanischen Republik; beide gehören zum immateriellen Kulturerbe der UNESCO."
+    ]
+  },
+  {
+    "iso": "GD",
+    "name": "Grenada",
+    "aliases": [],
+    "capital": { "name": "St. George's", "aliases": ["Saint George's"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Ostkaribischer Dollar",
+    "facts": [
+      "Wegen ihrer Muskatnüsse, Nelken und Zimtbäume wird die Insel „Gewürzinsel“ genannt – eine Muskatnuss ist sogar auf der Flagge abgebildet.",
+      "Vor der Westküste wurde 2006 der erste Unterwasser-Skulpturenpark der Welt eröffnet; seine Figuren sind inzwischen von Korallen bewachsen.",
+      "Der Inselstaat liegt am Südende des Inselbogens der Kleinen Antillen, nördlich von Trinidad. Zu ihm gehören auch die Grenadinen-Inseln Carriacou und Petite Martinique."
+    ]
+  },
+  {
+    "iso": "GT",
+    "name": "Guatemala",
+    "aliases": ["Republik Guatemala"],
+    "capital": { "name": "Guatemala-Stadt", "aliases": ["Guatemala City", "Ciudad de Guatemala"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Quetzal",
+    "facts": [
+      "Guatemala grenzt an Mexiko, Belize, Honduras und El Salvador und hat Küsten sowohl am Pazifik als auch an der Karibik.",
+      "Im Regenwald des Nordens liegt die Maya-Ruinenstadt Tikal. Ihre über das Blätterdach ragenden Tempel sind sogar im ersten „Star Wars“-Film zu sehen.",
+      "Der Quetzal, ein Vogel mit langen, schillernd grünen Schwanzfedern, ziert die Flagge – und gab auch der Landeswährung ihren Namen."
+    ]
+  },
+  {
+    "iso": "HN",
+    "name": "Honduras",
+    "aliases": ["Republik Honduras"],
+    "capital": { "name": "Tegucigalpa", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Lempira",
+    "facts": [
+      "Honduras grenzt an Guatemala, El Salvador und Nicaragua. Es hat eine lange Karibikküste, zum Pazifik aber nur einen schmalen Zugang am Golf von Fonseca.",
+      "In der Maya-Ruinenstadt Copán steht die Hieroglyphentreppe – mit über 2.000 Schriftzeichen der längste bekannte Maya-Text.",
+      "Die Währung Lempira ist nach einem indigenen Anführer benannt, der im 16. Jahrhundert Widerstand gegen die spanischen Eroberer leistete."
+    ]
+  },
+  {
+    "iso": "HT",
+    "name": "Haiti",
+    "aliases": ["Republik Haiti", "Ayiti", "Haïti"],
+    "capital": { "name": "Port-au-Prince", "aliases": ["Pòtoprens"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Haitianisches Kreolisch", "Französisch"],
+    "moreLanguages": false,
+    "currency": "Gourde",
+    "facts": [
+      "Haiti nimmt das westliche Drittel der Insel Hispaniola ein. Der Name stammt aus der Sprache der Taíno und bedeutet etwa „Land der hohen Berge“.",
+      "Am 1. Januar 1804 erklärte das Land seine Unabhängigkeit – als zweites Land Amerikas nach den USA und als erster Staat, der aus einem erfolgreichen Sklavenaufstand hervorging.",
+      "Am Unabhängigkeitstag isst man Soup Joumou, eine Kürbissuppe als Symbol der Freiheit. Sie gehört seit 2021 zum immateriellen Kulturerbe der UNESCO."
+    ]
+  },
+  {
+    "iso": "JM",
+    "name": "Jamaika",
+    "aliases": ["Jamaica"],
+    "capital": { "name": "Kingston", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Jamaika-Dollar",
+    "facts": [
+      "Jamaika liegt südlich von Kuba und westlich von Hispaniola – nach diesen beiden ist es die drittgrößte Insel der Großen Antillen.",
+      "Reggae stammt aus Jamaika und gehört seit 2018 zum immateriellen Kulturerbe der UNESCO.",
+      "Die Flagge in Grün, Gold und Schwarz ist die einzige Nationalflagge der Welt ganz ohne Rot, Weiß oder Blau."
+    ]
+  },
+  {
+    "iso": "KN",
+    "name": "St. Kitts und Nevis",
+    "aliases": ["Saint Kitts and Nevis", "Saint Kitts und Nevis", "St. Christopher und Nevis", "Föderation St. Kitts und Nevis", "St. Kitts"],
+    "capital": { "name": "Basseterre", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Basseterre – nicht zu verwechseln mit Basse-Terre, dem Verwaltungssitz des französischen Guadeloupe.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Ostkaribischer Dollar",
+    "facts": [
+      "St. Kitts und Nevis ist sowohl nach Fläche als auch nach Einwohnerzahl der kleinste Staat Amerikas.",
+      "Alexander Hamilton, einer der Gründerväter der USA, wurde auf der Insel Nevis geboren.",
+      "Die beiden Vulkaninseln im Norden der Kleinen Antillen trennt nur eine rund drei Kilometer breite Meerenge, „The Narrows“ genannt."
+    ]
+  },
+  {
+    "iso": "LC",
+    "name": "St. Lucia",
+    "aliases": ["Saint Lucia", "Sankt Lucia"],
+    "capital": { "name": "Castries", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Ostkaribischer Dollar",
+    "facts": [
+      "Die Pitons, zwei steile Vulkankegel an der Südwestküste, sind das Wahrzeichen der Insel und seit 2004 UNESCO-Welterbe.",
+      "Die Insel hat zwei Nobelpreisträger hervorgebracht, den Ökonomen Arthur Lewis und den Dichter Derek Walcott – beide an einem 23. Januar geboren.",
+      "St. Lucia liegt zwischen Martinique und St. Vincent. Da die Insel mehrfach zwischen Frankreich und Großbritannien wechselte, spricht man neben Englisch verbreitet ein französisch geprägtes Kreol."
+    ]
+  },
+  {
+    "iso": "MX",
+    "name": "Mexiko",
+    "aliases": ["Mexico", "México", "Vereinigte Mexikanische Staaten"],
+    "capital": { "name": "Mexiko-Stadt", "aliases": ["Mexico City", "Ciudad de México", "CDMX"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Mexikanischer Peso",
+    "facts": [
+      "Mexiko grenzt im Norden an die USA und im Süden an Guatemala und Belize. Kein Land der Welt hat mehr Spanischsprecher – weit mehr als Spanien selbst.",
+      "Die Große Pyramide von Cholula ist dem Volumen nach die größte Pyramide der Welt. Heute sieht sie aus wie ein bewachsener Hügel mit einer Kirche obendrauf.",
+      "Die Hauptstadt steht dort, wo die Azteken einst Tenochtitlan errichteten – auf einer Insel im Texcoco-See, der später fast vollständig trockengelegt wurde."
+    ]
+  },
+  {
+    "iso": "NI",
+    "name": "Nicaragua",
+    "aliases": ["Republik Nicaragua"],
+    "capital": { "name": "Managua", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Córdoba",
+    "facts": [
+      "Nicaragua ist das größte Land Mittelamerikas und liegt zwischen Honduras im Norden und Costa Rica im Süden.",
+      "Bullenhaie können über den Río San Juan aus der Karibik bis in den Nicaraguasee schwimmen – Haie in einem Süßwassersee sind eine echte Seltenheit.",
+      "Der Nationaldichter Rubén Darío gilt als Begründer des Modernismo, der die spanischsprachige Dichtung um 1900 prägte."
+    ]
+  },
+  {
+    "iso": "PA",
+    "name": "Panama",
+    "aliases": ["Panamá", "Republik Panama"],
+    "capital": { "name": "Panama-Stadt", "aliases": ["Panama City", "Ciudad de Panamá"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Balboa und US-Dollar",
+    "facts": [
+      "Panama verbindet als schmale Landbrücke Mittel- und Südamerika und grenzt an Costa Rica und Kolumbien.",
+      "Im Panamakanal werden Schiffe über Schleusen etwa 26 Meter hoch auf den künstlichen Gatúnsee gehoben und auf der anderen Seite wieder abgesenkt.",
+      "Wegen der S-Form des Landes geht in Panama-Stadt die Sonne über dem Pazifik auf – die Pazifik-Einfahrt des Kanals liegt östlich der Atlantik-Einfahrt."
+    ]
+  },
+  {
+    "iso": "SV",
+    "name": "El Salvador",
+    "aliases": ["Republik El Salvador"],
+    "capital": { "name": "San Salvador", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "El Salvador ist das kleinste Land Mittelamerikas und das einzige ohne Karibikküste – seine Küste liegt allein am Pazifik.",
+      "Das Maya-Dorf Joya de Cerén wurde um 600 n. Chr. unter Vulkanasche begraben und ist so gut erhalten, dass man es „Pompeji Amerikas“ nennt.",
+      "Das Nationalgericht Pupusa, ein gefüllter Maisfladen, hat einen eigenen Ehrentag: den Nationalen Pupusa-Tag am zweiten Sonntag im November."
+    ]
+  },
+  {
+    "iso": "TT",
+    "name": "Trinidad und Tobago",
+    "aliases": ["Trinidad and Tobago", "Republik Trinidad und Tobago", "Trinidad"],
+    "capital": { "name": "Port of Spain", "aliases": ["Port-of-Spain"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Trinidad-und-Tobago-Dollar",
+    "facts": [
+      "Trinidad liegt nur gut zehn Kilometer vor der Küste Venezuelas; die kleinere Schwesterinsel Tobago liegt nordöstlich davon.",
+      "Die Steelpan, ein aus Ölfässern gefertigtes Instrument, wurde im 20. Jahrhundert auf Trinidad erfunden und ist heute Nationalinstrument.",
+      "Der Pitch Lake bei La Brea ist die größte natürliche Asphaltlagerstätte der Welt – über seine zähe Oberfläche kann man sogar laufen."
+    ]
+  },
+  {
+    "iso": "US",
+    "name": "USA",
+    "aliases": ["Vereinigte Staaten", "Vereinigte Staaten von Amerika", "Amerika", "United States", "US"],
+    "capital": { "name": "Washington, D.C.", "aliases": ["Washington", "Washington DC"] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Washington, D.C., nicht New York. Sie liegt im District of Columbia, der zu keinem Bundesstaat gehört.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "Der 1872 gegründete Yellowstone-Nationalpark gilt als erster Nationalpark der Welt.",
+      "Die Freiheitsstatue in New York war ein Geschenk Frankreichs; ihr inneres Traggerüst konstruierte Gustave Eiffel.",
+      "In der Beringstraße liegen die beiden Diomedes-Inseln nur knapp vier Kilometer auseinander – die kleinere gehört zu den USA, die größere zu Russland, dazwischen verläuft die Datumsgrenze."
+    ]
+  },
+  {
+    "iso": "VC",
+    "name": "St. Vincent und die Grenadinen",
+    "aliases": ["Saint Vincent and the Grenadines", "Saint Vincent und die Grenadinen", "St. Vincent"],
+    "capital": { "name": "Kingstown", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Kingstown – nicht zu verwechseln mit Kingston, der Hauptstadt Jamaikas.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Ostkaribischer Dollar",
+    "facts": [
+      "Der Staat besteht aus der Hauptinsel St. Vincent und dem nördlichen Teil der Grenadinen; der südliche Teil dieser Inselkette gehört zu Grenada.",
+      "Der 1765 gegründete Botanische Garten von Kingstown gilt als ältester der westlichen Hemisphäre. Dort wächst ein Nachkomme der Brotfruchtbäume, die Kapitän Bligh 1793 aus der Südsee mitbrachte.",
+      "In der Wallilabou Bay auf St. Vincent wurden Szenen für den ersten „Fluch der Karibik“-Film gedreht."
+    ]
+  },
+  {
+    "iso": "AR",
+    "name": "Argentinien",
+    "aliases": ["Argentina", "Argentinische Republik"],
+    "capital": { "name": "Buenos Aires", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Argentinischer Peso",
+    "facts": [
+      "Der Aconcagua in den Anden nahe der Grenze zu Chile ist mit knapp 7.000 Metern der höchste Berg Amerikas und der höchste außerhalb Asiens.",
+      "Der Name Argentinien geht auf das lateinische Wort „argentum“ für Silber zurück – die spanischen Eroberer hofften hier auf reiche Silbervorkommen.",
+      "Der Tango entstand Ende des 19. Jahrhunderts in den Hafenvierteln am Río de la Plata und ist seit 2009 immaterielles UNESCO-Kulturerbe."
+    ]
+  },
+  {
+    "iso": "BO",
+    "name": "Bolivien",
+    "aliases": ["Bolivia", "Plurinationaler Staat Bolivien"],
+    "capital": { "name": "Sucre", "aliases": [] },
+    "otherCapitals": [{ "name": "La Paz", "aliases": [], "role": "Regierungssitz" }],
+    "capitalNote": "Laut Verfassung ist Sucre die Hauptstadt und Sitz der obersten Gerichte. Regierung und Parlament sitzen aber in La Paz.",
+    "languages": ["Spanisch", "Quechua", "Aymara", "Guaraní"],
+    "moreLanguages": true,
+    "currency": "Boliviano",
+    "facts": [
+      "Bolivien ist neben Paraguay einer der beiden Binnenstaaten Südamerikas; mit Peru teilt es sich den Titicacasee.",
+      "Der Salar de Uyuni ist mit über 10.000 Quadratkilometern die größte Salzpfanne der Erde. Nach Regen spiegelt sich in ihm der Himmel.",
+      "Die Verfassung erkennt neben Spanisch 36 indigene Sprachen als Amtssprachen an, darunter Quechua, Aymara und Guaraní."
+    ]
+  },
+  {
+    "iso": "BR",
+    "name": "Brasilien",
+    "aliases": ["Brazil", "Brasil", "Föderative Republik Brasilien"],
+    "capital": { "name": "Brasília", "aliases": ["Brasilia"] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Brasília, nicht Rio de Janeiro. Rio war bis 1960 Hauptstadt, dann wurde die Planstadt Brasília eingeweiht.",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "Real",
+    "facts": [
+      "Brasilien ist das fünftgrößte Land der Erde und grenzt an alle Staaten Südamerikas außer Chile und Ecuador.",
+      "In keinem anderen Land Südamerikas ist Portugiesisch Amtssprache – und nirgends auf der Welt leben mehr Portugiesischsprecher.",
+      "Kein Fluss der Erde führt so viel Wasser wie der Amazonas: An seiner Mündung strömen im Schnitt über 200.000 Kubikmeter pro Sekunde in den Atlantik."
+    ]
+  },
+  {
+    "iso": "CL",
+    "name": "Chile",
+    "aliases": ["Republik Chile"],
+    "capital": { "name": "Santiago de Chile", "aliases": ["Santiago"] },
+    "otherCapitals": [],
+    "capitalNote": "Der Nationalkongress tagt in Valparaíso.",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Chilenischer Peso",
+    "facts": [
+      "Chile ist über 4.000 Kilometer lang, aber im Durchschnitt keine 200 Kilometer breit – eingeklemmt zwischen den Anden und dem Pazifik.",
+      "Die Atacama im Norden gilt als trockenste Wüste der Erde außerhalb der Polargebiete. Wegen der klaren Luft stehen dort einige der größten Teleskope der Welt.",
+      "Auch die Osterinsel mit ihren berühmten Moai-Steinfiguren gehört zum Land – sie liegt rund 3.500 Kilometer vor der Küste mitten im Pazifik."
+    ]
+  },
+  {
+    "iso": "CO",
+    "name": "Kolumbien",
+    "aliases": ["Colombia", "Republik Kolumbien"],
+    "capital": { "name": "Bogotá", "aliases": ["Bogota"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Kolumbianischer Peso",
+    "facts": [
+      "Kolumbien ist das einzige Land Südamerikas mit Küsten sowohl am Pazifik als auch an der Karibik.",
+      "Kein Land der Erde hat so viele Vogelarten – hier leben über 1.900 verschiedene.",
+      "Das Land ist nach Christoph Kolumbus benannt, obwohl der Seefahrer das heutige Kolumbien nie betreten hat."
+    ]
+  },
+  {
+    "iso": "EC",
+    "name": "Ecuador",
+    "aliases": ["Republik Ecuador", "Ekuador"],
+    "capital": { "name": "Quito", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "Ecuador ist nach dem Äquator benannt, der knapp nördlich der Hauptstadt Quito durch das Land verläuft.",
+      "Wegen der Abplattung der Erde ist der Gipfel des Chimborazo der Punkt der Erdoberfläche, der am weitesten vom Erdmittelpunkt entfernt ist – weiter als der Mount Everest.",
+      "Der Panamahut stammt eigentlich aus Ecuador; seinen Namen bekam er, weil er über Panama in alle Welt verschifft wurde."
+    ]
+  },
+  {
+    "iso": "GY",
+    "name": "Guyana",
+    "aliases": ["Kooperative Republik Guyana", "Britisch-Guayana", "British Guiana"],
+    "capital": { "name": "Georgetown", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Guyana-Dollar",
+    "facts": [
+      "Guyana ist der einzige Staat Südamerikas, in dem Englisch Amtssprache ist – ein Erbe der britischen Kolonialzeit.",
+      "Die Kaieteur-Fälle stürzen 226 Meter senkrecht in die Tiefe – etwa viermal so tief wie die Niagarafälle.",
+      "Das Land liegt an der Nordostküste Südamerikas zwischen Venezuela, Brasilien und Suriname. Sein Name bedeutet in einer indigenen Sprache „Land der vielen Wasser“."
+    ]
+  },
+  {
+    "iso": "PE",
+    "name": "Peru",
+    "aliases": ["Perú", "Republik Peru"],
+    "capital": { "name": "Lima", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Lima, nicht Cusco – das war die Hauptstadt des Inkareichs.",
+    "languages": ["Spanisch", "Quechua", "Aymara"],
+    "moreLanguages": true,
+    "currency": "Sol",
+    "facts": [
+      "Peru liegt am Pazifik zwischen Ecuador, Kolumbien, Brasilien, Bolivien und Chile – und besteht zu mehr als der Hälfte aus Amazonas-Regenwald.",
+      "Die Kartoffel wurde vor Tausenden Jahren in den Anden im Süden Perus domestiziert; heute kennt man dort Tausende verschiedene Sorten.",
+      "Die Nazca-Linien sind riesige, in den Wüstenboden gescharrte Figuren wie Kolibri, Affe und Spinne, die man am besten aus der Luft erkennt."
+    ]
+  },
+  {
+    "iso": "PY",
+    "name": "Paraguay",
+    "aliases": ["Republik Paraguay"],
+    "capital": { "name": "Asunción", "aliases": ["Asuncion"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch", "Guaraní"],
+    "moreLanguages": false,
+    "currency": "Guaraní",
+    "facts": [
+      "Paraguay ist ein Binnenstaat zwischen Argentinien, Brasilien und Bolivien; der Río Paraguay teilt das Land in zwei sehr unterschiedliche Regionen.",
+      "Die Flagge hat zwei verschiedene Seiten: Vorne zeigt sie das Staatswappen, hinten das Siegel des Schatzamts.",
+      "Die indigene Sprache Guaraní ist neben Spanisch Amtssprache und wird von der Mehrheit der Bevölkerung gesprochen – auch die Währung heißt so."
+    ]
+  },
+  {
+    "iso": "SR",
+    "name": "Suriname",
+    "aliases": ["Surinam", "Republik Suriname", "Niederländisch-Guayana", "Dutch Guiana"],
+    "capital": { "name": "Paramaribo", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Niederländisch"],
+    "moreLanguages": false,
+    "currency": "Suriname-Dollar",
+    "facts": [
+      "Suriname ist das einzige Land Südamerikas, in dem Niederländisch Amtssprache ist.",
+      "Zwischen Guyana und Französisch-Guayana gelegen, ist es das kleinste unabhängige Land Südamerikas – und zu über 90 Prozent von Wald bedeckt.",
+      "Im Frieden von Breda 1667 behielten die Niederländer Suriname, während Neu-Amsterdam – das heutige New York – an England ging."
+    ]
+  },
+  {
+    "iso": "UY",
+    "name": "Uruguay",
+    "aliases": ["Republik Östlich des Uruguay", "Östliche Republik Uruguay", "República Oriental del Uruguay"],
+    "capital": { "name": "Montevideo", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Uruguayischer Peso",
+    "facts": [
+      "Uruguay liegt zwischen Argentinien und Brasilien am Río de la Plata und ist nach Suriname das zweitkleinste Land Südamerikas.",
+      "Auf den Weiden des Landes stehen etwa dreimal so viele Rinder, wie es Einwohner hat.",
+      "Kein Land trinkt pro Kopf so viel Mate – Thermoskanne und Mate-Becher gehören hier fast überall zum Straßenbild."
+    ]
+  },
+  {
+    "iso": "VE",
+    "name": "Venezuela",
+    "aliases": ["Bolivarische Republik Venezuela"],
+    "capital": { "name": "Caracas", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Bolívar",
+    "facts": [
+      "Venezuela liegt an der Karibikküste im Norden Südamerikas, zwischen Kolumbien, Brasilien und Guyana; mitten durch das Land fließt der mächtige Orinoco.",
+      "Der Salto Ángel ist mit 979 Metern der höchste Wasserfall der Erde – er stürzt von einem Tafelberg im Südosten des Landes.",
+      "Der Name bedeutet „Klein-Venedig“: Europäische Seefahrer sahen 1499 Pfahlbauten am Maracaibo-See, die sie an Venedig erinnerten."
+    ]
+  }
+]

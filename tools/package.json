@@ -1,0 +1,16 @@
+{
+  "name": "weltquiz-tools",
+  "private": true,
+  "type": "module",
+  "description": "Baut die Kartendaten (data/world.json) und die Inhaltsdateien (js/data/*.js) des Weltquiz.",
+  "scripts": {
+    "download": "node download-raw.mjs",
+    "map": "node build-map.mjs 7% 3% 10%",
+    "content": "node merge-content.mjs"
+  },
+  "devDependencies": {
+    "d3": "^7.9.0",
+    "mapshaper": "^0.6.0",
+    "topojson-server": "^3.0.1"
+  }
+}

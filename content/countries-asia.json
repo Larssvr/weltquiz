@@ -1,0 +1,786 @@
+[
+  {
+    "iso": "AE",
+    "name": "Vereinigte Arabische Emirate",
+    "aliases": ["VAE", "Emirate", "UAE", "United Arab Emirates"],
+    "capital": { "name": "Abu Dhabi", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist Abu Dhabi, nicht das größere und bekanntere Dubai.",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "VAE-Dirham",
+    "facts": [
+      "Die sieben Emirate, darunter Abu Dhabi und Dubai, liegen im Südosten der Arabischen Halbinsel zwischen Saudi-Arabien und Oman.",
+      "Der Falke ist Nationalvogel: Seit 2002 stellen die Emirate sogar eigene Falkenpässe aus, und manche Fluggesellschaften lassen die Vögel in der Kabine mitfliegen.",
+      "2021 erreichte die emiratische Raumsonde „Al-Amal“ („Hoffnung“) die Umlaufbahn des Mars – als erste interplanetare Mission eines arabischen Landes."
+    ]
+  },
+  {
+    "iso": "AF",
+    "name": "Afghanistan",
+    "aliases": [],
+    "capital": { "name": "Kabul", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Paschtu", "Dari"],
+    "moreLanguages": false,
+    "currency": "Afghani",
+    "facts": [
+      "Das Binnenland liegt zwischen Iran, Pakistan und Zentralasien; ganz im Nordosten reicht der schmale Wachan-Korridor bis an die Grenze Chinas.",
+      "In der Provinz Badachschan wird seit über 6000 Jahren Lapislazuli abgebaut; der blaue Stein gelangte bis nach Ägypten, etwa in die Totenmaske des Tutanchamun.",
+      "Als Nationalgericht gilt Kabuli Palau: Reis mit Lammfleisch, geraspelten Karotten und Rosinen."
+    ]
+  },
+  {
+    "iso": "AM",
+    "name": "Armenien",
+    "aliases": ["Republik Armenien", "Armenia"],
+    "capital": { "name": "Jerewan", "aliases": ["Eriwan", "Yerevan"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Armenisch"],
+    "moreLanguages": false,
+    "currency": "Dram",
+    "facts": [
+      "Der Überlieferung nach machte Armenien im Jahr 301 als erstes Land der Welt das Christentum zur Staatsreligion.",
+      "Das Binnenland im Südkaukasus trägt den Berg Ararat im Wappen – der liegt jedoch jenseits der Grenze in der Türkei und ist von Jerewan aus bei klarer Sicht gut zu sehen.",
+      "Das armenische Alphabet mit ursprünglich 36 Buchstaben schuf der Mönch Mesrop Maschtoz um das Jahr 405."
+    ]
+  },
+  {
+    "iso": "AZ",
+    "name": "Aserbaidschan",
+    "aliases": ["Republik Aserbaidschan", "Azerbaijan"],
+    "capital": { "name": "Baku", "aliases": ["Bakı"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Aserbaidschanisch"],
+    "moreLanguages": false,
+    "currency": "Aserbaidschan-Manat",
+    "facts": [
+      "Das Land liegt am Westufer des Kaspischen Meeres; seine Exklave Nachitschewan grenzt an Armenien, Iran und die Türkei.",
+      "Baku liegt rund 28 Meter unter dem Meeresspiegel und ist damit die am tiefsten gelegene Hauptstadt der Welt.",
+      "Am Hang Yanar Dağ bei Baku brennt austretendes Erdgas seit Jahrzehnten ununterbrochen – passend zum Beinamen „Land des Feuers“."
+    ]
+  },
+  {
+    "iso": "BD",
+    "name": "Bangladesch",
+    "aliases": ["Volksrepublik Bangladesch", "Bangladesh"],
+    "capital": { "name": "Dhaka", "aliases": ["Dacca", "Dakka"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Bengalisch"],
+    "moreLanguages": false,
+    "currency": "Taka",
+    "facts": [
+      "Das Land ist fast ganz von Indien umgeben; im Süden, im Mündungsdelta von Ganges und Brahmaputra, liegen die Sundarbans, der größte Mangrovenwald der Erde.",
+      "Der Internationale Tag der Muttersprache am 21. Februar erinnert an Studentenproteste 1952 in Dhaka, bei denen es um Bengalisch als Amtssprache ging.",
+      "Die bunt bemalten Fahrradrikschas von Dhaka und ihre Malerei zählen seit 2023 zum immateriellen Kulturerbe der UNESCO."
+    ]
+  },
+  {
+    "iso": "BH",
+    "name": "Bahrain",
+    "aliases": ["Königreich Bahrain", "Bahrein"],
+    "capital": { "name": "Manama", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Bahrain-Dinar",
+    "facts": [
+      "Der Inselstaat im Persischen Golf besteht aus über 30 Inseln und ist über den rund 25 Kilometer langen König-Fahd-Damm mit Saudi-Arabien verbunden.",
+      "Hier lag vermutlich das antike Handelsreich Dilmun; Tausende bronzezeitliche Grabhügel zeugen davon und sind heute UNESCO-Welterbe.",
+      "Bahrain war 1932 der erste Ort auf der arabischen Seite des Golfs, an dem Erdöl gefunden wurde; zuvor lebte man hier vor allem von der Perlentaucherei."
+    ]
+  },
+  {
+    "iso": "BN",
+    "name": "Brunei",
+    "aliases": ["Brunei Darussalam"],
+    "capital": { "name": "Bandar Seri Begawan", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Malaiisch"],
+    "moreLanguages": false,
+    "currency": "Brunei-Dollar",
+    "facts": [
+      "Das kleine Sultanat an der Nordküste Borneos besteht aus zwei getrennten Landesteilen, zwischen denen ein Streifen Malaysias liegt.",
+      "Im Wasserdorf Kampong Ayer in der Hauptstadt stehen ganze Stadtviertel auf Stelzen im Fluss – mit eigenen Schulen, Moscheen, Polizei und Feuerwehr.",
+      "Der Palast des Sultans, Istana Nurul Iman, gilt mit 1788 Räumen als größter bewohnter Palast der Welt."
+    ]
+  },
+  {
+    "iso": "BT",
+    "name": "Bhutan",
+    "aliases": ["Königreich Bhutan", "Druk Yul"],
+    "capital": { "name": "Thimphu", "aliases": ["Thimpu"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Dzongkha"],
+    "moreLanguages": false,
+    "currency": "Ngultrum",
+    "facts": [
+      "Das Himalaya-Königreich liegt zwischen China und Indien; der Gangkhar Puensum an der Nordgrenze gilt mit rund 7570 Metern als höchster unbestiegener Berg der Welt.",
+      "Statt nur auf das Wirtschaftswachstum zu schauen, verfolgt Bhutan das Ziel des „Bruttonationalglücks“ – es steht sogar in der Verfassung.",
+      "Das Nationalgericht Ema Datshi besteht aus scharfen Chilischoten in Käsesoße; Chilis werden hier eher als Gemüse denn als Gewürz gegessen."
+    ]
+  },
+  {
+    "iso": "CN",
+    "name": "China",
+    "aliases": ["Volksrepublik China", "VR China"],
+    "capital": { "name": "Peking", "aliases": ["Beijing"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Chinesisch"],
+    "moreLanguages": false,
+    "currency": "Renminbi (Yuan)",
+    "facts": [
+      "Mit 14 Nachbarstaaten, von Nordkorea bis Afghanistan, teilt sich China mit Russland den Rekord für die meisten Landnachbarn.",
+      "Obwohl sich das Land über fünf geografische Zeitzonen erstreckt, gilt überall nur eine Uhrzeit: die Pekinger Zeit.",
+      "Große Pandas leben in freier Wildbahn nur in China, vor allem in den Bergwäldern der Provinz Sichuan."
+    ]
+  },
+  {
+    "iso": "CY",
+    "name": "Zypern",
+    "aliases": ["Republik Zypern", "Cyprus"],
+    "capital": { "name": "Nikosia", "aliases": ["Nicosia", "Lefkosia"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Griechisch", "Türkisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Nach Sizilien und Sardinien ist Zypern die drittgrößte Insel im Mittelmeer; sie liegt südlich der Türkei und westlich von Syrien und dem Libanon.",
+      "Das lateinische Wort für Kupfer, cuprum, geht auf den Namen der Insel zurück – in der Antike war sie ein wichtiger Kupferlieferant.",
+      "Der Grillkäse Halloumi stammt von hier und ist seit 2021 in der EU als geschützte Ursprungsbezeichnung eingetragen."
+    ]
+  },
+  {
+    "iso": "GE",
+    "name": "Georgien",
+    "aliases": ["Georgia", "Sakartwelo", "Grusinien"],
+    "capital": { "name": "Tiflis", "aliases": ["Tbilisi"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Georgisch"],
+    "moreLanguages": false,
+    "currency": "Lari",
+    "facts": [
+      "Georgien liegt am Ostufer des Schwarzen Meeres; im Norden trennt der Große Kaukasus mit Gipfeln über 5000 Metern das Land von Russland.",
+      "Funde belegen hier Weinherstellung vor rund 8000 Jahren – traditionell gärt der Wein bis heute in großen, im Boden vergrabenen Tonamphoren, den Qvevri.",
+      "Der Name der Hauptstadt Tiflis (Tbilisi) bedeutet etwa „warmer Ort“ – nach den heißen Schwefelquellen, über denen bis heute Badehäuser stehen."
+    ]
+  },
+  {
+    "iso": "ID",
+    "name": "Indonesien",
+    "aliases": ["Republik Indonesien", "Indonesia"],
+    "capital": { "name": "Jakarta", "aliases": ["Djakarta"] },
+    "otherCapitals": [],
+    "capitalNote": "Die Verlegung der Hauptstadt nach Nusantara auf Borneo ist beschlossen; bis ein Präsidentenerlass sie vollzieht, bleibt Jakarta offiziell Hauptstadt.",
+    "languages": ["Indonesisch"],
+    "moreLanguages": false,
+    "currency": "Rupiah",
+    "facts": [
+      "Der größte Inselstaat der Welt besteht aus mehr als 17.000 Inseln und erstreckt sich zwischen Asien und Australien über drei Zeitzonen.",
+      "Nur auf Komodo und einigen Nachbarinseln lebt der Komodowaran, mit bis zu drei Metern Länge die größte Echse der Welt.",
+      "Der Borobudur auf Java aus dem 9. Jahrhundert gilt als größte buddhistische Tempelanlage der Welt."
+    ]
+  },
+  {
+    "iso": "IL",
+    "name": "Israel",
+    "aliases": ["Staat Israel"],
+    "capital": { "name": "Jerusalem", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Der Status Jerusalems ist international umstritten; die meisten Botschaften befinden sich in Tel Aviv.",
+    "languages": ["Hebräisch"],
+    "moreLanguages": false,
+    "currency": "Neuer Schekel",
+    "facts": [
+      "Das Land reicht vom Mittelmeer bis zum Roten Meer: Ganz im Süden liegt die Stadt Eilat an einem nur wenige Kilometer langen Küstenstreifen.",
+      "Über viele Jahrhunderte diente Hebräisch fast nur als Schrift- und Gebetssprache, bevor es ab dem späten 19. Jahrhundert wieder zur Alltagssprache wurde.",
+      "In der Wüste Negev liegt der Machtesch Ramon, ein rund 40 Kilometer langer Erosionskrater – er entstand nicht durch einen Meteoriteneinschlag."
+    ]
+  },
+  {
+    "iso": "IN",
+    "name": "Indien",
+    "aliases": ["Republik Indien", "India", "Bharat"],
+    "capital": { "name": "Neu-Delhi", "aliases": ["New Delhi", "Delhi"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Hindi", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Indische Rupie",
+    "facts": [
+      "Im Norden begrenzt der Himalaya das Land, nach Süden läuft es spitz zu – zwischen dem Arabischen Meer im Westen und dem Golf von Bengalen im Osten.",
+      "Die Ziffern, die wir „arabisch“ nennen, stammen ursprünglich aus Indien – ebenso die Idee, die Null als eigene Zahl zu verwenden.",
+      "Auf den Rupien-Scheinen steht der Wert in 17 Sprachen: vorn auf Hindi und Englisch, auf der Rückseite in 15 weiteren Sprachen des Landes."
+    ]
+  },
+  {
+    "iso": "IQ",
+    "name": "Irak",
+    "aliases": ["Republik Irak", "Iraq"],
+    "capital": { "name": "Bagdad", "aliases": ["Baghdad"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch", "Kurdisch"],
+    "moreLanguages": false,
+    "currency": "Irakischer Dinar",
+    "facts": [
+      "Zwischen Euphrat und Tigris lag Mesopotamien: In Städten wie Uruk entstand vor über 5000 Jahren mit der Keilschrift eine der ersten Schriften der Welt.",
+      "Das blau glasierte Ischtar-Tor aus Babylon steht heute, mit Originalziegeln rekonstruiert, im Berliner Pergamonmuseum.",
+      "Als Nationalgericht gilt Masgouf: Ein aufgeklappter Karpfen wird dabei langsam neben offenem Feuer gegart."
+    ]
+  },
+  {
+    "iso": "IR",
+    "name": "Iran",
+    "aliases": ["Islamische Republik Iran", "Persien", "Persia"],
+    "capital": { "name": "Teheran", "aliases": ["Tehran"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Persisch"],
+    "moreLanguages": false,
+    "currency": "Iranischer Rial",
+    "facts": [
+      "Das Land liegt zwischen dem Kaspischen Meer im Norden und dem Persischen Golf im Süden; sein höchster Berg ist der über 5600 Meter hohe Vulkan Damavand.",
+      "Das Wort „Schach“ kommt vom persischen „Schah“ (König) – über Persien gelangte das Spiel aus Indien in die arabische Welt und nach Europa.",
+      "Der Großteil des weltweit geernteten Safrans stammt aus Iran; für ein Kilogramm müssen weit über 100.000 Krokusblüten von Hand gepflückt werden."
+    ]
+  },
+  {
+    "iso": "JO",
+    "name": "Jordanien",
+    "aliases": ["Haschemitisches Königreich Jordanien", "Jordan"],
+    "capital": { "name": "Amman", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Jordanischer Dinar",
+    "facts": [
+      "Die Felsenstadt Petra meißelten die Nabatäer vor über 2000 Jahren direkt in den rötlichen Sandstein.",
+      "An der Westgrenze liegt das Tote Meer, dessen Ufer mit über 400 Metern unter dem Meeresspiegel die tiefste Landstelle der Erde ist.",
+      "Das Festessen Mansaf – Lamm in einer Soße aus getrocknetem Joghurt, serviert auf Reis – ist seit 2022 immaterielles UNESCO-Kulturerbe."
+    ]
+  },
+  {
+    "iso": "JP",
+    "name": "Japan",
+    "aliases": ["Nippon", "Nihon"],
+    "capital": { "name": "Tokio", "aliases": ["Tokyo"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Japanisch"],
+    "moreLanguages": false,
+    "currency": "Yen",
+    "facts": [
+      "Der Inselstaat vor der Ostküste Asiens besteht aus den vier Hauptinseln Hokkaidō, Honshū, Shikoku und Kyūshū sowie über 14.000 kleineren Inseln.",
+      "Der Landesname Nihon bedeutet „Ursprung der Sonne“ – daher der Beiname „Land der aufgehenden Sonne“ und die rote Scheibe auf der Flagge.",
+      "1964 nahm Japan mit dem Shinkansen zwischen Tokio und Osaka die erste Hochgeschwindigkeitsbahn der Welt in Betrieb."
+    ]
+  },
+  {
+    "iso": "KG",
+    "name": "Kirgisistan",
+    "aliases": ["Kirgistan", "Kirgisien", "Kyrgyzstan", "Kirgisische Republik"],
+    "capital": { "name": "Bischkek", "aliases": ["Bishkek"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Kirgisisch", "Russisch"],
+    "moreLanguages": false,
+    "currency": "Kirgisischer Som",
+    "facts": [
+      "Das Gebirgsland grenzt an China; im Nordosten liegt auf rund 1600 Metern der Yssykköl, einer der größten Bergseen der Welt, der selbst im Winter nicht zufriert.",
+      "Das Nationalepos „Manas“ umfasst in seiner bekanntesten Fassung rund eine halbe Million Verse und zählt zu den längsten Epen der Welt.",
+      "Die rote Flagge zeigt eine Sonne mit 40 Strahlen für die 40 kirgisischen Stämme und in ihrer Mitte den Dachkranz einer Jurte."
+    ]
+  },
+  {
+    "iso": "KH",
+    "name": "Kambodscha",
+    "aliases": ["Königreich Kambodscha", "Cambodia", "Kampuchea"],
+    "capital": { "name": "Phnom Penh", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Khmer"],
+    "moreLanguages": false,
+    "currency": "Riel",
+    "facts": [
+      "Die Tempelanlage Angkor Wat, das größte religiöse Bauwerk der Welt, ist auch auf der Nationalflagge abgebildet.",
+      "Mitten im Land liegt der See Tonle Sap: In der Regenzeit kehrt der gleichnamige Fluss seine Richtung um, und der See wächst auf ein Vielfaches seiner Fläche.",
+      "Ein beliebtes Nationalgericht ist Amok: Fisch in einer Currypaste mit Kokosmilch, gedämpft in Bananenblättern."
+    ]
+  },
+  {
+    "iso": "KP",
+    "name": "Nordkorea",
+    "aliases": ["Demokratische Volksrepublik Korea", "DVRK", "North Korea", "Nord-Korea"],
+    "capital": { "name": "Pjöngjang", "aliases": ["Pyongyang"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Koreanisch"],
+    "moreLanguages": false,
+    "currency": "Nordkoreanischer Won",
+    "facts": [
+      "Nordkorea nimmt den Norden der Koreanischen Halbinsel ein und grenzt vor allem an China, auf wenigen Kilometern entlang des Flusses Tumen aber auch an Russland.",
+      "In Kaesŏng lag die Hauptstadt des Goryeo-Reiches (918–1392), von dessen Namen sich die Bezeichnung „Korea“ ableitet.",
+      "Die kalten Buchweizennudeln Naengmyeon aus Pjöngjang sind so berühmt, dass ihre Tradition seit 2022 zum immateriellen UNESCO-Kulturerbe gehört."
+    ]
+  },
+  {
+    "iso": "KR",
+    "name": "Südkorea",
+    "aliases": ["Republik Korea", "South Korea", "Süd-Korea"],
+    "capital": { "name": "Seoul", "aliases": ["Söul"] },
+    "otherCapitals": [],
+    "capitalNote": "Viele Ministerien sitzen inzwischen in der Planstadt Sejong, Hauptstadt ist aber weiterhin Seoul.",
+    "languages": ["Koreanisch", "Koreanische Gebärdensprache"],
+    "moreLanguages": false,
+    "currency": "Südkoreanischer Won",
+    "facts": [
+      "Südkorea nimmt den Süden der Koreanischen Halbinsel ein; seine einzige Landgrenze ist die zu Nordkorea, ansonsten ist es von Meer umgeben.",
+      "Das Alphabet Hangeul wurde im 15. Jahrhundert unter König Sejong eigens geschaffen, damit auch einfache Leute lesen und schreiben lernen konnten.",
+      "Auf der Vulkaninsel Jejudo tauchen die Haenyeo, oft schon ältere Frauen, ohne Atemgerät nach Muscheln, Seeigeln und Seetang."
+    ]
+  },
+  {
+    "iso": "KW",
+    "name": "Kuwait",
+    "aliases": ["Staat Kuwait", "Kuweit"],
+    "capital": { "name": "Kuwait-Stadt", "aliases": ["Kuwait City", "Kuwait"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Kuwait-Dinar",
+    "facts": [
+      "Das kleine Land am Nordende des Persischen Golfs liegt zwischen Irak und Saudi-Arabien.",
+      "Der Kuwait-Dinar gilt seit Langem als die wertvollste Währungseinheit der Welt.",
+      "Auf der Insel Failaka gründeten Griechen nach den Feldzügen Alexanders des Großen eine Siedlung namens Ikaros."
+    ]
+  },
+  {
+    "iso": "KZ",
+    "name": "Kasachstan",
+    "aliases": ["Republik Kasachstan", "Kazakhstan"],
+    "capital": { "name": "Astana", "aliases": ["Nur-Sultan"] },
+    "otherCapitals": [],
+    "capitalNote": "Astana ist seit 1997 Hauptstadt (vorher Almaty) und hieß von 2019 bis 2022 Nur-Sultan.",
+    "languages": ["Kasachisch", "Russisch"],
+    "moreLanguages": false,
+    "currency": "Tenge",
+    "facts": [
+      "Das größte Binnenland der Erde reicht vom Kaspischen Meer bis nach China; der äußerste Westen jenseits des Flusses Ural zählt geografisch zu Europa.",
+      "Vom Weltraumbahnhof Baikonur in der Steppe startete 1961 Juri Gagarin als erster Mensch ins All; Russland hat das Gelände bis heute gepachtet.",
+      "Die Wälder am Tian Shan gelten als Urheimat des Kulturapfels – und der alte Stadtname Alma-Ata wird oft als „Vater der Äpfel“ übersetzt."
+    ]
+  },
+  {
+    "iso": "LA",
+    "name": "Laos",
+    "aliases": ["Demokratische Volksrepublik Laos", "Lao"],
+    "capital": { "name": "Vientiane", "aliases": ["Viangchan"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Laotisch"],
+    "moreLanguages": false,
+    "currency": "Kip",
+    "facts": [
+      "Laos ist das einzige Binnenland Südostasiens und grenzt an China, Myanmar, Thailand, Kambodscha und Vietnam.",
+      "In der Ebene der Tonkrüge stehen Tausende prähistorische Steinkrüge, manche bis zu drei Meter hoch; vermutlich dienten sie bei Bestattungen.",
+      "Grundnahrungsmittel ist Klebreis, der in kleinen geflochtenen Körbchen serviert und mit den Fingern zu Bällchen geformt wird."
+    ]
+  },
+  {
+    "iso": "LB",
+    "name": "Libanon",
+    "aliases": ["Libanesische Republik", "Lebanon"],
+    "capital": { "name": "Beirut", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Libanesisches Pfund",
+    "facts": [
+      "Die grüne Zeder auf der Flagge steht für die Libanon-Zedern, deren Holz schon die alten Ägypter und Phönizier schätzten.",
+      "Das Wort „Bibel“ geht auf die Hafenstadt Byblos zurück, über die in der Antike Papyrus nach Griechenland gehandelt wurde.",
+      "Das schmale Land am Ostufer des Mittelmeers ist so gebirgig, dass Skigebiete und Badestrände oft nur rund eine Autostunde auseinanderliegen."
+    ]
+  },
+  {
+    "iso": "LK",
+    "name": "Sri Lanka",
+    "aliases": ["Ceylon", "Demokratische Sozialistische Republik Sri Lanka"],
+    "capital": { "name": "Sri Jayawardenepura Kotte", "aliases": ["Kotte"] },
+    "otherCapitals": [{ "name": "Colombo", "aliases": [], "role": "Sitz von Präsident und Regierung" }],
+    "capitalNote": "Das Parlament tagt in Sri Jayawardenepura Kotte am Rand von Colombo; Colombo selbst ist die größte Stadt und Amtssitz des Präsidenten.",
+    "languages": ["Singhalesisch", "Tamil"],
+    "moreLanguages": false,
+    "currency": "Sri-Lanka-Rupie",
+    "facts": [
+      "Die tropfenförmige Insel liegt im Indischen Ozean vor der Südostküste Indiens, von dem sie nur die flache Palkstraße trennt.",
+      "Bis 1972 hieß das Land Ceylon – der Name lebt im weltberühmten Ceylon-Tee aus dem Hochland weiter.",
+      "1960 wurde Sirimavo Bandaranaike hier Premierministerin – als erste Frau der Welt an der Spitze einer Regierung."
+    ]
+  },
+  {
+    "iso": "MM",
+    "name": "Myanmar",
+    "aliases": ["Birma", "Burma"],
+    "capital": { "name": "Naypyidaw", "aliases": ["Naypyitaw", "Nay Pyi Taw"] },
+    "otherCapitals": [],
+    "capitalNote": "Bis 2005/2006 war Rangun (Yangon) Hauptstadt.",
+    "languages": ["Birmanisch"],
+    "moreLanguages": false,
+    "currency": "Kyat",
+    "facts": [
+      "Myanmar ist das flächengrößte Land auf dem südostasiatischen Festland; der Irrawaddy durchfließt es von Norden nach Süden bis zur Andamanensee.",
+      "In der Ebene von Bagan stehen über 2000 Tempel und Pagoden, die meisten aus dem 11. bis 13. Jahrhundert; seit 2019 ist sie UNESCO-Welterbe.",
+      "Viele Menschen tragen Thanaka im Gesicht, eine gelbliche Paste aus geriebener Baumrinde, die kühlt und vor Sonne schützt."
+    ]
+  },
+  {
+    "iso": "MN",
+    "name": "Mongolei",
+    "aliases": ["Mongolia"],
+    "capital": { "name": "Ulaanbaatar", "aliases": ["Ulan Bator", "Ulan-Bator"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Mongolisch"],
+    "moreLanguages": false,
+    "currency": "Tögrög",
+    "facts": [
+      "Eingezwängt zwischen nur zwei Nachbarn, Russland und China, ist die Mongolei das am dünnsten besiedelte unabhängige Land der Erde.",
+      "Ulaanbaatar gilt als kälteste Hauptstadt der Welt – die Jahresmitteltemperatur liegt etwa beim Gefrierpunkt.",
+      "Im 13. Jahrhundert begründete Dschingis Khan hier das Mongolische Reich, das größte zusammenhängende Landreich der Geschichte."
+    ]
+  },
+  {
+    "iso": "MY",
+    "name": "Malaysia",
+    "aliases": [],
+    "capital": { "name": "Kuala Lumpur", "aliases": [] },
+    "otherCapitals": [{ "name": "Putrajaya", "aliases": [], "role": "Regierungssitz" }],
+    "capitalNote": "Kuala Lumpur ist Hauptstadt und Sitz von König und Parlament; Regierung und Ministerien arbeiten im nahen Putrajaya.",
+    "languages": ["Malaiisch"],
+    "moreLanguages": false,
+    "currency": "Ringgit",
+    "facts": [
+      "Das Land besteht aus zwei Teilen, die das Südchinesische Meer trennt: dem Süden der Malaiischen Halbinsel und dem Norden der Insel Borneo.",
+      "Der König wird alle fünf Jahre aus dem Kreis der neun erblichen Herrscher der Teilstaaten gewählt – eine weltweit einzigartige Rotation.",
+      "Die 452 Meter hohen Petronas Towers in Kuala Lumpur sind die höchsten Zwillingstürme der Welt."
+    ]
+  },
+  {
+    "iso": "NP",
+    "name": "Nepal",
+    "aliases": ["Demokratische Bundesrepublik Nepal"],
+    "capital": { "name": "Kathmandu", "aliases": ["Katmandu"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Nepali"],
+    "moreLanguages": false,
+    "currency": "Nepalesische Rupie",
+    "facts": [
+      "Als einziges Land der Welt hat Nepal keine rechteckige Nationalflagge: Sie besteht aus zwei übereinandergesetzten Wimpeln.",
+      "Acht der 14 Achttausender liegen ganz oder teilweise in Nepal – darunter der Mount Everest an der Grenze zu China.",
+      "In Lumbini im Süden des Landes wurde der Überlieferung nach Siddhartha Gautama geboren, der spätere Buddha."
+    ]
+  },
+  {
+    "iso": "OM",
+    "name": "Oman",
+    "aliases": ["Sultanat Oman"],
+    "capital": { "name": "Maskat", "aliases": ["Muscat"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Omanischer Rial",
+    "facts": [
+      "Oman liegt im Südosten der Arabischen Halbinsel; die Halbinsel Musandam an der Straße von Hormus ist eine Exklave, vom Kernland durch die Emirate getrennt.",
+      "In der Region Dhofar im Süden wachsen Weihrauchbäume; die antiken Stätten des Weihrauchhandels dort sind UNESCO-Welterbe.",
+      "Während sonst in Arabien Sommerhitze herrscht, macht der Monsun „Khareef“ die Gegend um Salala von Juni bis September grün und neblig."
+    ]
+  },
+  {
+    "iso": "PH",
+    "name": "Philippinen",
+    "aliases": ["Republik der Philippinen", "Philippines", "Pilipinas"],
+    "capital": { "name": "Manila", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Filipino", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Philippinischer Peso",
+    "facts": [
+      "Der Inselstaat im westlichen Pazifik zwischen Taiwan und Borneo zählt über 7600 Inseln.",
+      "Benannt ist das Land nach dem spanischen König Philipp II.; über 300 Jahre lang war es spanische Kolonie.",
+      "Auf der Insel Bohol ragen über 1200 fast gleichförmige Hügel auf, die sich in der Trockenzeit braun färben – die „Chocolate Hills“."
+    ]
+  },
+  {
+    "iso": "PK",
+    "name": "Pakistan",
+    "aliases": ["Islamische Republik Pakistan"],
+    "capital": { "name": "Islamabad", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist Islamabad, nicht die größte Stadt Karachi, die nach der Unabhängigkeit 1947 zunächst Hauptstadt war.",
+    "languages": ["Urdu", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Pakistanische Rupie",
+    "facts": [
+      "Am Indus, der das Land von Norden bis zum Arabischen Meer durchfließt, lag vor rund 4500 Jahren Mohenjo-Daro, eine der größten Städte ihrer Zeit.",
+      "Das rosafarbene „Himalaya-Salz“ stammt größtenteils aus der Khewra-Salzmine in Pakistan – und damit gar nicht aus dem Himalaya.",
+      "Lastwagen werden hier oft über und über mit bunten Bildern, Spiegeln und Ketten verziert – die „Truck Art“ gilt als eigene Volkskunst."
+    ]
+  },
+  {
+    "iso": "PS",
+    "name": "Palästina",
+    "aliases": ["Staat Palästina", "Palästinensische Gebiete", "Palestine", "Westjordanland", "Gazastreifen"],
+    "capital": { "name": "Ramallah", "aliases": [] },
+    "otherCapitals": [{ "name": "Ostjerusalem", "aliases": ["East Jerusalem"], "role": "beanspruchte Hauptstadt" }],
+    "capitalNote": "Ramallah ist Verwaltungssitz der Palästinensischen Autonomiebehörde; als Hauptstadt beansprucht wird Ostjerusalem.",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Neuer Schekel, Jordanischer Dinar",
+    "facts": [
+      "Jericho im Jordantal liegt rund 250 Meter unter dem Meeresspiegel und gilt als eine der ältesten dauerhaft bewohnten Städte der Welt.",
+      "In Bethlehem steht die Geburtskirche, eine der ältesten noch genutzten Kirchen der Welt; sie ist seit 2012 UNESCO-Welterbe.",
+      "Als Nationalgericht gilt Musakhan: Fladenbrot mit Ofenhähnchen, reichlich Zwiebeln, Olivenöl und dem säuerlichen Gewürz Sumach."
+    ]
+  },
+  {
+    "iso": "QA",
+    "name": "Katar",
+    "aliases": ["Staat Katar", "Qatar"],
+    "capital": { "name": "Doha", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Katar-Riyal",
+    "facts": [
+      "Katar ist eine Halbinsel, die in den Persischen Golf ragt; seine einzige Landgrenze teilt es mit Saudi-Arabien.",
+      "Die weiß-weinrote Flagge ist die einzige Nationalflagge der Welt, die mehr als doppelt so breit wie hoch ist (Seitenverhältnis 11:28).",
+      "Im Südosten reicht die Meeresbucht Khor al-Udaid, das „Binnenmeer“, tief in eine Landschaft aus hohen Sanddünen hinein."
+    ]
+  },
+  {
+    "iso": "SA",
+    "name": "Saudi-Arabien",
+    "aliases": ["Königreich Saudi-Arabien", "Saudi Arabia", "Saudiarabien"],
+    "capital": { "name": "Riad", "aliases": ["Riyadh"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Saudi-Riyal",
+    "facts": [
+      "Das Königreich nimmt den größten Teil der Arabischen Halbinsel ein und hat Küsten am Roten Meer und am Persischen Golf.",
+      "Saudi-Arabien ist das größte Land der Welt ohne einen einzigen dauerhaft fließenden Fluss.",
+      "Die grüne Flagge trägt das islamische Glaubensbekenntnis und wird deshalb nie auf Halbmast gesetzt."
+    ]
+  },
+  {
+    "iso": "SG",
+    "name": "Singapur",
+    "aliases": ["Republik Singapur", "Singapore"],
+    "capital": { "name": "Singapur", "aliases": ["Singapore"] },
+    "otherCapitals": [],
+    "capitalNote": "Singapur ist ein Stadtstaat – Land und Hauptstadt tragen denselben Namen.",
+    "languages": ["Englisch", "Malaiisch", "Chinesisch", "Tamil"],
+    "moreLanguages": false,
+    "currency": "Singapur-Dollar",
+    "facts": [
+      "Der Stadtstaat liegt vor der Südspitze der Malaiischen Halbinsel und besteht aus einer Hauptinsel und über 60 kleineren Inseln.",
+      "Durch Landgewinnung ist Singapur seit der Unabhängigkeit 1965 um mehr als ein Fünftel größer geworden.",
+      "Der Verkauf von Kaugummi ist seit 1992 verboten – erlaubt sind nur medizinische Kaugummis aus der Apotheke."
+    ]
+  },
+  {
+    "iso": "SY",
+    "name": "Syrien",
+    "aliases": ["Arabische Republik Syrien", "Syria"],
+    "capital": { "name": "Damaskus", "aliases": ["Damascus"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Syrisches Pfund",
+    "facts": [
+      "Syrien liegt am Ostrand des Mittelmeers; der Euphrat durchfließt das Land von der Türkei kommend in Richtung Irak.",
+      "Damaskus gilt als eine der ältesten ununterbrochen bewohnten Städte der Welt – nach ihr sind der Stoff Damast und der Damaszener Stahl benannt.",
+      "Im Bergdorf Maalula wird bis heute Westaramäisch gesprochen, eine Sprache, die eng mit der Muttersprache Jesu verwandt ist."
+    ]
+  },
+  {
+    "iso": "TH",
+    "name": "Thailand",
+    "aliases": ["Königreich Thailand", "Siam"],
+    "capital": { "name": "Bangkok", "aliases": ["Krung Thep"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Thai"],
+    "moreLanguages": false,
+    "currency": "Baht",
+    "facts": [
+      "Als einziges Land Südostasiens wurde Thailand, früher Siam genannt, nie von einer europäischen Macht kolonisiert.",
+      "Die Umrisse des Landes erinnern an einen Elefantenkopf, dessen Rüssel die lange Malaiische Halbinsel hinabreicht.",
+      "Die Thais nennen Bangkok meist Krung Thep, „Stadt der Engel“ – die Kurzform eines zeremoniellen Namens, der als längster Ortsname der Welt gilt."
+    ]
+  },
+  {
+    "iso": "TJ",
+    "name": "Tadschikistan",
+    "aliases": ["Republik Tadschikistan", "Tajikistan"],
+    "capital": { "name": "Duschanbe", "aliases": ["Dushanbe"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Tadschikisch"],
+    "moreLanguages": false,
+    "currency": "Somoni",
+    "facts": [
+      "Das kleinste Land Zentralasiens grenzt an Afghanistan und China und ist fast ganz gebirgig – mehr als die Hälfte liegt über 3000 Metern.",
+      "Tadschikisch ist eine Form des Persischen – anders als die Turksprachen in Usbekistan und Kirgisistan –, wird aber mit kyrillischen Buchstaben geschrieben.",
+      "Im Pamir, dem „Dach der Welt“, liegt der Fedtschenko-Gletscher, mit rund 77 Kilometern der längste Gletscher außerhalb der Polargebiete."
+    ]
+  },
+  {
+    "iso": "TL",
+    "name": "Osttimor",
+    "aliases": ["Timor-Leste", "East Timor"],
+    "capital": { "name": "Dili", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Tetum", "Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "US-Dollar",
+    "facts": [
+      "Das Land umfasst die Osthälfte der Insel Timor nördlich von Australien; die Exklave Oecusse liegt an der Nordküste im indonesischen Westteil der Insel.",
+      "Neben den Philippinen ist Osttimor das einzige Land Asiens mit einer überwiegend katholischen Bevölkerung.",
+      "Mit seiner Unabhängigkeit 2002 wurde Osttimor der erste neue souveräne Staat des 21. Jahrhunderts."
+    ]
+  },
+  {
+    "iso": "TM",
+    "name": "Turkmenistan",
+    "aliases": ["Turkmenien"],
+    "capital": { "name": "Aşgabat", "aliases": ["Aschgabat", "Ashgabat"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Turkmenisch"],
+    "moreLanguages": false,
+    "currency": "Turkmenistan-Manat",
+    "facts": [
+      "Das Land liegt am Ostufer des Kaspischen Meeres; den größten Teil seiner Fläche bedeckt die Wüste Karakum („Schwarzer Sand“).",
+      "Auf der grünen Flagge verläuft ein senkrechter roter Streifen mit fünf traditionellen Teppichmustern, je eines für die großen Stämme des Landes.",
+      "Das Achal-Tekkiner-Pferd mit seinem metallisch glänzenden Fell ist Nationalsymbol und ziert sogar das Staatswappen."
+    ]
+  },
+  {
+    "iso": "TR",
+    "name": "Türkei",
+    "aliases": ["Türkiye", "Turkey", "Türkiye Cumhuriyeti"],
+    "capital": { "name": "Ankara", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist seit 1923 Ankara, nicht Istanbul, die größte Stadt des Landes.",
+    "languages": ["Türkisch"],
+    "moreLanguages": false,
+    "currency": "Türkische Lira",
+    "facts": [
+      "Das Land liegt auf zwei Kontinenten: Ostthrakien gehört zu Europa, das viel größere Anatolien zu Asien – dazwischen liegen Bosporus, Marmarameer und Dardanellen.",
+      "Göbekli Tepe im Südosten ist rund 11.500 Jahre alt und damit eine der ältesten bekannten Monumentalanlagen der Menschheit – viel älter als Stonehenge.",
+      "Der heilige Nikolaus war im 4. Jahrhundert Bischof von Myra, dem heutigen Demre an der türkischen Südküste."
+    ]
+  },
+  {
+    "iso": "TW",
+    "name": "Taiwan",
+    "aliases": ["Republik China", "Formosa"],
+    "capital": { "name": "Taipeh", "aliases": ["Taipei"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Chinesisch"],
+    "moreLanguages": false,
+    "currency": "Neuer Taiwan-Dollar",
+    "facts": [
+      "Die Hauptinsel liegt an der schmalsten Stelle der Taiwanstraße rund 130 Kilometer vor dem asiatischen Festland; portugiesische Seefahrer nannten sie „Ilha Formosa“ – schöne Insel.",
+      "Bubble Tea, Tee mit Tapiokaperlen, wurde in den 1980er-Jahren in Taiwan erfunden.",
+      "Die Insel ist etwa so groß wie Baden-Württemberg, doch ihr höchster Berg, der Yushan, ist mit 3952 Metern höher als der Fuji in Japan."
+    ]
+  },
+  {
+    "iso": "UZ",
+    "name": "Usbekistan",
+    "aliases": ["Republik Usbekistan", "Uzbekistan"],
+    "capital": { "name": "Taschkent", "aliases": ["Tashkent", "Toshkent"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Usbekisch"],
+    "moreLanguages": false,
+    "currency": "Usbekischer Sum",
+    "facts": [
+      "Neben Liechtenstein ist Usbekistan das einzige doppelte Binnenland der Welt: Um ans Meer zu gelangen, muss man mindestens zwei Grenzen überqueren.",
+      "Samarkand war ein Knotenpunkt der Seidenstraße; sein Registan-Platz mit drei prachtvoll gekachelten Medresen ist das Wahrzeichen der Stadt.",
+      "Das Wort „Algorithmus“ geht auf den Gelehrten al-Chwarizmi zurück, dessen Beiname auf Choresm verweist – eine Oasenregion, die heute größtenteils zu Usbekistan gehört."
+    ]
+  },
+  {
+    "iso": "VN",
+    "name": "Vietnam",
+    "aliases": ["Sozialistische Republik Vietnam", "Viet Nam"],
+    "capital": { "name": "Hanoi", "aliases": ["Hà Nội", "Ha Noi"] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist Hanoi im Norden, nicht das größere Ho-Chi-Minh-Stadt (Saigon) im Süden.",
+    "languages": ["Vietnamesisch"],
+    "moreLanguages": false,
+    "currency": "Dong",
+    "facts": [
+      "Das lang gestreckte, S-förmige Land an der Ostküste Indochinas ist an seiner schmalsten Stelle nur rund 50 Kilometer breit.",
+      "Die Höhle Hang Sơn Đoòng gilt als größte bekannte Höhle der Welt – in ihrem Inneren wächst sogar ein eigener Dschungel.",
+      "Anders als Chinesisch wird Vietnamesisch heute mit lateinischen Buchstaben geschrieben; viele Zusatzzeichen markieren die Töne."
+    ]
+  },
+  {
+    "iso": "YE",
+    "name": "Jemen",
+    "aliases": ["Republik Jemen", "Yemen"],
+    "capital": { "name": "Sanaa", "aliases": ["Sana'a"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Jemen-Rial",
+    "facts": [
+      "Die Hafenstadt al-Mucha an der Südwestspitze der Arabischen Halbinsel gab dem Mokka seinen Namen – von hier wurde jahrhundertelang Kaffee verschifft.",
+      "Die bis zu 500 Jahre alten Lehmhochhäuser von Schibam brachten der Stadt den Beinamen „Manhattan der Wüste“ ein.",
+      "Auf der Insel Sokotra im Arabischen Meer wächst der bizarre Drachenblutbaum; rund ein Drittel der Pflanzenarten dort gibt es nirgendwo sonst."
+    ]
+  },
+  {
+    "iso": "MV",
+    "name": "Malediven",
+    "aliases": ["Republik Malediven", "Maldives"],
+    "capital": { "name": "Malé", "aliases": ["Male"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Dhivehi"],
+    "moreLanguages": false,
+    "currency": "Rufiyaa",
+    "facts": [
+      "Rund 1200 Koralleninseln in 26 Atollen reihen sich südwestlich von Indien und Sri Lanka im Indischen Ozean aneinander.",
+      "Die Malediven sind das flachste Land der Erde: Der höchste natürliche Punkt liegt nur etwa 2,4 Meter über dem Meeresspiegel.",
+      "Die Landessprache Dhivehi wird in der Thaana-Schrift von rechts nach links geschrieben; die ersten neun Buchstaben entstanden aus arabischen Ziffern."
+    ]
+  }
+]

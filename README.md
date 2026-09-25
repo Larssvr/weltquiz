@@ -18,6 +18,18 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 
 Statische Seite ohne Build-Schritt: HTML, CSS, JavaScript (ES-Module), [d3](https://d3js.org) und [topojson-client](https://github.com/topojson/topojson-client).
 
+## Daten neu bauen
+
+Die Inhalte (Namen, Hauptstädte, Fakten) liegen als JSON in `content/`, die Skripte in `tools/`:
+
+```
+cd tools
+npm install
+npm run download   # Natural-Earth-Rohdaten nach raw/
+npm run map        # data/world.json
+npm run content    # js/data/*.js aus content/*.json
+```
+
 ## Quellen
 
 - Karten: [Natural Earth](https://www.naturalearthdata.com) (gemeinfrei), Ländergrenzen in der deutschen Sichtweise (`admin_0_countries_deu`)

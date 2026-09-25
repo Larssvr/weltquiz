@@ -1,0 +1,722 @@
+[
+  {
+    "iso": "AD",
+    "name": "Andorra",
+    "aliases": ["Fürstentum Andorra", "Principat d'Andorra"],
+    "capital": { "name": "Andorra la Vella", "aliases": ["Andorra-la-Vella", "Andorra la Vieja", "Andorre-la-Vieille"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Katalanisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Der Kleinstaat liegt in den Pyrenäen zwischen Spanien und Frankreich; seine Hauptstadt Andorra la Vella ist mit gut 1.000 Metern die höchstgelegene Hauptstadt Europas.",
+      "Das Land hat zwei Staatsoberhäupter, die Ko-Fürsten: den Bischof von Urgell in Spanien und den Präsidenten Frankreichs.",
+      "Andorra ist das einzige Land der Welt, in dem Katalanisch die alleinige Amtssprache ist."
+    ]
+  },
+  {
+    "iso": "AL",
+    "name": "Albanien",
+    "aliases": ["Republik Albanien", "Albania", "Shqipëria", "Shqipëri"],
+    "capital": { "name": "Tirana", "aliases": ["Tiranë"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Albanisch"],
+    "moreLanguages": false,
+    "currency": "Lek",
+    "facts": [
+      "An der Straße von Otranto trennen das Land nur rund 70 Kilometer Meer vom „Absatz“ des italienischen Stiefels.",
+      "Albanisch bildet einen eigenen Zweig der indogermanischen Sprachen und ist mit keiner anderen lebenden Sprache eng verwandt.",
+      "Auf Albanisch heißt das Land Shqipëria, oft als „Land der Adler“ gedeutet – ein schwarzer Doppeladler prangt auch auf der roten Flagge."
+    ]
+  },
+  {
+    "iso": "AT",
+    "name": "Österreich",
+    "aliases": ["Republik Österreich", "Austria", "Oesterreich"],
+    "capital": { "name": "Wien", "aliases": ["Vienna"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Deutsch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Das Binnenland grenzt an acht Staaten, von Deutschland und Tschechien bis Italien und Slowenien; gut 60 Prozent seiner Fläche gehören zu den Alpen.",
+      "Der Tiergarten Schönbrunn in Wien wurde 1752 gegründet und gilt als ältester noch bestehender Zoo der Welt.",
+      "Laut österreichischem Lebensmittelbuch ist ein Wiener Schnitzel immer aus Kalbfleisch – die Variante aus Schwein heißt korrekt „Wiener Schnitzel vom Schwein“."
+    ]
+  },
+  {
+    "iso": "BA",
+    "name": "Bosnien und Herzegowina",
+    "aliases": ["Bosnien", "Bosnien-Herzegowina", "Bosnia and Herzegovina", "Bosnia", "Bosna i Hercegovina", "BiH"],
+    "capital": { "name": "Sarajevo", "aliases": ["Sarajewo"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Bosnisch", "Kroatisch", "Serbisch"],
+    "moreLanguages": false,
+    "currency": "Konvertible Mark",
+    "facts": [
+      "Das gelbe Dreieck auf der Flagge steht für die ungefähre Form des Landes, seine drei Ecken für die drei großen Volksgruppen.",
+      "Nur bei Neum reicht das Land ans Meer: Seine Adriaküste ist gerade einmal rund 20 Kilometer lang.",
+      "Von der Alten Brücke in Mostar springen Wagemutige seit Jahrhunderten mehr als 20 Meter tief in den Fluss Neretva."
+    ]
+  },
+  {
+    "iso": "BE",
+    "name": "Belgien",
+    "aliases": ["Königreich Belgien", "Belgium", "België", "Belgique"],
+    "capital": { "name": "Brüssel", "aliases": ["Brussels", "Bruxelles", "Brussel"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Niederländisch", "Französisch", "Deutsch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Deutsch ist eine der drei Amtssprachen: Im Osten, rund um Eupen und Sankt Vith, lebt eine deutschsprachige Gemeinschaft.",
+      "Die Kusttram fährt auf rund 67 Kilometern fast die gesamte belgische Nordseeküste ab – eine der längsten Straßenbahnlinien der Welt.",
+      "Tim und Struppi, die Schlümpfe und Lucky Luke stammen von belgischen Zeichnern; in Brüssel erinnern große Comic-Wandbilder an sie."
+    ]
+  },
+  {
+    "iso": "BG",
+    "name": "Bulgarien",
+    "aliases": ["Republik Bulgarien", "Bulgaria"],
+    "capital": { "name": "Sofia", "aliases": ["Sofija"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Bulgarisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Im Norden bildet die Donau über weite Strecken die Grenze zu Rumänien, im Osten liegt die Küste des Schwarzen Meeres.",
+      "Die kyrillische Schrift entstand im 9./10. Jahrhundert im Ersten Bulgarischen Reich; seit Bulgariens EU-Beitritt 2007 ist sie die dritte Schrift der EU.",
+      "Traditionell bedeutet Kopfnicken in Bulgarien „Nein“ und Kopfschütteln „Ja“ – genau umgekehrt wie im deutschsprachigen Raum."
+    ]
+  },
+  {
+    "iso": "BY",
+    "name": "Belarus",
+    "aliases": ["Weißrussland", "Weissrussland", "Republik Belarus", "Belorussland", "Byelorussia", "Belorussia"],
+    "capital": { "name": "Minsk", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Belarussisch", "Russisch"],
+    "moreLanguages": false,
+    "currency": "Belarussischer Rubel",
+    "facts": [
+      "Das Binnenland zwischen Polen, Litauen, Lettland, Russland und der Ukraine zählt rund 11.000 Seen.",
+      "Im Urwald von Białowieża, den sich Belarus mit Polen teilt, streifen Wisente frei umher – er gehört zu den letzten Tieflandurwäldern Europas.",
+      "Der Maler Marc Chagall wuchs in Witebsk auf – die Stadt und ihre Holzhäuser tauchen in vielen seiner Bilder auf."
+    ]
+  },
+  {
+    "iso": "CH",
+    "name": "Schweiz",
+    "aliases": ["Schweizerische Eidgenossenschaft", "Eidgenossenschaft", "Switzerland", "Suisse", "Svizzera", "Svizra", "Confoederatio Helvetica", "Helvetien"],
+    "capital": { "name": "Bern", "aliases": ["Berne", "Berna"] },
+    "otherCapitals": [],
+    "capitalNote": "Bern ist offiziell „Bundesstadt“, eine Hauptstadt im rechtlichen Sinn hat die Schweiz nicht.",
+    "languages": ["Deutsch", "Französisch", "Italienisch", "Rätoromanisch"],
+    "moreLanguages": false,
+    "currency": "Schweizer Franken",
+    "facts": [
+      "Rhein, Rhone und Inn entspringen in den Schweizer Alpen – deshalb heißt das Binnenland auch „Wasserschloss Europas“; sein Wasser fließt bis in Nordsee, Mittelmeer und Schwarzes Meer.",
+      "Die Nationalflagge ist quadratisch – das gibt es sonst nur noch bei der Flagge der Vatikanstadt.",
+      "Der Gotthard-Basistunnel war bei seiner Eröffnung 2016 mit rund 57 Kilometern der längste Eisenbahntunnel der Welt."
+    ]
+  },
+  {
+    "iso": "CZ",
+    "name": "Tschechien",
+    "aliases": ["Tschechische Republik", "Czechia", "Czech Republic", "Česko", "Česká republika", "Tschechei"],
+    "capital": { "name": "Prag", "aliases": ["Praha", "Prague"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Tschechisch"],
+    "moreLanguages": false,
+    "currency": "Tschechische Krone",
+    "facts": [
+      "Die Elbe entspringt im Riesengebirge an der Grenze zu Polen und fließt durch Böhmen nach Deutschland bis in die Nordsee.",
+      "Das Wort „Roboter“ stammt aus dem Tschechischen: Karel Čapek verwendete es 1920 in seinem Theaterstück „R.U.R.“ – erfunden hatte es sein Bruder Josef.",
+      "Das Pilsner ist nach der Stadt Pilsen benannt, wo 1842 erstmals dieses helle, untergärige Bier gebraut wurde."
+    ]
+  },
+  {
+    "iso": "DE",
+    "name": "Deutschland",
+    "aliases": ["Bundesrepublik Deutschland", "BRD", "Germany"],
+    "capital": { "name": "Berlin", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Deutsch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Deutschland grenzt an neun Staaten: Dänemark, Polen, Tschechien, Österreich, die Schweiz, Frankreich, Luxemburg, Belgien und die Niederlande.",
+      "Bei seiner Fertigstellung 1880 war der Kölner Dom mit rund 157 Metern das höchste Gebäude der Welt – vier Jahre lang.",
+      "Im deutschen Brotregister sind über 3.000 Brotsorten verzeichnet; die Brotkultur zählt offiziell zum immateriellen Kulturerbe des Landes."
+    ]
+  },
+  {
+    "iso": "DK",
+    "name": "Dänemark",
+    "aliases": ["Königreich Dänemark", "Denmark", "Danmark", "Daenemark"],
+    "capital": { "name": "Kopenhagen", "aliases": ["København", "Copenhagen"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Dänisch"],
+    "moreLanguages": false,
+    "currency": "Dänische Krone",
+    "facts": [
+      "Das Land besteht aus der Halbinsel Jütland, die an Deutschland grenzt, und über 400 Inseln – kein Ort liegt mehr als gut 50 Kilometer vom Meer entfernt.",
+      "Zum Königreich gehören auch Grönland und die Färöer; Grönland allein ist rund 50-mal so groß wie Dänemark selbst.",
+      "LEGO stammt aus Billund in Jütland; der Name kommt vom dänischen „leg godt“ – „spiel gut“."
+    ]
+  },
+  {
+    "iso": "EE",
+    "name": "Estland",
+    "aliases": ["Republik Estland", "Estonia", "Eesti"],
+    "capital": { "name": "Tallinn", "aliases": ["Reval"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Estnisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Zwischen Tallinn und Helsinki liegen nur rund 80 Kilometer über den Finnischen Meerbusen – die Fähre braucht etwa zwei Stunden.",
+      "Estnisch ist eng mit dem Finnischen verwandt, nicht aber mit dem Lettischen oder Litauischen der baltischen Nachbarn.",
+      "Als erstes Land der Welt ließ Estland 2005 bei landesweiten Wahlen verbindliche Stimmabgaben über das Internet zu."
+    ]
+  },
+  {
+    "iso": "ES",
+    "name": "Spanien",
+    "aliases": ["Königreich Spanien", "Spain", "España", "Espana"],
+    "capital": { "name": "Madrid", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Spanisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Der höchste Berg Spaniens steht nicht auf dem Festland: Der Vulkan Teide auf Teneriffa ist rund 3.700 Meter hoch.",
+      "Die spanische Nationalhymne „Marcha Real“ hat keinen offiziellen Text – sie wird stets nur instrumental gespielt.",
+      "Obwohl der Großteil des Landes westlich des Nullmeridians liegt, gilt auf dem Festland seit 1940 Mitteleuropäische Zeit – wie in Berlin."
+    ]
+  },
+  {
+    "iso": "FI",
+    "name": "Finnland",
+    "aliases": ["Republik Finnland", "Finland", "Suomi"],
+    "capital": { "name": "Helsinki", "aliases": ["Helsingfors"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Finnisch", "Schwedisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Im Westen grenzt Finnland an Schweden, im Norden an Norwegen, im Osten an Russland; bei Rovaniemi in Lappland überquert man den Polarkreis.",
+      "Finnland gilt als „Land der tausend Seen“ – tatsächlich gibt es dort fast 188.000 Seen, die größer als 500 Quadratmeter sind.",
+      "Die finnische Saunakultur gehört seit 2020 zum immateriellen Kulturerbe der UNESCO."
+    ]
+  },
+  {
+    "iso": "FR",
+    "name": "Frankreich",
+    "aliases": ["Französische Republik", "France", "République française"],
+    "capital": { "name": "Paris", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Wegen seiner Form nennen die Franzosen ihr Land oft „l’Hexagone“ – das Sechseck.",
+      "Dank seiner Überseegebiete erstreckt sich Frankreich über zwölf Zeitzonen – mehr als jedes andere Land der Welt.",
+      "Das festliche Essen der Franzosen mit mehreren Gängen und passenden Weinen steht seit 2010 auf der UNESCO-Liste des immateriellen Kulturerbes."
+    ]
+  },
+  {
+    "iso": "GB",
+    "name": "Vereinigtes Königreich",
+    "aliases": ["Großbritannien", "Grossbritannien", "UK", "United Kingdom", "Britannien", "England", "Schottland", "Wales", "Nordirland", "Great Britain", "Britain", "GB", "Vereinigtes Königreich Großbritannien und Nordirland"],
+    "capital": { "name": "London", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Pfund Sterling",
+    "facts": [
+      "Der Nullmeridian verläuft durch die Sternwarte von Greenwich in London – von hier aus werden die Längengrade gezählt.",
+      "Der Union Jack vereint die Kreuze der Schutzpatrone Englands, Schottlands und Irlands – Wales ist auf der Flagge nicht vertreten.",
+      "Als Heimat der ersten Briefmarke (1840) druckt das Land als einziges der Welt keinen Ländernamen auf seine Marken, sondern stets ein Bild des Monarchen."
+    ]
+  },
+  {
+    "iso": "GR",
+    "name": "Griechenland",
+    "aliases": ["Hellenische Republik", "Greece", "Hellas", "Ellada", "Elláda"],
+    "capital": { "name": "Athen", "aliases": ["Athens", "Athina", "Athína"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Griechisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Je nach Zählweise gehören bis zu 6.000 Inseln und Eilande zu Griechenland – bewohnt sind davon aber nur rund 200.",
+      "Der Olymp ist mit knapp 2.920 Metern der höchste Berg des Landes – in der Antike galt er als Sitz der Götter.",
+      "Die Olympischen Spiele der Antike fanden in Olympia statt; 1896 wurden in Athen die ersten Spiele der Neuzeit ausgetragen."
+    ]
+  },
+  {
+    "iso": "HR",
+    "name": "Kroatien",
+    "aliases": ["Republik Kroatien", "Croatia", "Hrvatska"],
+    "capital": { "name": "Zagreb", "aliases": ["Agram"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Kroatisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Vor der Adriaküste liegen über 1.200 Inseln, Eilande und Felsen – bewohnt sind davon nur knapp 50.",
+      "Die Krawatte geht auf die Halstücher kroatischer Reiter im 17. Jahrhundert zurück – ihr Name leitet sich vom Wort „Kroate“ ab.",
+      "Die 16 Plitvicer Seen sind durch Wasserfälle miteinander verbunden und gehören seit 1979 zum UNESCO-Welterbe."
+    ]
+  },
+  {
+    "iso": "HU",
+    "name": "Ungarn",
+    "aliases": ["Hungary", "Magyarország", "Republik Ungarn"],
+    "capital": { "name": "Budapest", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Ungarisch"],
+    "moreLanguages": false,
+    "currency": "Forint",
+    "facts": [
+      "Der Plattensee (Balaton) im Westen des Landes ist mit knapp 600 Quadratkilometern der größte See Mitteleuropas.",
+      "Den Zauberwürfel erfand 1974 der Budapester Architekt und Designdozent Ernő Rubik.",
+      "Im Ungarischen steht der Familienname vor dem Vornamen – Ernő Rubik heißt dort also Rubik Ernő."
+    ]
+  },
+  {
+    "iso": "IE",
+    "name": "Irland",
+    "aliases": ["Republik Irland", "Ireland", "Éire", "Eire"],
+    "capital": { "name": "Dublin", "aliases": ["Baile Átha Cliath"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Irisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Die Republik umfasst rund fünf Sechstel der Insel Irland; den Nordosten bildet Nordirland, das zum Vereinigten Königreich gehört.",
+      "Die Harfe ist das Staatswappen – weil Guinness sie schon als Markenzeichen nutzte, zeigt die staatliche Harfe in die andere Richtung.",
+      "Heimische Schlangen gibt es auf der Insel nicht – das liegt an der Eiszeit, auch wenn die Legende den heiligen Patrick verantwortlich macht."
+    ]
+  },
+  {
+    "iso": "IS",
+    "name": "Island",
+    "aliases": ["Iceland", "Ísland"],
+    "capital": { "name": "Reykjavík", "aliases": ["Reykjavik"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Isländisch"],
+    "moreLanguages": false,
+    "currency": "Isländische Krone",
+    "facts": [
+      "Reykjavík ist die nördlichste Hauptstadt eines unabhängigen Staates; die Insel selbst liegt knapp südlich des Polarkreises im Nordatlantik.",
+      "Das Land liegt auf dem Mittelatlantischen Rücken, wo die Nordamerikanische und die Eurasische Platte auseinanderdriften – im Nationalpark Þingvellir sieht man die Spalten.",
+      "Die meisten Isländer haben keinen Familiennamen, sondern einen Vatersnamen: Die Kinder eines Jón heißen etwa Jónsson oder Jónsdóttir."
+    ]
+  },
+  {
+    "iso": "IT",
+    "name": "Italien",
+    "aliases": ["Italienische Republik", "Italy", "Italia"],
+    "capital": { "name": "Rom", "aliases": ["Roma", "Rome"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Italienisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Das stiefelförmige Land umschließt zwei unabhängige Staaten vollständig: San Marino und die Vatikanstadt.",
+      "Der Ätna auf Sizilien ist einer der aktivsten Vulkane der Welt und mit über 3.300 Metern der höchste Berg Italiens südlich der Alpen.",
+      "Das heutige Standarditalienisch geht auf das Florentinische zurück, in dem Dante im 14. Jahrhundert seine „Göttliche Komödie“ schrieb."
+    ]
+  },
+  {
+    "iso": "LI",
+    "name": "Liechtenstein",
+    "aliases": ["Fürstentum Liechtenstein", "Lichtenstein"],
+    "capital": { "name": "Vaduz", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Deutsch"],
+    "moreLanguages": false,
+    "currency": "Schweizer Franken",
+    "facts": [
+      "Das Fürstentum zwischen der Schweiz und Österreich ist neben Usbekistan der einzige doppelte Binnenstaat: Auch alle seine Nachbarn haben keinen Zugang zum Meer.",
+      "Seine Armee schaffte Liechtenstein bereits 1868 ab – seitdem hat das Land kein eigenes Militär.",
+      "Benannt ist das Land nach der Fürstenfamilie Liechtenstein, deren Stammburg südlich von Wien in Niederösterreich steht."
+    ]
+  },
+  {
+    "iso": "LT",
+    "name": "Litauen",
+    "aliases": ["Republik Litauen", "Lithuania", "Lietuva"],
+    "capital": { "name": "Vilnius", "aliases": ["Wilna", "Wilno"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Litauisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Nach einer Berechnung französischer Geografen von 1989 liegt der geografische Mittelpunkt Europas rund 25 Kilometer nördlich von Vilnius.",
+      "Litauisch gilt als eine der altertümlichsten lebenden indogermanischen Sprachen und hat manche Gemeinsamkeit mit dem Sanskrit bewahrt.",
+      "Die rund 98 Kilometer lange Kurische Nehrung mit ihren hohen Wanderdünen teilt sich Litauen mit dem russischen Gebiet Kaliningrad."
+    ]
+  },
+  {
+    "iso": "LU",
+    "name": "Luxemburg",
+    "aliases": ["Großherzogtum Luxemburg", "Luxembourg", "Lëtzebuerg"],
+    "capital": { "name": "Luxemburg", "aliases": ["Luxemburg-Stadt", "Luxembourg", "Lëtzebuerg", "Luxembourg City"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Luxemburgisch", "Französisch", "Deutsch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Im Dreiländereck mit Frankreich und Deutschland liegt der Moselort Schengen, der dem Schengener Abkommen von 1985 seinen Namen gab.",
+      "Luxemburg ist das einzige noch bestehende Großherzogtum der Welt – an der Spitze des Staates steht ein Großherzog.",
+      "Als erstes Land der Welt machte das Großherzogtum 2020 Busse, Bahnen und Trams landesweit kostenlos."
+    ]
+  },
+  {
+    "iso": "LV",
+    "name": "Lettland",
+    "aliases": ["Republik Lettland", "Latvia", "Latvija"],
+    "capital": { "name": "Riga", "aliases": ["Rīga"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Lettisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Lettland liegt in der Mitte der drei baltischen Staaten, zwischen Estland und Litauen an der Ostsee; mehr als die Hälfte des Landes ist bewaldet.",
+      "Riga und Tallinn streiten, wer den ersten geschmückten Weihnachtsbaum aufgestellt hat – Riga beruft sich auf das Jahr 1510.",
+      "In Rigas Zentrum ist etwa jedes dritte Gebäude im Jugendstil erbaut – kaum eine Stadt der Welt hat eine größere Dichte solcher Bauten."
+    ]
+  },
+  {
+    "iso": "MC",
+    "name": "Monaco",
+    "aliases": ["Fürstentum Monaco", "Principauté de Monaco"],
+    "capital": { "name": "Monaco", "aliases": ["Monaco-Ville"] },
+    "otherCapitals": [],
+    "capitalNote": "Monaco ist ein Stadtstaat, die Hauptstadt heißt ebenfalls Monaco – Monte-Carlo ist nur ein Stadtteil.",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Nach der Vatikanstadt ist Monaco der zweitkleinste Staat der Welt; an Land ist es vollständig von Frankreich umgeben.",
+      "Die Flagge gleicht fast genau der Indonesiens – Rot über Weiß –, nur das Seitenverhältnis ist ein anderes.",
+      "Der Überlieferung nach eroberte 1297 ein als Mönch verkleideter Grimaldi die Festung – die Familie regiert das Fürstentum bis heute."
+    ]
+  },
+  {
+    "iso": "MD",
+    "name": "Republik Moldau",
+    "aliases": ["Moldau", "Moldawien", "Moldova", "Republica Moldova"],
+    "capital": { "name": "Chișinău", "aliases": ["Kischinau", "Chisinau", "Kischinjow", "Chişinău", "Kishinev"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Rumänisch"],
+    "moreLanguages": false,
+    "currency": "Moldauischer Leu",
+    "facts": [
+      "Das Binnenland liegt zwischen Rumänien und der Ukraine; der Fluss Pruth bildet die gesamte Grenze zu Rumänien.",
+      "Unter dem Dorf Mileștii Mici erstrecken sich rund 200 Kilometer Stollen – die dort gelagerte Weinsammlung steht als größte der Welt im Guinness-Buch.",
+      "Die blau-gelb-rote Flagge ähnelt stark der rumänischen – unterscheiden lässt sie sich am Wappen mit Adler und Auerochsenkopf."
+    ]
+  },
+  {
+    "iso": "ME",
+    "name": "Montenegro",
+    "aliases": ["Crna Gora"],
+    "capital": { "name": "Podgorica", "aliases": [] },
+    "otherCapitals": [ { "name": "Cetinje", "aliases": [], "role": "Altkönigliche Hauptstadt laut Verfassung" } ],
+    "capitalNote": "Hauptstadt ist Podgorica; die frühere Königsstadt Cetinje trägt laut Verfassung den Titel „Altkönigliche Hauptstadt“.",
+    "languages": ["Montenegrinisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Der Name bedeutet „Schwarzer Berg“, auf Montenegrinisch Crna Gora – vermutlich nach den dunklen Wäldern des Lovćen-Gebirges.",
+      "Die verwinkelte Bucht von Kotor an der Adria sieht aus wie ein Fjord, ist aber ein vom Meer überflutetes Flusstal.",
+      "Obwohl Montenegro nicht zur EU gehört, zahlt man dort mit dem Euro – davor war einige Jahre lang die D-Mark offizielles Zahlungsmittel."
+    ]
+  },
+  {
+    "iso": "MK",
+    "name": "Nordmazedonien",
+    "aliases": ["Republik Nordmazedonien", "North Macedonia", "Mazedonien", "Makedonien", "Severna Makedonija", "Macedonia"],
+    "capital": { "name": "Skopje", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Mazedonisch", "Albanisch"],
+    "moreLanguages": false,
+    "currency": "Mazedonischer Denar",
+    "facts": [
+      "Der Ohridsee an der Grenze zu Albanien ist mit über 1,3 Millionen Jahren der älteste See Europas.",
+      "Mutter Teresa wurde 1910 in Skopje geboren; in der Hauptstadt erinnert heute ein Gedenkhaus an sie.",
+      "Bis 2019 hieß der Staat Republik Mazedonien; der Zusatz „Nord“ unterscheidet ihn von der griechischen Region Makedonien."
+    ]
+  },
+  {
+    "iso": "MT",
+    "name": "Malta",
+    "aliases": ["Republik Malta"],
+    "capital": { "name": "Valletta", "aliases": ["Valetta"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Maltesisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Der Inselstaat liegt rund 80 Kilometer südlich von Sizilien und ist das flächenmäßig kleinste Mitgliedsland der EU.",
+      "Maltesisch ist die einzige semitische Amtssprache der EU – und die einzige semitische Sprache, die offiziell in lateinischer Schrift geschrieben wird.",
+      "Die Megalith-Tempel von Ġgantija auf Gozo sind über 5.000 Jahre alt und damit älter als Stonehenge und die Pyramiden von Gizeh."
+    ]
+  },
+  {
+    "iso": "NL",
+    "name": "Niederlande",
+    "aliases": ["Holland", "Königreich der Niederlande", "Netherlands", "Nederland"],
+    "capital": { "name": "Amsterdam", "aliases": [] },
+    "otherCapitals": [ { "name": "Den Haag", "aliases": ["The Hague", "'s-Gravenhage"], "role": "Regierungssitz" } ],
+    "capitalNote": "Amsterdam ist die Hauptstadt, Regierung und Parlament sitzen aber in Den Haag.",
+    "languages": ["Niederländisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Rund ein Viertel des Landes liegt unter dem Meeresspiegel; die Provinz Flevoland wurde fast vollständig dem Meer abgerungen.",
+      "„Holland“ bezeichnet eigentlich nur die Provinzen Nord- und Südholland – die Regierung wirbt deshalb seit 2020 nur noch mit „Niederlande“.",
+      "Die Tulpe, heute ein Wahrzeichen des Landes, stammt ursprünglich aus Zentralasien und kam im 16. Jahrhundert über das Osmanische Reich nach Europa."
+    ]
+  },
+  {
+    "iso": "NO",
+    "name": "Norwegen",
+    "aliases": ["Königreich Norwegen", "Norway", "Norge", "Noreg"],
+    "capital": { "name": "Oslo", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Norwegisch", "Samisch"],
+    "moreLanguages": false,
+    "currency": "Norwegische Krone",
+    "facts": [
+      "Mit allen Fjorden und Inseln ist Norwegens Küste über 100.000 Kilometer lang – genug, um die Erde zweieinhalbmal zu umrunden.",
+      "Der Friedensnobelpreis wird in Oslo verliehen, alle anderen Nobelpreise dagegen in Stockholm.",
+      "Das Norwegische kennt zwei offiziell gleichberechtigte Schriftformen: das verbreitete Bokmål und das seltenere Nynorsk."
+    ]
+  },
+  {
+    "iso": "PL",
+    "name": "Polen",
+    "aliases": ["Republik Polen", "Poland", "Polska"],
+    "capital": { "name": "Warschau", "aliases": ["Warszawa", "Warsaw"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Polnisch"],
+    "moreLanguages": false,
+    "currency": "Złoty",
+    "facts": [
+      "Die Weichsel, der längste Fluss des Landes, fließt von den Beskiden im Süden über Krakau und Warschau bis in die Ostsee.",
+      "Die in Warschau geborene Marie Curie benannte das mit ihrem Mann entdeckte Element Polonium nach ihrer Heimat.",
+      "Im Salzbergwerk Wieliczka bei Krakau ist eine ganze Kapelle aus Salz gehauen – samt Kronleuchtern aus Salzkristallen."
+    ]
+  },
+  {
+    "iso": "PT",
+    "name": "Portugal",
+    "aliases": ["Portugiesische Republik", "República Portuguesa"],
+    "capital": { "name": "Lissabon", "aliases": ["Lisboa", "Lisbon"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Das Cabo da Roca westlich von Lissabon ist der westlichste Punkt des europäischen Festlands.",
+      "Das Bündnis mit England von 1373 gilt als ältestes noch bestehendes Bündnis der Welt.",
+      "Etwa die Hälfte des weltweit geernteten Korks stammt aus Portugal, vor allem aus den Korkeichenwäldern des Alentejo."
+    ]
+  },
+  {
+    "iso": "RO",
+    "name": "Rumänien",
+    "aliases": ["Romania", "România"],
+    "capital": { "name": "Bukarest", "aliases": ["București", "Bucuresti", "Bucharest"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Rumänisch"],
+    "moreLanguages": false,
+    "currency": "Rumänischer Leu",
+    "facts": [
+      "Das Donaudelta am Schwarzen Meer ist das zweitgrößte Flussdelta Europas und gehört seit 1991 zum UNESCO-Welterbe.",
+      "Rumänisch ist eine romanische Sprache und damit enger mit dem Italienischen verwandt als mit den Sprachen der meisten Nachbarländer.",
+      "Schloss Bran wird gern als „Draculaschloss“ vermarktet – dabei hat Bram Stoker, der Autor von „Dracula“, Rumänien nie besucht."
+    ]
+  },
+  {
+    "iso": "RS",
+    "name": "Serbien",
+    "aliases": ["Republik Serbien", "Serbia", "Srbija"],
+    "capital": { "name": "Belgrad", "aliases": ["Beograd", "Belgrade"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Serbisch"],
+    "moreLanguages": false,
+    "currency": "Serbischer Dinar",
+    "facts": [
+      "Belgrad liegt dort, wo die Save in die Donau mündet; der Name der Stadt bedeutet „weiße Stadt“.",
+      "Serbisch wird mit zwei Alphabeten geschrieben: Amtsschrift ist laut Verfassung Kyrillisch, im Alltag ist aber auch die Lateinschrift weit verbreitet.",
+      "Der Erfinder Nikola Tesla war serbischer Herkunft; der Flughafen von Belgrad trägt seinen Namen, und die Stadt hat ein Tesla-Museum."
+    ]
+  },
+  {
+    "iso": "RU",
+    "name": "Russland",
+    "aliases": ["Russische Föderation", "Russia", "Rossija"],
+    "capital": { "name": "Moskau", "aliases": ["Moskva", "Moscow"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Russisch"],
+    "moreLanguages": false,
+    "currency": "Russischer Rubel",
+    "facts": [
+      "Das flächengrößte Land der Welt reicht über den Ural hinweg von Europa bis nach Asien und erstreckt sich über elf Zeitzonen.",
+      "Der Baikalsee in Sibirien ist der tiefste und älteste See der Erde und enthält rund ein Fünftel des flüssigen Süßwassers an der Erdoberfläche.",
+      "Die Transsibirische Eisenbahn von Moskau nach Wladiwostok ist mit über 9.000 Kilometern die längste Eisenbahnstrecke der Welt."
+    ]
+  },
+  {
+    "iso": "SE",
+    "name": "Schweden",
+    "aliases": ["Königreich Schweden", "Sweden", "Sverige"],
+    "capital": { "name": "Stockholm", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Schwedisch"],
+    "moreLanguages": false,
+    "currency": "Schwedische Krone",
+    "facts": [
+      "Seit 2000 verbindet die Öresundverbindung Malmö mit Kopenhagen – teils als Brücke, teils als Tunnel unter dem Meer.",
+      "Das Jedermannsrecht erlaubt es, fast überall in der Natur zu wandern, Beeren zu pflücken und für ein, zwei Nächte zu zelten – auch auf Privatland.",
+      "Der Name IKEA setzt sich aus den Initialen des Gründers Ingvar Kamprad, seines Elternhofs Elmtaryd und seines Heimatdorfs Agunnaryd zusammen."
+    ]
+  },
+  {
+    "iso": "SI",
+    "name": "Slowenien",
+    "aliases": ["Republik Slowenien", "Slovenia", "Slovenija"],
+    "capital": { "name": "Ljubljana", "aliases": ["Laibach"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Slowenisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Zwischen Italien und Kroatien hat das Land nur rund 47 Kilometer Küste an der Adria.",
+      "Das Wappen auf der Flagge zeigt den dreigipfligen Triglav – mit 2.864 Metern der höchste Berg des Landes.",
+      "Die weißen Lipizzaner der Spanischen Hofreitschule in Wien gehen auf das Gestüt Lipica zurück, das 1580 im heutigen Slowenien gegründet wurde."
+    ]
+  },
+  {
+    "iso": "SK",
+    "name": "Slowakei",
+    "aliases": ["Slowakische Republik", "Slovakia", "Slovensko"],
+    "capital": { "name": "Bratislava", "aliases": ["Pressburg"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Slowakisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Bratislava ist die einzige Hauptstadt der Welt, die an zwei Nachbarstaaten grenzt: Österreich und Ungarn.",
+      "Der Gerlachovský štít in der Hohen Tatra ist mit 2.655 Metern der höchste Gipfel der gesamten Karpaten.",
+      "Am 1. Januar 1993 teilte sich die Tschechoslowakei friedlich in zwei Staaten: Tschechien und die Slowakei."
+    ]
+  },
+  {
+    "iso": "SM",
+    "name": "San Marino",
+    "aliases": ["Republik San Marino", "Repubblica di San Marino"],
+    "capital": { "name": "San Marino", "aliases": ["Città di San Marino", "Stadt San Marino"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Italienisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Die Zwergrepublik rund um den Monte Titano liegt nahe der Adriaküste bei Rimini und ist vollständig von Italien umgeben.",
+      "San Marino gilt als älteste noch bestehende Republik der Welt – der Überlieferung nach wurde sie im Jahr 301 gegründet.",
+      "An der Spitze stehen gleich zwei Staatsoberhäupter, die Capitani Reggenti – sie werden alle sechs Monate neu gewählt."
+    ]
+  },
+  {
+    "iso": "UA",
+    "name": "Ukraine",
+    "aliases": ["Ukrajina"],
+    "capital": { "name": "Kiew", "aliases": ["Kyjiw", "Kyiv", "Kiev"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Ukrainisch"],
+    "moreLanguages": false,
+    "currency": "Hrywnja",
+    "facts": [
+      "Nach Russland ist die Ukraine das flächenmäßig zweitgrößte Land Europas; der Dnipro fließt mitten hindurch und teilt auch Kiew.",
+      "Die blau-gelbe Flagge wird oft als Himmel über Weizenfeldern gedeutet – dank fruchtbarer Schwarzerde gilt das Land als Kornkammer Europas.",
+      "Das Weihnachtslied „Carol of the Bells“ beruht auf „Schtschedryk“, einem ukrainischen Neujahrslied in der Bearbeitung von Mykola Leontowytsch."
+    ]
+  },
+  {
+    "iso": "VA",
+    "name": "Vatikanstadt",
+    "aliases": ["Vatikan", "Vatikanstaat", "Heiliger Stuhl", "Vatican City", "Staat der Vatikanstadt", "Vatican", "Città del Vaticano"],
+    "capital": { "name": "Vatikanstadt", "aliases": ["Vatikan", "Vatican City", "Città del Vaticano"] },
+    "otherCapitals": [],
+    "capitalNote": "Die Vatikanstadt ist ein Stadtstaat mitten in Rom – Rom selbst ist die Hauptstadt Italiens, nicht des Vatikans.",
+    "languages": ["Italienisch", "Latein"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Mit knapp einem halben Quadratkilometer ist die Vatikanstadt der kleinste Staat der Welt – sie liegt vollständig in Rom.",
+      "Für die Sicherheit des Papstes sorgt seit 1506 die Schweizergarde; ihre Mitglieder müssen katholische Schweizer sein.",
+      "In der Sixtinischen Kapelle mit Michelangelos berühmten Deckenfresken wählen die Kardinäle im Konklave den neuen Papst."
+    ]
+  },
+  {
+    "iso": "XK",
+    "name": "Kosovo",
+    "aliases": ["Republik Kosovo", "Kosova", "Kosovë"],
+    "capital": { "name": "Pristina", "aliases": ["Priština", "Prishtina", "Prishtinë"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Albanisch", "Serbisch"],
+    "moreLanguages": false,
+    "currency": "Euro",
+    "facts": [
+      "Die Flagge zeigt die goldenen Umrisse des Kosovo auf blauem Grund; sonst trägt nur noch die Nationalflagge Zyperns eine Landkarte.",
+      "Die Hymne heißt „Europa“ und hat keinen offiziellen Text – genau wie die spanische Nationalhymne.",
+      "Die Nationalbibliothek in Pristina fällt mit ihren 99 Kuppeln und dem Metallgitter um die Fassade sofort ins Auge."
+    ]
+  }
+]

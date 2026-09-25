@@ -1,0 +1,879 @@
+[
+  {
+    "iso": "AO",
+    "name": "Angola",
+    "aliases": ["Republik Angola"],
+    "capital": { "name": "Luanda", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "Kwanza",
+    "facts": [
+      "Die Provinz Cabinda liegt getrennt vom übrigen Angola nördlich der Kongomündung – eingeklemmt zwischen der Republik Kongo und der DR Kongo.",
+      "Die Riesen-Rappenantilope, auf Portugiesisch „Palanca Negra Gigante“, lebt nur in Angola und ist Nationalsymbol – sogar die Fußballnationalelf ist nach ihr benannt.",
+      "Der weltweit getanzte Kizomba stammt aus Angola: Er entstand in den 1980er-Jahren aus dem einheimischen Semba und karibischem Zouk."
+    ]
+  },
+  {
+    "iso": "BF",
+    "name": "Burkina Faso",
+    "aliases": ["Obervolta", "Upper Volta", "Haute-Volta", "Burkina"],
+    "capital": { "name": "Ouagadougou", "aliases": ["Wagadugu", "Ouaga"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Mooré", "Dioula", "Fulfulde"],
+    "moreLanguages": true,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Der Name bedeutet etwa „Land der aufrichtigen Menschen“ und verbindet Wörter aus Mooré und Dioula. Französisch ist seit 2023 keine Amtssprache mehr, nur noch Arbeitssprache.",
+      "In Ouagadougou findet alle zwei Jahre das FESPACO statt, eines der wichtigsten Filmfestivals Afrikas.",
+      "Das Binnenland grenzt an sechs Staaten: Mali, Niger, Benin, Togo, Ghana und die Elfenbeinküste."
+    ]
+  },
+  {
+    "iso": "BI",
+    "name": "Burundi",
+    "aliases": ["Republik Burundi", "Uburundi"],
+    "capital": { "name": "Gitega", "aliases": [] },
+    "otherCapitals": [
+      { "name": "Bujumbura", "aliases": [], "role": "Wirtschaftshauptstadt (bis 2019 Hauptstadt)" }
+    ],
+    "capitalNote": "Seit 2019 ist Gitega die Hauptstadt. Bujumbura am Tanganjikasee, die größte Stadt des Landes, bleibt Wirtschaftshauptstadt.",
+    "languages": ["Kirundi", "Französisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Burundi-Franc",
+    "facts": [
+      "Burundi liegt am Nordende des Tanganjikasees – nach dem Baikalsee der zweittiefste See der Erde.",
+      "Der rituelle Tanz der Königstrommel ist seit 2014 immaterielles UNESCO-Kulturerbe; die Trommler tragen die schweren Trommeln dabei auf dem Kopf.",
+      "Bei Rutovu im Süden steht eine kleine Steinpyramide an einer Quelle, die als südlichster Ursprung des Nils gilt."
+    ]
+  },
+  {
+    "iso": "BJ",
+    "name": "Benin",
+    "aliases": ["Republik Benin", "Dahomey", "Bénin"],
+    "capital": { "name": "Porto-Novo", "aliases": ["Porto Novo"] },
+    "otherCapitals": [
+      { "name": "Cotonou", "aliases": [], "role": "Regierungssitz" }
+    ],
+    "capitalNote": "Offizielle Hauptstadt ist Porto-Novo; Regierung und Präsident haben ihren Sitz aber im größeren Cotonou.",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Benin gilt als Ursprungsland des Voodoo (Vodun). Die Religion ist offiziell anerkannt und hat im Januar einen eigenen staatlichen Feiertag.",
+      "Ganvié im Nokoué-See ist ein Pfahlbaudorf mit Tausenden Bewohnern, die sich mit Booten fortbewegen – oft „Venedig Afrikas“ genannt.",
+      "Das schmale Land reicht vom Golf von Guinea weit nach Norden bis zum Fluss Niger, der einen Teil der Grenze zum Nachbarstaat Niger bildet."
+    ]
+  },
+  {
+    "iso": "BW",
+    "name": "Botswana",
+    "aliases": ["Republik Botswana", "Botsuana", "Betschuanaland", "Bechuanaland"],
+    "capital": { "name": "Gaborone", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Pula",
+    "facts": [
+      "Im Okavangodelta endet ein großer Fluss mitten in der Kalahari, statt ins Meer zu fließen; 2014 wurde es als 1000. Stätte ins UNESCO-Welterbe aufgenommen.",
+      "Die Währung Pula bedeutet in der Nationalsprache Setswana „Regen“ – im trockenen Land ein Segenswunsch und zugleich Wahlspruch des Staates.",
+      "Das Binnenland liegt größtenteils in der Kalahari und grenzt an Südafrika, Namibia, Simbabwe und – nur auf einem winzigen Stück – an Sambia."
+    ]
+  },
+  {
+    "iso": "CD",
+    "name": "Demokratische Republik Kongo",
+    "aliases": ["DR Kongo", "Kongo-Kinshasa", "Kongo", "Zaire", "DRC", "Democratic Republic of the Congo", "DR Congo"],
+    "capital": { "name": "Kinshasa", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Nicht verwechseln: Kinshasa ist die Hauptstadt der DR Kongo, Brazzaville am anderen Ufer des Kongo die der Republik Kongo.",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "Kongo-Franc",
+    "facts": [
+      "Der Kongo ist der tiefste Fluss der Erde: Forscher maßen an seinem Unterlauf Tiefen von über 220 Metern.",
+      "Bonobos und Okapis leben in freier Wildbahn nur in der DR Kongo; beide wurden erst im 20. Jahrhundert wissenschaftlich beschrieben.",
+      "Das zweitgrößte Land Afrikas hat nur einen rund 40 km schmalen Zugang zum Atlantik, an der Mündung des Kongo."
+    ]
+  },
+  {
+    "iso": "CF",
+    "name": "Zentralafrikanische Republik",
+    "aliases": ["ZAR", "Central African Republic", "CAR", "Centrafrique", "Ubangi-Schari"],
+    "capital": { "name": "Bangui", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Sango", "Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BEAC",
+    "facts": [
+      "Das Binnenland liegt fast genau im Herzen Afrikas; der Fluss Ubangi bildet im Süden die Grenze zur DR Kongo, an ihm liegt die Hauptstadt Bangui.",
+      "Sango ist neben Französisch Amtssprache und wird im ganzen Land als gemeinsame Verkehrssprache gesprochen.",
+      "An der Waldlichtung Dzanga Bai im Südwesten kommen oft Dutzende Waldelefanten gleichzeitig zusammen, um mineralreiches Wasser zu trinken."
+    ]
+  },
+  {
+    "iso": "CG",
+    "name": "Republik Kongo",
+    "aliases": ["Kongo-Brazzaville", "Kongo", "Republic of the Congo", "Congo-Brazzaville"],
+    "capital": { "name": "Brazzaville", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Nicht verwechseln: Brazzaville ist die Hauptstadt der Republik Kongo, Kinshasa am anderen Ufer des Kongo die der DR Kongo.",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BEAC",
+    "facts": [
+      "Brazzaville und Kinshasa liegen sich am Kongo direkt gegenüber – nach Rom und dem Vatikan die am nächsten beieinander liegenden Hauptstädte der Welt.",
+      "In Brazzaville pflegen die „Sapeurs“ einen Kult um Eleganz: Sie tragen farbenfrohe Designeranzüge und führen sie auf der Straße vor.",
+      "Odzala-Kokoua, 1935 erstmals unter Schutz gestellt, gehört zu den ältesten Nationalparks Afrikas; seit 2023 ist das Waldgebiet UNESCO-Welterbe."
+    ]
+  },
+  {
+    "iso": "CI",
+    "name": "Elfenbeinküste",
+    "aliases": ["Côte d'Ivoire", "Cote d'Ivoire", "Ivory Coast"],
+    "capital": { "name": "Yamoussoukro", "aliases": [] },
+    "otherCapitals": [
+      { "name": "Abidjan", "aliases": [], "role": "Regierungssitz und Wirtschaftszentrum" }
+    ],
+    "capitalNote": "Yamoussoukro ist seit 1983 offiziell Hauptstadt. Regierung, Botschaften und Wirtschaft sitzen aber größtenteils weiterhin in Abidjan.",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Das Land am Golf von Guinea, zwischen Liberia und Ghana, ist seit Jahrzehnten der größte Kakaoproduzent der Welt.",
+      "Die Basilika Notre-Dame de la Paix in Yamoussoukro ist dem Petersdom nachempfunden und gilt als eine der größten Kirchen der Welt.",
+      "Seit 1985 besteht die Regierung darauf, dass der Landesname in allen Sprachen „Côte d'Ivoire“ lautet – statt Übersetzungen wie Elfenbeinküste."
+    ]
+  },
+  {
+    "iso": "CM",
+    "name": "Kamerun",
+    "aliases": ["Republik Kamerun", "Cameroon", "Cameroun"],
+    "capital": { "name": "Jaunde", "aliases": ["Yaoundé", "Yaounde"] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Jaunde (Yaoundé) – nicht die Hafen- und Wirtschaftsmetropole Douala.",
+    "languages": ["Französisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BEAC",
+    "facts": [
+      "Kamerun wird „Afrika im Kleinen“ genannt, weil Regenwald, Savanne, Vulkanberge, Strände und trockener Sahel in einem Land liegen.",
+      "Der Name geht auf portugiesische Seefahrer zurück, die den Fluss Wouri wegen seiner vielen Garnelen „Rio dos Camarões“ nannten.",
+      "Das Land liegt im Knick des Golfs von Guinea, wo die Küste Afrikas nach Süden abbiegt; im Norden reicht es wie ein Keil bis an den Tschadsee."
+    ]
+  },
+  {
+    "iso": "CV",
+    "name": "Kap Verde",
+    "aliases": ["Cabo Verde", "Kapverden", "Cape Verde", "Kapverdische Inseln"],
+    "capital": { "name": "Praia", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "Kap-Verde-Escudo",
+    "facts": [
+      "Die zehn Vulkaninseln liegen gut 500 km vor der Küste Senegals im Atlantik; bei ihrer Entdeckung um 1460 waren sie unbewohnt.",
+      "Im Krater des aktiven Vulkans Fogo, mit rund 2.830 m der höchste Berg des Landes, bauen Bauern Wein an.",
+      "Die Morna – melancholische Lieder, die Cesária Évora weltberühmt machte – ist seit 2019 immaterielles UNESCO-Kulturerbe."
+    ]
+  },
+  {
+    "iso": "DJ",
+    "name": "Dschibuti",
+    "aliases": ["Djibouti", "Republik Dschibuti"],
+    "capital": { "name": "Dschibuti", "aliases": ["Djibouti"] },
+    "otherCapitals": [],
+    "capitalNote": "Staat und Hauptstadt tragen denselben Namen: Dschibuti.",
+    "languages": ["Französisch", "Arabisch"],
+    "moreLanguages": false,
+    "currency": "Dschibuti-Franc",
+    "facts": [
+      "Der Assalsee liegt rund 155 Meter unter dem Meeresspiegel – der tiefste Punkt Afrikas – und ist etwa zehnmal so salzig wie das Meer.",
+      "Das Land liegt an der Meerenge Bab al-Mandab, die das Rote Meer mit dem Golf von Aden verbindet – einer der wichtigsten Schifffahrtswege der Welt.",
+      "Am Abbe-See an der Grenze zu Äthiopien ragen bis zu 50 Meter hohe Kalksteinschlote auf, aus denen teils Dampf strömt."
+    ]
+  },
+  {
+    "iso": "DZ",
+    "name": "Algerien",
+    "aliases": ["Demokratische Volksrepublik Algerien", "Algeria", "Algérie"],
+    "capital": { "name": "Algier", "aliases": ["Algiers", "Alger"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch", "Tamazight"],
+    "moreLanguages": false,
+    "currency": "Algerischer Dinar",
+    "facts": [
+      "Seit der Unabhängigkeit des Südsudan 2011 ist Algerien das flächengrößte Land Afrikas; mehr als vier Fünftel davon gehören zur Sahara.",
+      "Im Tassili n'Ajjer zeigen Tausende Felsbilder Giraffen, Rinderherden und Jäger – Spuren einer Zeit, als die Sahara grün war.",
+      "Land und Hauptstadt heißen auf Arabisch gleich: Al-Dschaza'ir bedeutet „die Inseln“ – nach kleinen Inseln vor der Küste von Algier."
+    ]
+  },
+  {
+    "iso": "EG",
+    "name": "Ägypten",
+    "aliases": ["Arabische Republik Ägypten", "Egypt", "Misr"],
+    "capital": { "name": "Kairo", "aliases": ["Cairo"] },
+    "otherCapitals": [],
+    "capitalNote": "Hauptstadt ist Kairo. Regierung, Ministerien und Parlament sind inzwischen aber größtenteils in eine neu gebaute Stadt rund 45 km östlich von Kairo umgezogen.",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Ägyptisches Pfund",
+    "facts": [
+      "Die Cheops-Pyramide in Gizeh ist das einzige der sieben Weltwunder der Antike, das heute noch steht.",
+      "Ägypten liegt an der Nordostecke Afrikas; die Sinai-Halbinsel jenseits des Sueskanals gehört geografisch bereits zu Asien.",
+      "Der Sueskanal verbindet seit 1869 Mittelmeer und Rotes Meer – ganz ohne Schleusen, weil beide Meere fast auf gleicher Höhe liegen."
+    ]
+  },
+  {
+    "iso": "ER",
+    "name": "Eritrea",
+    "aliases": ["Staat Eritrea"],
+    "capital": { "name": "Asmara", "aliases": ["Asmera"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Tigrinya", "Arabisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Nakfa",
+    "facts": [
+      "Der Name Eritrea stammt vom griechischen Namen des Roten Meeres, an dessen Küste sich das Land als langer Streifen entlangzieht.",
+      "Asmara ist wegen seiner vielen modernistischen Bauten aus den 1930er-Jahren UNESCO-Welterbe; eine Tankstelle dort sieht aus wie ein Flugzeug.",
+      "Vor der Küste liegt der Dahlak-Archipel mit über 100 Inseln im Roten Meer; nur wenige davon sind bewohnt."
+    ]
+  },
+  {
+    "iso": "ET",
+    "name": "Äthiopien",
+    "aliases": ["Demokratische Bundesrepublik Äthiopien", "Ethiopia", "Abessinien"],
+    "capital": { "name": "Addis Abeba", "aliases": ["Addis Ababa"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Amharisch", "Oromo", "Somali", "Tigrinya"],
+    "moreLanguages": true,
+    "currency": "Birr",
+    "facts": [
+      "Äthiopien hat einen eigenen Kalender mit 13 Monaten; er liegt gegenüber dem gregorianischen Kalender etwa sieben bis acht Jahre zurück.",
+      "Der Arabica-Kaffee stammt aus den Bergwäldern im Südwesten des Landes; bis heute wird Kaffee hier in einer festlichen Zeremonie geröstet und aufgebrüht.",
+      "Aus dem Tanasee im Hochland fließt der Blaue Nil, der den größten Teil des Nilwassers liefert. Einen Zugang zum Meer hat das Land nicht."
+    ]
+  },
+  {
+    "iso": "GA",
+    "name": "Gabun",
+    "aliases": ["Gabunische Republik", "Gabon"],
+    "capital": { "name": "Libreville", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BEAC",
+    "facts": [
+      "Der Äquator verläuft quer durch das zu großen Teilen von Regenwald bedeckte Land; die Hauptstadt Libreville liegt knapp nördlich davon.",
+      "Bei Oklo liefen vor fast zwei Milliarden Jahren natürliche Kernreaktoren – entdeckt wurden sie 1972 in einer Uranmine.",
+      "Im Loango-Nationalpark laufen Waldelefanten am Strand entlang, und Flusspferde schwimmen sogar in der Brandung des Atlantiks."
+    ]
+  },
+  {
+    "iso": "GH",
+    "name": "Ghana",
+    "aliases": ["Republik Ghana", "Goldküste", "Gold Coast"],
+    "capital": { "name": "Accra", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Cedi",
+    "facts": [
+      "Die britische Kolonie Goldküste benannte sich bei der Unabhängigkeit 1957 nach dem mittelalterlichen Reich Ghana – obwohl dieses viel weiter nördlich lag.",
+      "Der Voltasee ist nach Fläche der größte Stausee der Welt; er entstand in den 1960er-Jahren hinter dem Akosombo-Damm.",
+      "Der Nullmeridian verläuft durch die Hafenstadt Tema. Wo er den Äquator kreuzt, rund 600 km weiter südlich, liegt nur offenes Meer."
+    ]
+  },
+  {
+    "iso": "GM",
+    "name": "Gambia",
+    "aliases": ["Republik Gambia", "The Gambia"],
+    "capital": { "name": "Banjul", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Dalasi",
+    "facts": [
+      "Das kleinste Land auf dem afrikanischen Festland ist ein höchstens 48 km breiter Streifen entlang des Gambia-Flusses, fast ganz von Senegal umschlossen.",
+      "Auf Englisch heißt das Land offiziell „The Gambia“ – mit großem „The“, auch um es vom gleichnamigen Fluss zu unterscheiden.",
+      "Bei Wassu stehen Steinkreise, die zum UNESCO-Welterbe „Steinkreise von Senegambia“ gehören – der größten Ansammlung von Steinkreisen weltweit."
+    ]
+  },
+  {
+    "iso": "GN",
+    "name": "Guinea",
+    "aliases": ["Republik Guinea", "Guinea-Conakry", "Guinée"],
+    "capital": { "name": "Conakry", "aliases": ["Konakry"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Französisch", "Pular", "Malinke", "Susu"],
+    "moreLanguages": true,
+    "currency": "Guinea-Franc",
+    "facts": [
+      "In Guinea entspringen die Flüsse Niger, Senegal und Gambia – das Land gilt daher als „Wasserschloss Westafrikas“.",
+      "Guinea besitzt die größten Bauxitvorkommen der Welt; das Erz ist der wichtigste Rohstoff für die Herstellung von Aluminium.",
+      "In den Nimbabergen an der Grenze zu Liberia und der Elfenbeinküste lebt eine Kröte, die – sehr ungewöhnlich für Froschlurche – lebende Junge zur Welt bringt."
+    ]
+  },
+  {
+    "iso": "GQ",
+    "name": "Äquatorialguinea",
+    "aliases": ["Republik Äquatorialguinea", "Equatorial Guinea", "Guinea Ecuatorial", "Spanisch-Guinea"],
+    "capital": { "name": "Ciudad de la Paz", "aliases": [] },
+    "otherCapitals": [
+      { "name": "Malabo", "aliases": [], "role": "bis 2026 Hauptstadt" }
+    ],
+    "capitalNote": "Seit Januar 2026 ist die neu gebaute Planstadt Ciudad de la Paz auf dem Festland offiziell Hauptstadt. Zuvor war es Malabo auf der Insel Bioko.",
+    "languages": ["Spanisch", "Französisch", "Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BEAC",
+    "facts": [
+      "Äquatorialguinea ist das einzige Land Afrikas, in dem Spanisch Amtssprache ist.",
+      "Das Land besteht aus dem Festlandsteil Río Muni zwischen Kamerun und Gabun sowie aus Inseln wie Bioko, das vor der Küste Kameruns liegt.",
+      "Trotz des Namens verläuft der Äquator nicht durch das Festland: Nur die kleine Insel Annobón liegt südlich davon."
+    ]
+  },
+  {
+    "iso": "GW",
+    "name": "Guinea-Bissau",
+    "aliases": ["Republik Guinea-Bissau", "Guiné-Bissau", "Portugiesisch-Guinea"],
+    "capital": { "name": "Bissau", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Vor der Küste liegt der Bijagós-Archipel mit rund 88 Inseln, seit 2025 UNESCO-Welterbe; auf der Insel Orango schwimmen Flusspferde sogar im Meerwasser.",
+      "Das kleine Land zwischen Senegal und Guinea lebt vor allem vom Export von Cashewnüssen.",
+      "Amtssprache ist Portugiesisch, doch die meisten Menschen verständigen sich auf Kriol, einer portugiesisch geprägten Kreolsprache."
+    ]
+  },
+  {
+    "iso": "KE",
+    "name": "Kenia",
+    "aliases": ["Republik Kenia", "Kenya"],
+    "capital": { "name": "Nairobi", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Swahili", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Kenia-Schilling",
+    "facts": [
+      "Das Land ist nach dem Mount Kenya benannt, dem zweithöchsten Berg Afrikas, der nur rund 16 km südlich des Äquators liegt.",
+      "Jedes Jahr durchqueren über eine Million Gnus auf ihrer großen Wanderung aus der Serengeti den Mara-Fluss in der Masai Mara.",
+      "Der Turkanasee im Norden ist der größte dauerhafte Wüstensee der Welt; wegen seiner Farbe heißt er auch „Jademeer“."
+    ]
+  },
+  {
+    "iso": "KM",
+    "name": "Komoren",
+    "aliases": ["Union der Komoren", "Comoros", "Comores"],
+    "capital": { "name": "Moroni", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Komorisch", "Französisch", "Arabisch"],
+    "moreLanguages": false,
+    "currency": "Komoren-Franc",
+    "facts": [
+      "Die Inselgruppe liegt am Nordende der Straße von Mosambik, zwischen dem afrikanischen Festland und Madagaskar.",
+      "Die Komoren gehören zu den größten Produzenten von Ylang-Ylang-Öl, einem Duftstoff für Parfüms – daher der Beiname „Parfüminseln“.",
+      "In den Tiefen vor den Inseln lebt der Quastenflosser, ein urtümlicher Fisch, den man lange für seit Jahrmillionen ausgestorben hielt."
+    ]
+  },
+  {
+    "iso": "LR",
+    "name": "Liberia",
+    "aliases": ["Republik Liberia"],
+    "capital": { "name": "Monrovia", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Liberianischer Dollar",
+    "facts": [
+      "Liberia wurde ab 1822 von freigelassenen Afroamerikanern besiedelt und 1847 unabhängig – es gilt als älteste Republik Afrikas.",
+      "Die Hauptstadt Monrovia ist nach US-Präsident James Monroe benannt – als einzige Hauptstadt außerhalb der USA nach einem US-Präsidenten.",
+      "Europäische Seefahrer nannten die Küste zwischen Sierra Leone und der Elfenbeinküste nach einem hier gehandelten Gewürz „Pfefferküste“."
+    ]
+  },
+  {
+    "iso": "LS",
+    "name": "Lesotho",
+    "aliases": ["Königreich Lesotho", "Basutoland"],
+    "capital": { "name": "Maseru", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Sesotho", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Loti",
+    "facts": [
+      "Lesotho ist ganz von Südafrika umschlossen und das einzige Land der Welt, das vollständig über 1.000 m Höhe liegt – sein tiefster Punkt liegt bei 1.400 m.",
+      "Der spitze Strohhut Mokorotlo ist ein Nationalsymbol und prangt sogar auf der Flagge.",
+      "In den Maloti-Bergen fällt im Winter Schnee; mit Afriski gibt es hier sogar eines der wenigen Skigebiete Afrikas."
+    ]
+  },
+  {
+    "iso": "LY",
+    "name": "Libyen",
+    "aliases": ["Staat Libyen", "Libya"],
+    "capital": { "name": "Tripolis", "aliases": ["Tripoli"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Libyscher Dinar",
+    "facts": [
+      "Libyen hat keinen einzigen ständig fließenden Fluss; Wasser aus uralten Grundwasserspeichern unter der Sahara gelangt über ein riesiges Rohrnetz an die Küste.",
+      "In Leptis Magna, einer der besterhaltenen Römerstädte am Mittelmeer, wurde Kaiser Septimius Severus geboren.",
+      "Das Land liegt an der Mittelmeerküste zwischen Tunesien und Ägypten; an der Großen Syrte schwingt die Küste in einem weiten Bogen nach Süden."
+    ]
+  },
+  {
+    "iso": "MA",
+    "name": "Marokko",
+    "aliases": ["Königreich Marokko", "Morocco", "Maroc"],
+    "capital": { "name": "Rabat", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Rabat – nicht die größere Wirtschaftsmetropole Casablanca.",
+    "languages": ["Arabisch", "Tamazight"],
+    "moreLanguages": false,
+    "currency": "Marokkanischer Dirham",
+    "facts": [
+      "An der Straße von Gibraltar trennen Marokko nur rund 14 Kilometer vom europäischen Festland.",
+      "Die Al-Qarawiyyin in Fès, gegründet 859, gilt als älteste durchgehend bestehende Hochschule der Welt.",
+      "Der Arganbaum wächst fast nur im Südwesten Marokkos; Ziegen klettern sogar in seine Äste, um die Früchte zu fressen."
+    ]
+  },
+  {
+    "iso": "MG",
+    "name": "Madagaskar",
+    "aliases": ["Republik Madagaskar", "Madagascar", "Madagasikara"],
+    "capital": { "name": "Antananarivo", "aliases": ["Tananarive", "Tana"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Malagasy", "Französisch"],
+    "moreLanguages": false,
+    "currency": "Ariary",
+    "facts": [
+      "Madagaskar ist die viertgrößte Insel der Erde und liegt rund 400 km vor der Küste Mosambiks im Indischen Ozean.",
+      "Lemuren kommen von Natur aus nur auf Madagaskar vor – ebenso etwa die Hälfte aller Chamäleonarten der Welt.",
+      "Die Landessprache Malagasy ist mit Sprachen auf Borneo verwandt: Vor weit über 1.000 Jahren segelten Seefahrer aus Südostasien bis hierher."
+    ]
+  },
+  {
+    "iso": "ML",
+    "name": "Mali",
+    "aliases": ["Republik Mali", "Französisch-Sudan"],
+    "capital": { "name": "Bamako", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Bambara", "Fulfulde", "Dogon", "Songhai"],
+    "moreLanguages": true,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Die Große Moschee von Djenné im Binnendelta des Niger ist das größte Lehmgebäude der Welt; die Bewohner erneuern ihren Lehmputz traditionell jedes Jahr gemeinsam.",
+      "Laut Berichten seiner Zeit verteilte Herrscher Mansa Musa auf seiner Pilgerreise 1324 in Kairo so viel Gold, dass dessen Wert dort jahrelang sank.",
+      "Seit der Verfassung von 2023 sind die 13 Nationalsprachen, allen voran Bambara, Amtssprachen; Französisch ist nur noch Arbeitssprache."
+    ]
+  },
+  {
+    "iso": "MR",
+    "name": "Mauretanien",
+    "aliases": ["Islamische Republik Mauretanien", "Mauritania", "Mauritanie"],
+    "capital": { "name": "Nouakchott", "aliases": ["Nuakschott"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Ouguiya",
+    "facts": [
+      "Die Richat-Struktur, das „Auge der Sahara“, ist ein rund 40 km großes Ringgebilde aus Gestein, das Astronauten als markanter Orientierungspunkt dient.",
+      "Die Erzzüge von den Minen bei Zouérat im Landesinneren zum Atlantikhafen Nouadhibou sind bis zu drei Kilometer lang – einige der längsten Züge der Welt.",
+      "Neben dem madagassischen Ariary ist die Ouguiya die einzige Währung, die nicht dezimal geteilt ist: 1 Ouguiya hat offiziell 5 Khoums."
+    ]
+  },
+  {
+    "iso": "MU",
+    "name": "Mauritius",
+    "aliases": ["Republik Mauritius", "Maurice"],
+    "capital": { "name": "Port Louis", "aliases": ["Port-Louis"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch", "Französisch"],
+    "moreLanguages": false,
+    "currency": "Mauritius-Rupie",
+    "facts": [
+      "Die Vulkaninsel östlich von Madagaskar war die einzige Heimat des Dodos; der im 17. Jahrhundert ausgestorbene Vogel ist heute Schildhalter im Staatswappen.",
+      "Vor der Halbinsel Le Morne sieht es aus der Luft aus, als stürze ein Wasserfall ins Meer – eine Täuschung durch Sand, der am Meeresboden abrutscht.",
+      "Die „Blaue Mauritius“ von 1847 gehört zu den berühmtesten und wertvollsten Briefmarken der Welt."
+    ]
+  },
+  {
+    "iso": "MW",
+    "name": "Malawi",
+    "aliases": ["Republik Malawi", "Njassaland", "Nyasaland"],
+    "capital": { "name": "Lilongwe", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Malawi-Kwacha",
+    "facts": [
+      "Der Malawisee nimmt rund ein Fünftel der Landesfläche ein; das lang gestreckte Land liegt zwischen Sambia, Tansania und Mosambik.",
+      "Im Malawisee leben mehr Fischarten als in jedem anderen See der Welt, darunter Hunderte farbenprächtige Buntbarsche.",
+      "Wegen der Freundlichkeit seiner Bewohner trägt Malawi den Beinamen „The Warm Heart of Africa“ – das warme Herz Afrikas."
+    ]
+  },
+  {
+    "iso": "MZ",
+    "name": "Mosambik",
+    "aliases": ["Republik Mosambik", "Mozambique", "Moçambique"],
+    "capital": { "name": "Maputo", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "Metical",
+    "facts": [
+      "Mosambik hat eine der längsten Küsten Afrikas: rund 2.500 km am Indischen Ozean, gegenüber von Madagaskar.",
+      "Die kleine Ilha de Moçambique gab dem ganzen Land seinen Namen und war bis 1898 Hauptstadt der portugiesischen Kolonie.",
+      "Im Bazaruto-Archipel lebt eine der letzten größeren Dugong-Populationen Ostafrikas – Seekühe, die auf Seegraswiesen weiden."
+    ]
+  },
+  {
+    "iso": "NA",
+    "name": "Namibia",
+    "aliases": ["Republik Namibia", "Südwestafrika", "Deutsch-Südwestafrika"],
+    "capital": { "name": "Windhuk", "aliases": ["Windhoek"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Namibia-Dollar",
+    "facts": [
+      "Die Namib gilt als älteste Wüste der Erde; die roten Dünen bei Sossusvlei gehören zu den höchsten der Welt.",
+      "Der Caprivizipfel, ein schmaler Landstreifen im Nordosten, führt Namibia bis an den Sambesi – ein Relikt eines deutsch-britischen Vertrags von 1890.",
+      "Der Hoba-Meteorit bei Grootfontein wiegt rund 60 Tonnen und ist der größte bekannte Meteorit der Erde – er liegt noch dort, wo er einschlug."
+    ]
+  },
+  {
+    "iso": "NE",
+    "name": "Niger",
+    "aliases": ["Republik Niger"],
+    "capital": { "name": "Niamey", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Hausa"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Das Land ist nach dem Fluss Niger benannt, der allerdings nur durch seinen äußersten Südwesten fließt – vorbei an der Hauptstadt Niamey.",
+      "Der Baum von Ténéré galt als einsamster Baum der Welt, bis ihn 1973 ein Lastwagen umfuhr; heute markiert eine Metallskulptur die Stelle.",
+      "Seit 2025 ist Hausa die Nationalsprache. Französisch, bis dahin Amtssprache, ist seitdem wie Englisch nur noch Arbeitssprache."
+    ]
+  },
+  {
+    "iso": "NG",
+    "name": "Nigeria",
+    "aliases": ["Bundesrepublik Nigeria"],
+    "capital": { "name": "Abuja", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Abuja ist seit 1991 Hauptstadt. Bis dahin war es Lagos, das bis heute die größte Stadt des Landes ist.",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Naira",
+    "facts": [
+      "In Nigeria werden über 500 Sprachen gesprochen, die größten sind Hausa, Yoruba und Igbo – Amtssprache ist Englisch.",
+      "Die Filmindustrie „Nollywood“ gehört gemessen an der Zahl der produzierten Filme zu den größten der Welt.",
+      "Das weiße Y im Staatswappen steht für den Zusammenfluss von Niger und Benue, die sich mitten im Land bei Lokoja vereinigen."
+    ]
+  },
+  {
+    "iso": "RW",
+    "name": "Ruanda",
+    "aliases": ["Republik Ruanda", "Rwanda"],
+    "capital": { "name": "Kigali", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Kinyarwanda", "Englisch", "Französisch", "Swahili"],
+    "moreLanguages": false,
+    "currency": "Ruanda-Franc",
+    "facts": [
+      "Ruanda wird „Land der tausend Hügel“ genannt; es liegt im Hochland östlich des Kivusees, zwischen der DR Kongo und Tansania.",
+      "Am letzten Samstag jedes Monats ist Umuganda: Vormittags arbeiten Erwachsene im ganzen Land gemeinsam für das Gemeinwohl.",
+      "Seit 2008 sind Plastiktüten im ganzen Land verboten; die Hauptstadt Kigali gilt als eine der saubersten Städte Afrikas."
+    ]
+  },
+  {
+    "iso": "SC",
+    "name": "Seychellen",
+    "aliases": ["Republik Seychellen", "Seychelles"],
+    "capital": { "name": "Victoria", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Seychellenkreol", "Englisch", "Französisch"],
+    "moreLanguages": false,
+    "currency": "Seychellen-Rupie",
+    "facts": [
+      "Die Seychellen sind der kleinste Staat Afrikas: rund 115 Inseln im Indischen Ozean, nordöstlich von Madagaskar.",
+      "Die Seychellenpalme Coco de Mer bildet die größten Samen im Pflanzenreich; wild wächst sie nur auf den Inseln Praslin und Curieuse.",
+      "Auf dem Aldabra-Atoll leben rund 100.000 Riesenschildkröten – die größte Population dieser Tiere weltweit."
+    ]
+  },
+  {
+    "iso": "SD",
+    "name": "Sudan",
+    "aliases": ["Republik Sudan", "Nordsudan"],
+    "capital": { "name": "Khartum", "aliases": ["Khartoum"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Sudanesisches Pfund",
+    "facts": [
+      "Im Sudan stehen mehr Pyramiden als in Ägypten: Die Herrscher des Reiches Kusch ließen über 200 steile Grabpyramiden errichten, etwa bei Meroe.",
+      "In Khartum vereinigen sich der Blaue und der Weiße Nil – am Zusammenfluss sieht man die unterschiedlich gefärbten Ströme nebeneinander.",
+      "Der Sudan liefert den größten Teil des weltweit gehandelten Gummi arabicum, eines Zusatzstoffs etwa in Limonaden und Süßigkeiten."
+    ]
+  },
+  {
+    "iso": "SL",
+    "name": "Sierra Leone",
+    "aliases": ["Republik Sierra Leone", "Salone"],
+    "capital": { "name": "Freetown", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Leone",
+    "facts": [
+      "Den Namen gab 1462 der Portugiese Pedro de Sintra: Die Berge an der Küste erinnerten ihn an einen Löwen – „Serra Leoa“.",
+      "Das Land liegt zwischen Guinea und Liberia; der Hafen von Freetown gehört zu den größten Naturhäfen der Welt.",
+      "Amtssprache ist Englisch, doch fast alle Menschen verständigen sich auf Krio, einer englischbasierten Kreolsprache."
+    ]
+  },
+  {
+    "iso": "SN",
+    "name": "Senegal",
+    "aliases": ["Republik Senegal", "Sénégal"],
+    "capital": { "name": "Dakar", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Auf der Halbinsel Cap-Vert, auf der auch Dakar liegt, befindet sich der westlichste Punkt des afrikanischen Festlands.",
+      "Der Lac Rose nordöstlich von Dakar schimmert durch salzliebende Algen oft rosa; Arbeiter gewinnen dort Salz von Hand.",
+      "Das Nationalgericht Thieboudienne aus Fisch, Reis und Gemüse ist seit 2021 immaterielles UNESCO-Kulturerbe."
+    ]
+  },
+  {
+    "iso": "SO",
+    "name": "Somalia",
+    "aliases": ["Bundesrepublik Somalia", "Soomaaliya"],
+    "capital": { "name": "Mogadischu", "aliases": ["Mogadishu", "Muqdisho"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Somali", "Arabisch"],
+    "moreLanguages": false,
+    "currency": "Somalia-Schilling",
+    "facts": [
+      "Somalia hat die längste Küste des afrikanischen Festlands; am Horn von Afrika liegt Ras Hafun, der östlichste Punkt des Festlands.",
+      "In keinem Land der Welt leben mehr Dromedare – Kamele sind hier Reichtum, Transportmittel und Milchlieferant zugleich.",
+      "Erst 1972 erhielt Somali eine offizielle Schrift: ein lateinisches Alphabet, das sich gegen arabische und eigene Schriften durchsetzte."
+    ]
+  },
+  {
+    "iso": "SS",
+    "name": "Südsudan",
+    "aliases": ["Republik Südsudan", "South Sudan"],
+    "capital": { "name": "Juba", "aliases": ["Dschuba"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Südsudanesisches Pfund",
+    "facts": [
+      "Seit seiner Unabhängigkeit 2011 ist der Südsudan der jüngste allgemein anerkannte Staat der Welt.",
+      "Mitten im Land breitet sich der Weiße Nil zum Sudd aus, einem der größten Sumpfgebiete der Erde.",
+      "Bei Zählungen aus der Luft wurden hier rund sechs Millionen wandernde Antilopen erfasst – vermutlich die größte Säugetierwanderung an Land."
+    ]
+  },
+  {
+    "iso": "ST",
+    "name": "São Tomé und Príncipe",
+    "aliases": ["Sao Tome und Principe", "São Tomé and Príncipe", "Sao Tome and Principe"],
+    "capital": { "name": "São Tomé", "aliases": ["Sao Tome"] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt heißt wie die größere der beiden Hauptinseln: São Tomé.",
+    "languages": ["Portugiesisch"],
+    "moreLanguages": false,
+    "currency": "Dobra",
+    "facts": [
+      "Der zweitkleinste Staat Afrikas besteht aus zwei Vulkaninseln und einigen Eilanden im Golf von Guinea, vor der Küste Gabuns.",
+      "Der Äquator verläuft über das Inselchen Ilhéu das Rolas direkt südlich von São Tomé; ein Denkmal markiert dort die Linie.",
+      "Um 1908 war São Tomé und Príncipe der größte Kakaoproduzent der Welt – daher der Spitzname „Schokoladeninseln“."
+    ]
+  },
+  {
+    "iso": "SZ",
+    "name": "Eswatini",
+    "aliases": ["Swasiland", "Swaziland", "Königreich Eswatini"],
+    "capital": { "name": "Mbabane", "aliases": [] },
+    "otherCapitals": [
+      { "name": "Lobamba", "aliases": [], "role": "königliche und legislative Hauptstadt" }
+    ],
+    "capitalNote": "Mbabane ist Verwaltungshauptstadt. Das nahe Lobamba ist königliche und legislative Hauptstadt, dort tagt das Parlament.",
+    "languages": ["Siswati", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Lilangeni",
+    "facts": [
+      "Seit 2018 heißt das Land auch international offiziell Eswatini, „Land der Swasi“; zuvor war der Name Swasiland üblich.",
+      "Beim Umhlanga-Fest tragen jedes Jahr Zehntausende junge Frauen Schilfrohr zur Residenz der Königinmutter und tanzen dort.",
+      "Das kleine Binnenland liegt zwischen Südafrika und Mosambik und gehört zu den kleinsten Staaten Afrikas."
+    ]
+  },
+  {
+    "iso": "TD",
+    "name": "Tschad",
+    "aliases": ["Republik Tschad", "Chad", "Tchad"],
+    "capital": { "name": "N'Djamena", "aliases": ["Ndjamena", "N'Djaména"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Französisch", "Arabisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BEAC",
+    "facts": [
+      "Das Land ist nach dem Tschadsee benannt, der an der Grenze zu Kamerun, Niger und Nigeria liegt und seine Größe stark verändert.",
+      "Der Emi Koussi im Tibesti-Gebirge ist mit über 3.400 Metern der höchste Berg der Sahara.",
+      "Im Norden des Tschad fand man 2001 den Schädel „Toumaï“ – mit rund sieben Millionen Jahren einer der ältesten bekannten Vormenschen."
+    ]
+  },
+  {
+    "iso": "TG",
+    "name": "Togo",
+    "aliases": ["Republik Togo", "Togolesische Republik"],
+    "capital": { "name": "Lomé", "aliases": ["Lome"] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Französisch"],
+    "moreLanguages": false,
+    "currency": "CFA-Franc BCEAO",
+    "facts": [
+      "Togo ist ein schmaler Streifen zwischen Ghana und Benin: an der Küste nur rund 56 km breit, aber über 500 km lang.",
+      "Im Koutammakou-Gebiet bauen die Batammariba zweistöckige Lehmburgen, die Takienta; die Landschaft ist UNESCO-Welterbe.",
+      "Deutschland schloss 1884 in Togoville am Togosee einen Schutzvertrag; nach dem Ort wurde die Kolonie – und später das Land – benannt."
+    ]
+  },
+  {
+    "iso": "TN",
+    "name": "Tunesien",
+    "aliases": ["Tunesische Republik", "Tunisia", "Tunisie"],
+    "capital": { "name": "Tunis", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Arabisch"],
+    "moreLanguages": false,
+    "currency": "Tunesischer Dinar",
+    "facts": [
+      "Tunesien reicht am weitesten nach Norden: Nahe Bizerte liegt der nördlichste Punkt des afrikanischen Kontinents.",
+      "Viele Wüstenszenen von „Star Wars“ entstanden in Tunesien; Lukes Heimatplanet Tatooine ist nach der Stadt Tataouine benannt.",
+      "Die Ruinen von Karthago, der antiken Rivalin Roms, liegen heute in einem Vorort von Tunis."
+    ]
+  },
+  {
+    "iso": "TZ",
+    "name": "Tansania",
+    "aliases": ["Vereinigte Republik Tansania", "Tanzania", "Tanganjika", "Sansibar"],
+    "capital": { "name": "Dodoma", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "Die Hauptstadt ist Dodoma. Dar es Salaam ist die größte Stadt des Landes und war früher Hauptstadt.",
+    "languages": ["Swahili", "Englisch"],
+    "moreLanguages": false,
+    "currency": "Tansania-Schilling",
+    "facts": [
+      "Der Kilimandscharo ist mit 5.895 m der höchste Berg Afrikas und gilt als höchster frei stehender Berg der Welt.",
+      "Der Name Tansania verbindet Tanganjika und Sansibar, die sich 1964 zu einem gemeinsamen Staat zusammenschlossen.",
+      "Tansania grenzt an alle drei großen Seen Ostafrikas: den Victoriasee, den Tanganjikasee und den Malawisee."
+    ]
+  },
+  {
+    "iso": "UG",
+    "name": "Uganda",
+    "aliases": ["Republik Uganda"],
+    "capital": { "name": "Kampala", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch", "Swahili"],
+    "moreLanguages": false,
+    "currency": "Uganda-Schilling",
+    "facts": [
+      "Bei Jinja verlässt der Nil den Victoriasee und beginnt seinen langen Weg nach Norden bis zum Mittelmeer.",
+      "Winston Churchill nannte Uganda wegen seiner üppigen Landschaften und Tierwelt die „Perle Afrikas“.",
+      "Im Bwindi-Nationalpark im Südwesten lebt fast die Hälfte aller Berggorillas der Welt."
+    ]
+  },
+  {
+    "iso": "ZA",
+    "name": "Südafrika",
+    "aliases": ["Republik Südafrika", "South Africa", "RSA", "Suid-Afrika"],
+    "capital": { "name": "Pretoria", "aliases": ["Tshwane"] },
+    "otherCapitals": [
+      { "name": "Kapstadt", "aliases": ["Cape Town", "Kaapstad"], "role": "Sitz des Parlaments" },
+      { "name": "Bloemfontein", "aliases": ["Mangaung"], "role": "Sitz des Obersten Berufungsgerichts" }
+    ],
+    "capitalNote": "Südafrika hat drei Hauptstädte: Pretoria (Regierungssitz), Kapstadt (Parlament) und Bloemfontein (Oberstes Berufungsgericht). Johannesburg ist die größte Stadt, aber keine Hauptstadt.",
+    "languages": ["Zulu", "Xhosa", "Afrikaans", "Englisch"],
+    "moreLanguages": true,
+    "currency": "Rand",
+    "facts": [
+      "Südafrika hat zwölf Amtssprachen – seit 2023 gehört auch die Südafrikanische Gebärdensprache dazu.",
+      "Nicht das Kap der Guten Hoffnung ist die Südspitze Afrikas, sondern das Kap Agulhas – dort treffen Atlantik und Indischer Ozean aufeinander.",
+      "Der Rotbusch, aus dem Rooibos-Tee gemacht wird, wächst fast nur in der Region der Cederberge nördlich von Kapstadt."
+    ]
+  },
+  {
+    "iso": "ZM",
+    "name": "Sambia",
+    "aliases": ["Republik Sambia", "Zambia", "Nordrhodesien"],
+    "capital": { "name": "Lusaka", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch"],
+    "moreLanguages": false,
+    "currency": "Sambischer Kwacha",
+    "facts": [
+      "Die Victoriafälle an der Grenze zu Simbabwe heißen bei den Einheimischen Mosi-oa-Tunya – „Rauch, der donnert“.",
+      "Im Kasanka-Nationalpark sammeln sich ab Oktober bis zu zehn Millionen Palmenflughunde – eine der größten Säugetierwanderungen der Erde.",
+      "Das Land ist nach dem Sambesi benannt, der im Nordwesten Sambias entspringt und später die Grenze zu Simbabwe bildet."
+    ]
+  },
+  {
+    "iso": "ZW",
+    "name": "Simbabwe",
+    "aliases": ["Republik Simbabwe", "Zimbabwe", "Rhodesien", "Südrhodesien"],
+    "capital": { "name": "Harare", "aliases": [] },
+    "otherCapitals": [],
+    "capitalNote": "",
+    "languages": ["Englisch", "Shona", "Ndebele"],
+    "moreLanguages": true,
+    "currency": "Zimbabwe Gold (ZiG)",
+    "facts": [
+      "Der Name stammt von Great Zimbabwe, einer mittelalterlichen Stadt aus Stein: „Dzimba dza mabwe“ bedeutet auf Shona „Häuser aus Stein“.",
+      "Der Karibasee an der Grenze zu Sambia ist nach Volumen der größte Stausee der Welt.",
+      "Die Verfassung von 2013 erkennt 16 Amtssprachen an, darunter Shona, Ndebele, Englisch und die Gebärdensprache."
+    ]
+  }
+]
