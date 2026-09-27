@@ -97,10 +97,10 @@ button { cursor: pointer; }
 .coast { fill: none; stroke: var(--coast); stroke-width: 0.8; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .lakes path { fill: var(--sea); stroke: var(--coast); stroke-width: 0.6; vector-effect: non-scaling-stroke; transition: fill 0.35s ease; }
 .water-hl path { fill: transparent; stroke: none; transition: fill 0.35s ease; }
-.water-hl path.is-target, .lakes path.is-target { fill: var(--target); }
+.water-hl path.is-target, .lakes path.is-target, .water-hl path.is-pick, .lakes path.is-pick { fill: var(--target); }
 .water-hl path.is-right, .lakes path.is-right { fill: var(--right); }
 .water-hl path.is-wrong, .lakes path.is-wrong { fill: var(--wrong); }
-.water-hl path.is-target, .water-hl path.is-right, .water-hl path.is-wrong { fill-opacity: 0.82; }
+.water-hl path.is-target, .water-hl path.is-pick, .water-hl path.is-right, .water-hl path.is-wrong { fill-opacity: 0.82; }
 
 .ring-line { fill: none; stroke: var(--target); stroke-width: 2.5; }
 .ring-pulse { fill: none; stroke: var(--target); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: pulse 1.8s ease-out infinite; }

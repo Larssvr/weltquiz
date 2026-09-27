@@ -95,7 +95,7 @@ export class WorldMap {
     });
     this.waterHit = this.waterFeatures.map(w => {
       const rings = this._rings(w.f);
-      return { w, rings, box: ringsBox(rings) };
+      return { w, rings, box: ringsBox(rings), ringBoxes: rings.map(r => ringsBox([r])) };
     });
 
     this.zoom = d3.zoom()
@@ -368,8 +368,8 @@ export class WorldMap {
   clear() {
     this.landSel.classed('is-target is-right is-wrong is-pick is-out is-hover', false)
       .classed('m0 m1 m2 m3', false).classed('cmp-a cmp-b cmp-ab', false);
-    this.waterSel.classed('is-target is-right is-wrong cmp-a cmp-b cmp-ab', false);
-    this.lakeSel.classed('is-target is-right is-wrong cmp-a cmp-b cmp-ab', false);
+    this.waterSel.classed('is-target is-right is-wrong is-pick cmp-a cmp-b cmp-ab', false);
+    this.lakeSel.classed('is-target is-right is-wrong is-pick cmp-a cmp-b cmp-ab', false);
     this.overlay.selectAll('*').remove();
     this.overlayItems = [];
     this.svg.classed('mastery', false).classed('compare', false);
@@ -415,6 +415,18 @@ export class WorldMap {
     this.lakeSel.filter(w => set.has(w)).classed(cls, on);
   }
 
+  /**
+   * Gewässer finden: die angetippte Fläche hervorheben – alle Stücke mit genau denselben Namen,
+   * also z. B. nur den Finnischen Meerbusen und nicht gleich die ganze Ostsee. Gibt ihren Rahmen zurück.
+   */
+  pickWater(w) {
+    const key = w ? w.f.properties.w : null;
+    const on = x => key != null && x.f.properties.w === key;
+    this.waterSel.classed('is-pick', on);
+    this.lakeSel.classed('is-pick', on);
+    return w ? this.focusBox(this._pieces(this.waterHit.filter(h => on(h.w)))) : null;
+  }
+
   setMastery(levels) {
     this.svg.classed('mastery', true);
     this.landSel.each(function (f) {
@@ -434,6 +446,11 @@ export class WorldMap {
     g.append('circle').attr('r', 17).attr('class', 'ring-line');
     this.overlayItems.push({ x, y, el: g, kind: 'ring', box, force });
     this._placeOverlay();
+  }
+
+  clearRings() {
+    this.overlay.selectAll('.ring').remove();
+    this.overlayItems = this.overlayItems.filter(it => it.kind !== 'ring');
   }
 
   /** Ringe um jede kleine Inselgruppe eines Landes (für Staaten aus winzigen, verstreuten Inseln). */
@@ -593,21 +610,53 @@ export class WorldMap {
   /**
    * Was liegt unter dem Punkt (Karteneinheiten)?
    * water: Meere/Seen melden · lakesFirst: Seen vor Land (Entdecken) · prefer: winziges Ziel darf knapp daneben getroffen werden
+   * waterOnly: nur Gewässer (Gewässer finden) – kleine Seen und Meerengen auch knapp daneben
    */
-  hitTest(x, y, tol, { water = true, lakesFirst = false, prefer = null } = {}) {
+  hitTest(x, y, tol, { water = true, lakesFirst = false, prefer = null, waterOnly = false } = {}) {
     const k = this.transform.k;
     const tiny = b => Math.max(b[1][0] - b[0][0], b[1][1] - b[0][1]) * k < 20;
     const boxDist = b => Math.hypot(Math.max(b[0][0] - x, 0, x - b[1][0]), Math.max(b[0][1] - y, 0, y - b[1][1]));
     const inBox = b => x >= b[0][0] && x <= b[1][0] && y >= b[0][1] && y <= b[1][1];
     const asCountry = h => ({ type: 'country', code: h.c, props: h.f.properties });
-    const waterAt = lakes => {
+    const asWater = h => {
+      const ids = (h.w.f.properties.w || '').split(' ').filter(Boolean);
+      return ids.length ? { type: 'water', ids, w: h.w } : null;
+    };
+    const waterAt = (lakes, px = x, py = y) => {
       for (const h of this.waterHit) {
-        if (h.w.lake !== lakes || !inBox(h.box) || !pointInRings(x, y, h.rings)) continue;
-        const ids = (h.w.f.properties.w || '').split(' ').filter(Boolean);
-        if (ids.length) return { type: 'water', ids };
+        const b = h.box;
+        if (h.w.lake !== lakes || px < b[0][0] || px > b[1][0] || py < b[0][1] || py > b[1][1] || !pointInRings(px, py, h.rings)) continue;
+        const hit = asWater(h);
+        if (hit) return hit;
       }
       return null;
     };
+
+    if (waterOnly) {
+      // 1. See oder Meer unter dem Finger
+      const exact = waterAt(true) || waterAt(false);
+      if (exact) return exact;
+      // 2. winzige Seen und Meerengen knapp daneben
+      let best = null, bestD = tol;
+      for (const h of this.waterHit) {
+        if (!asWater(h)) continue;
+        for (const b of h.ringBoxes) {
+          if (!tiny(b)) continue;
+          const d = boxDist(b);
+          if (d < bestD) { best = h; bestD = d; }
+        }
+      }
+      if (best) return asWater(best);
+      // 3. knapp neben der Küste (Land und Meer sind etwas unterschiedlich vereinfacht)
+      for (const r of [tol * 0.5, tol]) {
+        for (let i = 0; i < 8; i++) {
+          const a = i * Math.PI / 4, px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+          const near = waterAt(true, px, py) || waterAt(false, px, py);
+          if (near) return near;
+        }
+      }
+      return null;
+    }
 
     // 1. winziges Zielland (Vatikan, Nauru …) knapp daneben zählt als Treffer
     if (prefer) {

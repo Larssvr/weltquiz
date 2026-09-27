@@ -1,10 +1,10 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=6';
-import { Searcher } from './search.js?v=6';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=6';
-import { COUNTRIES } from './data/countries.js?v=6';
-import { WATER } from './data/water.js?v=6';
-import { WORLD_FACTS } from './data/world-facts.js?v=6';
-import { CITIES } from './data/cities.js?v=6';
+import { WorldMap, REGION_BOX, W } from './map.js?v=7';
+import { Searcher } from './search.js?v=7';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=7';
+import { COUNTRIES } from './data/countries.js?v=7';
+import { WATER } from './data/water.js?v=7';
+import { WORLD_FACTS } from './data/world-facts.js?v=7';
+import { CITIES } from './data/cities.js?v=7';
 
 /* ================= Daten ================= */
 
@@ -36,8 +36,8 @@ function normalizeRegions(regions, legacyRegion) {
 }
 
 // Auswahl in Worten: „Welt“, ein Kontinent, „Welt außer Afrika“, oder eine kurze Liste.
-function regionsLabel(regions, legacyRegion) {
-  const list = normalizeRegions(regions, legacyRegion);
+function regionsLabel(regions) {
+  const list = normalizeRegions(regions);
   if (list.length >= ALL_CONTINENTS.length) return 'Welt';
   if (list.length === 1) return regionLabel(list[0]);
   const excluded = ALL_CONTINENTS.filter(id => !list.includes(id));
@@ -61,19 +61,19 @@ const MODES = {
     variantLabel: 'Wie willst du spielen?',
     variants: [
       { id: 'capital', label: 'Hauptstadt nennen', hint: 'Du siehst das Land und schreibst die Hauptstadt.' },
-      { id: 'country', label: 'Land zur Hauptstadt', hint: 'Du siehst die Hauptstadt und schreibst das Land.' },
+      { id: 'country', label: 'Land zur Hauptstadt', hint: 'Du bekommst die Hauptstadt und tippst ihr Land auf der Karte an.' },
     ],
     regions: true,
   },
   gewaesser: {
     title: 'Meere, Seen & Ozeane', desc: 'Welches Gewässer ist markiert?',
-    variantLabel: 'Welche Gewässer?',
+    variantLabel: 'Wie willst du spielen?',
     variants: [
-      { id: 'alle', label: 'Alle Gewässer' },
-      { id: 'meere', label: 'Ozeane & Meere' },
-      { id: 'seen', label: 'Seen' },
+      { id: 'name', label: 'Gewässer benennen', hint: 'Ein Gewässer ist markiert, du schreibst den Namen.' },
+      { id: 'find', label: 'Gewässer finden', hint: 'Du bekommst den Namen und tippst auf die Karte.' },
     ],
     regions: false,
+    waterSets: true,
   },
   flaggen: {
     title: 'Flaggen', desc: 'Zu welchem Land gehört die Flagge?',
@@ -85,6 +85,26 @@ const MODES = {
     regions: true,
   },
 };
+
+const WATER_SETS = [
+  { id: 'alle', label: 'Alle Gewässer' },
+  { id: 'meere', label: 'Ozeane & Meere' },
+  { id: 'seen', label: 'Seen' },
+];
+const waterLabel = id => WATER_SETS.find(s => s.id === id)?.label || 'Alle Gewässer';
+
+// Gespeicherte Einstellungen und Runden aufs aktuelle Format bringen – ältere Stände hatten andere Felder.
+function normalizeCfg(mode, cfg = {}) {
+  const def = MODES[mode];
+  let { variant, water } = cfg;
+  // Gewässer: früher war die Variante die Auswahl (alle/meere/seen), jetzt ist sie die Spielweise
+  if (WATER_SETS.some(s => s.id === variant)) { water = water || variant; variant = 'name'; }
+  return {
+    variant: def.variants.some(v => v.id === variant) ? variant : def.variants[0].id,
+    regions: normalizeRegions(cfg.regions, cfg.region),
+    water: WATER_SETS.some(s => s.id === water) ? water : 'alle',
+  };
+}
 
 // Flaggen, die sich zum Verwechseln ähneln – gute Ablenker für „Flagge auswählen“
 const FLAG_GROUPS = [
@@ -187,9 +207,9 @@ const emph = (phrase, tag = 'em') => {
 };
 function inRegions(c, regions) { return regions.length >= ALL_CONTINENTS.length || c.regions.some(r => regions.includes(r)); }
 function countriesIn(regions) { return COUNTRIES.filter(c => inRegions(c, regions)); }
-function waterIn(variant) {
-  if (variant === 'meere') return WATER.filter(w => w.group === 'meer');
-  if (variant === 'seen') return WATER.filter(w => w.group === 'see');
+function waterIn(set) {
+  if (set === 'meere') return WATER.filter(w => w.group === 'meer');
+  if (set === 'seen') return WATER.filter(w => w.group === 'see');
   return WATER;
 }
 function capitalsOf(c) { return [c.capital, ...(c.otherCapitals || [])]; }
@@ -318,7 +338,8 @@ function resumeRow() {
   const r = savedRound();
   if (!r) return '';
   const def = MODES[r.mode];
-  const where = r.mode === 'gewaesser' ? '' : ` – ${regionsLabel(r.regions, r.region)}`;
+  const n = normalizeCfg(r.mode, r);
+  const where = ` – ${r.mode === 'gewaesser' ? waterLabel(n.water) : regionsLabel(n.regions)}`;
   return `<li><button class="legend-row resume-row" data-act="resume" type="button">
     <span class="swatch">${SWATCH.resume}</span>
     <span><span class="name">Runde fortsetzen</span><span class="desc">${esc(def.title)}${esc(where)}: weiter mit Frage ${r.results.length + 1} von ${r.items.length}</span></span>
@@ -364,12 +385,10 @@ function renderHome() {
 let setup = null;
 
 function openSetup(mode) {
-  const def = MODES[mode];
   const last = state.last[mode] || {};
   setup = {
     mode,
-    variant: def.variants.some(v => v.id === last.variant) ? last.variant : def.variants[0].id,
-    regions: normalizeRegions(last.regions, last.region),
+    ...normalizeCfg(mode, last),
     count: [10, 20, 'alle'].includes(last.count) ? last.count : 10,
   };
   renderSetup();
@@ -378,7 +397,7 @@ function openSetup(mode) {
 }
 
 function poolSize(s) {
-  if (s.mode === 'gewaesser') return waterIn(s.variant).length;
+  if (s.mode === 'gewaesser') return waterIn(s.water).length;
   return countriesIn(s.regions).length;
 }
 
@@ -398,6 +417,10 @@ function renderSetup() {
     ${def.regions ? `<div class="field">
       <p class="field-label">Welche Kontinente? <span style="font-weight:400;color:var(--muted)">${esc(regionsLabel(setup.regions))}</span></p>
       <div class="options">${CONTINENTS.map(r => `<button type="button" class="opt" data-region="${r.id}" aria-pressed="${setup.regions.includes(r.id)}">${r.label}</button>`).join('')}</div>
+    </div>` : ''}
+    ${def.waterSets ? `<div class="field">
+      <p class="field-label">Welche Gewässer?</p>
+      <div class="options">${WATER_SETS.map(s => `<button type="button" class="opt" data-water="${s.id}" aria-pressed="${s.id === setup.water}">${s.label}</button>`).join('')}</div>
     </div>` : ''}
     <div class="field">
       <p class="field-label">Wie viele Fragen?</p>
@@ -422,7 +445,7 @@ let round = null;
 let q = null;           // aktuelle Frage
 
 function buildPool(cfg) {
-  if (cfg.mode === 'gewaesser') return waterIn(cfg.variant).map(w => w.id);
+  if (cfg.mode === 'gewaesser') return waterIn(cfg.water).map(w => w.id);
   return countriesIn(cfg.regions).map(c => c.iso);
 }
 
@@ -446,7 +469,7 @@ function pickItems(pool, count, mode) {
 function startRound(cfg, items, { remember = true } = {}) {
   items = items || pickItems(buildPool(cfg), cfg.count, cfg.mode);
   round = { ...cfg, items, i: 0, results: [], streak: 0, best: 0 };
-  if (remember) state.last[cfg.mode] = { variant: cfg.variant, regions: cfg.regions, count: cfg.count };
+  if (remember) state.last[cfg.mode] = { variant: cfg.variant, regions: cfg.regions, water: cfg.water, count: cfg.count };
   persistRound();
   show('quiz');
   nextQuestion();
@@ -455,8 +478,8 @@ function startRound(cfg, items, { remember = true } = {}) {
 // Die laufende Runde wird mitgespeichert – nach einem Neuladen geht es an derselben Stelle weiter.
 function persistRound() {
   if (!round) return;
-  const { mode, variant, regions, count, items, i, results, streak, best } = round;
-  state.round = { mode, variant, regions, count, items, i, results, streak, best, t: Date.now() };
+  const { mode, variant, regions, water, count, items, i, results, streak, best } = round;
+  state.round = { mode, variant, regions, water, count, items, i, results, streak, best, t: Date.now() };
   save();
 }
 
@@ -471,7 +494,7 @@ function savedRound() {
 function resumeRound() {
   const r = savedRound();
   if (!r) { state.round = null; save(); renderHome(); return; }
-  round = { ...r, regions: normalizeRegions(r.regions, r.region), streak: r.streak || 0, best: r.best || 0 };
+  round = { ...r, ...normalizeCfg(r.mode, r), streak: r.streak || 0, best: r.best || 0 };
   round.i = Math.max(r.i || 0, r.results.length);
   show('quiz');
   nextQuestion();
@@ -520,14 +543,13 @@ function nextQuestion() {
     map.setCountryClass(id, 'is-target');
     flyCountry(id, true);
   } else if (mode === 'hauptstaedte' && variant === 'country') {
+    // Kein Stern und kein Heranzoomen: sonst verrät die Lage das Land, bevor man die Hauptstadt kennen muss
     const c = C.get(id);
-    textQuestion({ prompt: `Zu welchem Land gehört die Hauptstadt <em>${esc(c.capital.name)}</em>?`, placeholder: 'Land eingeben …', searcher: countrySearch, answer: c.name, emptyText: 'Kein Land gefunden – anders schreiben?' });
-    if (c.capital.lat != null) {
-      map.pin(c.capital.lon, c.capital.lat, '', 'target');
-      map.flyToPoint(c.capital.lon, c.capital.lat, { size: 150 });
-    } else {
-      map.setCountryClass(id, 'is-target'); flyCountry(id, true);
-    }
+    findQuestion(c, `Zu welchem Land gehört die Hauptstadt <em>${esc(c.capital.name)}</em>?`);
+    map.showRegions(round.regions);
+  } else if (mode === 'gewaesser' && variant === 'find') {
+    waterFindQuestion(WB.get(id));
+    map.showRegion('welt');
   } else if (mode === 'gewaesser') {
     const w = WB.get(id);
     textQuestion({ prompt: 'Wie heißt dieses Gewässer?', placeholder: 'Meer, See oder Ozean eingeben …', searcher: waterSearch, answer: w.name, emptyText: 'Kein Gewässer gefunden – anders schreiben?' });
@@ -553,11 +575,9 @@ function flyCountry(code, ring) {
 function refitQuestion() {
   if (view !== 'quiz' || !q || q.answered) return;
   const { mode, variant, id } = q;
-  if (mode === 'gewaesser') map.flyToWater(id, { duration: 350 });
-  else if (mode === 'hauptstaedte' && variant === 'country') {
-    const c = C.get(id);
-    if (c.capital.lat != null) map.flyToPoint(c.capital.lon, c.capital.lat, { size: 150, duration: 350 });
-  } else if ((mode === 'laender' && variant === 'name') || mode === 'hauptstaedte' || (mode === 'flaggen' && variant === 'pick')) {
+  // Beim Suchen auf der Karte gibt es kein sichtbares Ziel – dorthin zu fliegen würde die Lösung verraten
+  if (mode === 'gewaesser' && variant === 'name') map.flyToWater(id, { duration: 350 });
+  else if ((mode === 'laender' && variant === 'name') || (mode === 'hauptstaedte' && variant === 'capital') || (mode === 'flaggen' && variant === 'pick')) {
     map.flyToCountry(id, { duration: 350 });
   }
 }
@@ -657,20 +677,33 @@ function submitText() {
   answer(ok, q.chosen);
 }
 
-/* ----- Land finden (Tippen auf Karte) ----- */
+/* ----- Auf der Karte antippen: Land finden, Land zur Hauptstadt, Gewässer finden ----- */
 
-function findQuestion(c) {
+function pickCard(prompt, instruction) {
   $('#view-quiz').innerHTML = `
     <div class="q-head">
-      <h2 class="q-prompt">Wo ${pl(c, 'liegt', 'liegen')} ${emph(nom(c))}?</h2>
+      <h2 class="q-prompt">${prompt}</h2>
       <div class="q-tools"><button class="chip-btn" type="button" data-act="hint">Tipp</button></div>
     </div>
-    <p class="hint" id="find-state">Tippe auf der Karte auf das Land und bestätige mit OK.</p>
+    <p class="hint" id="find-state">${instruction}</p>
     <div class="below">
       <button class="chip-btn" type="button" data-act="skip">Weiß ich nicht</button>
       <button class="btn primary ok" type="button" data-act="confirm-pick" disabled>OK</button>
     </div>`;
   $('#map').classList.add('pickable');
+}
+
+// Auswahl bestätigen lassen; winzige Flächen bekommen einen Ring, damit man sieht, was angetippt ist
+function picked(box, other) {
+  map.clearRings();
+  if (box) map.ringFor(box);
+  sfx.select();
+  $('#find-state').textContent = `Auswahl getroffen. Passt? Dann OK – oder tippe ${other} an.`;
+  $('[data-act="confirm-pick"]').disabled = false;
+}
+
+function findQuestion(c, prompt = `Wo ${pl(c, 'liegt', 'liegen')} ${emph(nom(c))}?`) {
+  pickCard(prompt, 'Tippe auf der Karte auf das Land und bestätige mit OK.');
   // nur Länder zählen; winzige Zielländer lassen sich auch knapp daneben antippen
   map.hitOptions = { water: false, prefer: c.iso };
   map.onClick = hit => {
@@ -678,9 +711,27 @@ function findQuestion(c) {
     if (q.pick) map.setCountryClass(q.pick.code, 'is-pick', false);
     q.pick = { code: hit.code, props: hit.props };
     map.setCountryClass(hit.code, 'is-pick', true);
-    sfx.select();
-    $('#find-state').textContent = 'Auswahl getroffen. Passt? Dann OK – oder tippe ein anderes Land an.';
-    $('[data-act="confirm-pick"]').disabled = false;
+    picked(map.countryBox(hit.code), 'ein anderes Land');
+  };
+}
+
+function waterFindQuestion(w) {
+  // Die Art nur nennen, wenn sie nicht schon im Namen steckt: „Saimaa (See)“, aber nicht „Bodensee (See)“
+  const kind = w.name.toLowerCase().includes(w.kind.toLowerCase()) ? '' : ` <span class="kind">(${esc(w.kind)})</span>`;
+  pickCard(`Finde auf der Karte: <em>${esc(w.name)}</em>${kind}`,
+    'Tippe auf das Gewässer und bestätige mit OK. Kleine Seen findest du leichter, wenn du heranzoomst.');
+  map.hitOptions = { waterOnly: true };
+  map.onClick = hit => {
+    if (!q || q.answered) return;
+    const ids = hit?.type === 'water' ? hit.ids.filter(id => WB.has(id)) : [];
+    if (!ids.length) {
+      $('#find-state').textContent = 'Hier ist kein Gewässer aus dem Quiz. Tippe auf ein Meer, einen See oder einen Ozean.';
+      return;
+    }
+    // Ein Teil zählt fürs Ganze: Wer beim Finnischen Meerbusen tippt, hat auch die Ostsee getroffen
+    const ok = ids.includes(w.id) || ids.some(id => map.waterRelation(id, w.id) === 'inside');
+    q.pick = { water: ok ? w.id : ids[ids.length - 1], ok };
+    picked(map.pickWater(hit.w), 'ein anderes Gewässer');
   };
 }
 
@@ -731,6 +782,7 @@ function answer(ok, chosen) {
   let detail = '', note = '', fact = '', fly = null;
   if (mode === 'gewaesser') {
     const w = WB.get(id);
+    map.pickWater(null);
     map.setWaterClass(id, 'is-target', false);
     map.setWaterClass(id, 'is-right');
     map.labelWater(id, w.name, 'water right');
@@ -738,11 +790,11 @@ function answer(ok, chosen) {
       map.setWaterClass(chosen.id, 'is-wrong', true, id);
       map.labelWater(chosen.id, WB.get(chosen.id).name, 'water wrong');
       const rel = map.waterRelation(id, chosen.id);
-      if (rel === 'inside') note = `Nah dran: ${chosen.label} ist das größere Gewässer drumherum. Gefragt war genau der markierte Teil.`;
+      if (rel === 'inside') note = `Nah dran: ${chosen.label} ist das größere Gewässer drumherum. Gesucht war genau der grün markierte Teil.`;
       else if (rel === 'contains') note = `Nah dran: ${chosen.label} ist nur ein Teil davon. Gefragt war das ganze markierte Gewässer.`;
     }
     detail = ok ? `Genau: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>`
-      : `Gesucht war: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>${chosen ? `. Deine Antwort: ${esc(chosen.label)}.` : ''}`;
+      : `Gesucht war: <b>${esc(w.name)}</b> <span class="kind">(${esc(w.kind)})</span>${chosen ? `. ${variant === 'find' ? 'Angetippt' : 'Deine Antwort'}: ${esc(chosen.label)}.` : ''}`;
     fact = nextFact('w:' + id, w.facts);
     const tb = map.waterBox(id);
     if (!ok && chosen) {
@@ -752,17 +804,16 @@ function answer(ok, chosen) {
   } else {
     const c = C.get(id);
     map.setCountryClass(id, 'is-target', false);
-    map.setCountryClass(id, 'is-pick', false);
+    if (q.pick?.code) map.setCountryClass(q.pick.code, 'is-pick', false);
     map.setCountryClass(id, 'is-right');
     map.labelCountry(id, c.name, 'right');
     let wrongCode = null;
-    if (!ok) {
-      if (mode === 'laender' && variant === 'find' && q.pick) wrongCode = q.pick.code;
+    if (!ok && chosen) {
+      if (q.pick?.code) wrongCode = q.pick.code;                   // auf der Karte angetippt
       else if (mode === 'hauptstaedte' && variant === 'capital') wrongCode = null;
-      else if (chosen && C.has(chosen.id)) wrongCode = chosen.id;
+      else if (C.has(chosen.id)) wrongCode = chosen.id;
     }
     if (wrongCode && wrongCode !== id) {
-      map.setCountryClass(wrongCode, 'is-pick', false);
       map.setCountryClass(wrongCode, 'is-wrong');
       map.labelCountry(wrongCode, nameOf(wrongCode, q.pick?.props), 'wrong');
     }
@@ -785,9 +836,12 @@ function answer(ok, chosen) {
         else if (chosen.city) detail = `Die Hauptstadt ${esc(gen(c))} ist <b>${esc(c.capital.name)}</b>. ${esc(chosen.label)} liegt ${esc(inDat(other))} und ist dort keine Hauptstadt.`;
         else detail = `Die Hauptstadt ${esc(gen(c))} ist <b>${esc(c.capital.name)}</b> – ${esc(chosen.label)} ist die Hauptstadt ${esc(gen(other))}.`;
       } else {
-        const picked = chosen && C.get(chosen.id);
-        detail = ok ? `${esc(c.capital.name)} ist die Hauptstadt ${emph(gen(c), 'b')}.`
-          : `${esc(c.capital.name)} ist die Hauptstadt ${emph(gen(c), 'b')}${picked ? ` – nicht ${esc(gen(picked))}` : ''}.`;
+        // Land zur Hauptstadt: beim falsch angetippten Land dessen Hauptstadt zeigen – so lernt man beide
+        const tapped = wrongCode && wrongCode !== id ? C.get(wrongCode) : null;
+        if (tapped && tapped.capital.lat != null) map.pin(tapped.capital.lon, tapped.capital.lat, tapped.capital.name, 'wrong');
+        detail = `${esc(c.capital.name)} ist die Hauptstadt ${emph(gen(c), 'b')}.`;
+        if (tapped) detail += ` Du hast ${esc(acc(tapped))} angetippt – dort ist ${esc(tapped.capital.name)} die Hauptstadt.`;
+        else if (wrongCode && wrongCode !== id) detail += ` Du hast ${esc(nameOf(wrongCode, q.pick?.props))} angetippt.`;
       }
       note = c.capitalNote || '';
     } else if (mode === 'laender' && variant === 'find') {
@@ -838,7 +892,8 @@ function answer(ok, chosen) {
     card.innerHTML = (keepFlag ? keepFlag.outerHTML : '') + body;
   }
   card.querySelector('[data-act="next"]').focus({ preventScroll: true });
-  requestAnimationFrame(() => fly && fly());
+  const seq = flightSeq;   // ist schon die nächste Frage dran, bleibt die Kamera dort
+  requestAnimationFrame(() => { if (fly && flightSeq === seq) fly(); });
 }
 
 function chosenLabel(ch) { return ch.label || ch.name || ''; }
@@ -862,12 +917,14 @@ function useHint() {
   if (!q || q.answered) return;
   q.hinted = true;
   sfx.hint();
-  if (q.mode === 'laender' && q.variant === 'find') {
-    const b = map.countryBox(q.id);
+  const findsWater = q.mode === 'gewaesser' && q.variant === 'find';
+  if (findsWater || (q.mode === 'laender' && q.variant === 'find') || (q.mode === 'hauptstaedte' && q.variant === 'country')) {
+    // Ausschnitt rund ums Ziel zeigen – leicht versetzt, damit es nicht genau in der Mitte liegt
+    const b = findsWater ? map.waterBox(q.id) : map.countryBox(q.id);
     const cx = (b[0][0] + b[1][0]) / 2 + (Math.random() - 0.5) * 30, cy = (b[0][1] + b[1][1]) / 2 + (Math.random() - 0.5) * 20;
     const s = Math.max(110, (b[1][0] - b[0][0]) * 3.2);
     map.flyToBox([[cx - s / 2, cy - s * 0.3], [cx + s / 2, cy + s * 0.3]], { pad: 1, minSize: 10 });
-    $('#find-state').textContent = 'Tipp: Das Land liegt in diesem Ausschnitt.';
+    $('#find-state').textContent = `Tipp: ${findsWater ? 'Das Gewässer' : 'Das Land'} liegt in diesem Ausschnitt.`;
     return;
   }
   const a = q.answerText || '';
@@ -904,7 +961,7 @@ function finishRound() {
   const missed = r.results.filter(x => !x.ok);
   const def = MODES[r.mode];
   const variantLabel = def.variants.find(v => v.id === r.variant)?.label;
-  const sub = r.mode === 'gewaesser' ? variantLabel : `${variantLabel} – ${regionsLabel(r.regions)}`;
+  const sub = `${variantLabel} – ${r.mode === 'gewaesser' ? waterLabel(r.water) : regionsLabel(r.regions)}`;
   const nameFor = id => r.mode === 'gewaesser' ? WB.get(id).name
     : r.mode === 'hauptstaedte' && r.variant === 'capital' ? `${C.get(id).capital.name} (${C.get(id).name})`
     : r.mode === 'hauptstaedte' ? `${C.get(id).name} (${C.get(id).capital.name})` : C.get(id).name;
@@ -1221,7 +1278,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 6;
+const APP_VERSION = 7;
 let updateReady = false;
 
 async function checkUpdate() {
@@ -1432,7 +1489,8 @@ function wire() {
       else if (g === 'duell') openDuel();
       return;
     }
-    if (t.dataset.variant) { setup.variant = t.dataset.variant; renderSetup(); if (setup.mode === 'gewaesser') focusSetupRegion(); return; }
+    if (t.dataset.variant) { setup.variant = t.dataset.variant; renderSetup(); return; }
+    if (t.dataset.water) { setup.water = t.dataset.water; renderSetup(); return; }
     if (t.dataset.region) {
       const id = t.dataset.region;
       const on = setup.regions.includes(id);
@@ -1458,11 +1516,13 @@ function wire() {
       case 'skip': skip(); break;
       case 'next': next(); break;
       case 'confirm-pick':
-        if (q && q.pick && !q.answered) answer(q.pick.code === q.id, { id: q.pick.code, label: nameOf(q.pick.code, q.pick.props) });
+        if (!q || !q.pick || q.answered) break;
+        if (q.pick.water) answer(q.pick.ok, { id: q.pick.water, label: WB.get(q.pick.water).name });
+        else answer(q.pick.code === q.id, { id: q.pick.code, label: nameOf(q.pick.code, q.pick.props) });
         break;
       case 'retry': {
         const missed = round.results.filter(x => !x.ok).map(x => x.id);
-        startRound({ mode: round.mode, variant: round.variant, regions: round.regions, count: missed.length }, shuffle(missed), { remember: false });
+        startRound({ mode: round.mode, variant: round.variant, regions: round.regions, water: round.water, count: missed.length }, shuffle(missed), { remember: false });
         break;
       }
       case 'again': openSetup(round.mode); break;
