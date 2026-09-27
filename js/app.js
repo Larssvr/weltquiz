@@ -1,10 +1,10 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=5';
-import { Searcher } from './search.js?v=5';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=5';
-import { COUNTRIES } from './data/countries.js?v=5';
-import { WATER } from './data/water.js?v=5';
-import { WORLD_FACTS } from './data/world-facts.js?v=5';
-import { CITIES } from './data/cities.js?v=5';
+import { WorldMap, REGION_BOX, W } from './map.js?v=6';
+import { Searcher } from './search.js?v=6';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=6';
+import { COUNTRIES } from './data/countries.js?v=6';
+import { WATER } from './data/water.js?v=6';
+import { WORLD_FACTS } from './data/world-facts.js?v=6';
+import { CITIES } from './data/cities.js?v=6';
 
 /* ================= Daten ================= */
 
@@ -21,6 +21,30 @@ const REGIONS = [
   { id: 'ozeanien', label: 'Ozeanien' },
 ];
 const regionLabel = id => REGIONS.find(r => r.id === id)?.label || 'Welt';
+const CONTINENTS = REGIONS.filter(r => r.id !== 'welt');
+const ALL_CONTINENTS = CONTINENTS.map(r => r.id);
+
+// Die Rundeneinstellung merkt sich eine Liste ausgewählter Kontinente (alle = „Welt“). Alte
+// gespeicherte Stände hatten stattdessen ein einzelnes region-Feld – hier aufs neue Format bringen.
+function normalizeRegions(regions, legacyRegion) {
+  if (Array.isArray(regions)) {
+    const valid = regions.filter(id => ALL_CONTINENTS.includes(id));
+    if (valid.length) return valid;
+  }
+  if (legacyRegion && ALL_CONTINENTS.includes(legacyRegion)) return [legacyRegion];
+  return ALL_CONTINENTS.slice();
+}
+
+// Auswahl in Worten: „Welt“, ein Kontinent, „Welt außer Afrika“, oder eine kurze Liste.
+function regionsLabel(regions, legacyRegion) {
+  const list = normalizeRegions(regions, legacyRegion);
+  if (list.length >= ALL_CONTINENTS.length) return 'Welt';
+  if (list.length === 1) return regionLabel(list[0]);
+  const excluded = ALL_CONTINENTS.filter(id => !list.includes(id));
+  if (excluded.length === 1) return `Welt außer ${regionLabel(excluded[0])}`;
+  if (list.length <= 3) return list.map(regionLabel).join(', ');
+  return `${list.length} Kontinente`;
+}
 
 const MODES = {
   laender: {
@@ -161,8 +185,8 @@ const emph = (phrase, tag = 'em') => {
   const m = phrase.match(/^(der|die|das|dem|den|des|von|zu|zur|zum|im|in) (.+)$/);
   return m ? `${m[1]} <${tag}>${esc(m[2])}</${tag}>` : `<${tag}>${esc(phrase)}</${tag}>`;
 };
-function inRegion(c, region) { return region === 'welt' || c.regions.includes(region); }
-function countriesIn(region) { return COUNTRIES.filter(c => inRegion(c, region)); }
+function inRegions(c, regions) { return regions.length >= ALL_CONTINENTS.length || c.regions.some(r => regions.includes(r)); }
+function countriesIn(regions) { return COUNTRIES.filter(c => inRegions(c, regions)); }
 function waterIn(variant) {
   if (variant === 'meere') return WATER.filter(w => w.group === 'meer');
   if (variant === 'seen') return WATER.filter(w => w.group === 'see');
@@ -294,7 +318,7 @@ function resumeRow() {
   const r = savedRound();
   if (!r) return '';
   const def = MODES[r.mode];
-  const where = r.mode === 'gewaesser' ? '' : ` – ${regionLabel(r.region)}`;
+  const where = r.mode === 'gewaesser' ? '' : ` – ${regionsLabel(r.regions, r.region)}`;
   return `<li><button class="legend-row resume-row" data-act="resume" type="button">
     <span class="swatch">${SWATCH.resume}</span>
     <span><span class="name">Runde fortsetzen</span><span class="desc">${esc(def.title)}${esc(where)}: weiter mit Frage ${r.results.length + 1} von ${r.items.length}</span></span>
@@ -345,7 +369,7 @@ function openSetup(mode) {
   setup = {
     mode,
     variant: def.variants.some(v => v.id === last.variant) ? last.variant : def.variants[0].id,
-    region: last.region || 'welt',
+    regions: normalizeRegions(last.regions, last.region),
     count: [10, 20, 'alle'].includes(last.count) ? last.count : 10,
   };
   renderSetup();
@@ -355,7 +379,7 @@ function openSetup(mode) {
 
 function poolSize(s) {
   if (s.mode === 'gewaesser') return waterIn(s.variant).length;
-  return countriesIn(s.region).length;
+  return countriesIn(s.regions).length;
 }
 
 function renderSetup() {
@@ -372,8 +396,8 @@ function renderSetup() {
       </div>
     </div>
     ${def.regions ? `<div class="field">
-      <p class="field-label">Welche Region?</p>
-      <div class="options">${REGIONS.map(r => `<button type="button" class="opt" data-region="${r.id}" aria-pressed="${r.id === setup.region}">${r.label}</button>`).join('')}</div>
+      <p class="field-label">Welche Kontinente? <span style="font-weight:400;color:var(--muted)">${esc(regionsLabel(setup.regions))}</span></p>
+      <div class="options">${CONTINENTS.map(r => `<button type="button" class="opt" data-region="${r.id}" aria-pressed="${setup.regions.includes(r.id)}">${r.label}</button>`).join('')}</div>
     </div>` : ''}
     <div class="field">
       <p class="field-label">Wie viele Fragen?</p>
@@ -388,8 +412,8 @@ function focusSetupRegion() {
     map.showRegion('welt');
     return;
   }
-  if (setup.region !== 'welt') map.dimOutside(countriesIn(setup.region).map(c => c.iso));
-  map.showRegion(setup.region);
+  if (setup.regions.length < ALL_CONTINENTS.length) map.dimOutside(countriesIn(setup.regions).map(c => c.iso));
+  map.showRegions(setup.regions);
 }
 
 /* ---------- Runde ---------- */
@@ -399,7 +423,7 @@ let q = null;           // aktuelle Frage
 
 function buildPool(cfg) {
   if (cfg.mode === 'gewaesser') return waterIn(cfg.variant).map(w => w.id);
-  return countriesIn(cfg.region).map(c => c.iso);
+  return countriesIn(cfg.regions).map(c => c.iso);
 }
 
 function pickItems(pool, count, mode) {
@@ -422,7 +446,7 @@ function pickItems(pool, count, mode) {
 function startRound(cfg, items, { remember = true } = {}) {
   items = items || pickItems(buildPool(cfg), cfg.count, cfg.mode);
   round = { ...cfg, items, i: 0, results: [], streak: 0, best: 0 };
-  if (remember) state.last[cfg.mode] = { variant: cfg.variant, region: cfg.region, count: cfg.count };
+  if (remember) state.last[cfg.mode] = { variant: cfg.variant, regions: cfg.regions, count: cfg.count };
   persistRound();
   show('quiz');
   nextQuestion();
@@ -431,8 +455,8 @@ function startRound(cfg, items, { remember = true } = {}) {
 // Die laufende Runde wird mitgespeichert – nach einem Neuladen geht es an derselben Stelle weiter.
 function persistRound() {
   if (!round) return;
-  const { mode, variant, region, count, items, i, results, streak, best } = round;
-  state.round = { mode, variant, region, count, items, i, results, streak, best, t: Date.now() };
+  const { mode, variant, regions, count, items, i, results, streak, best } = round;
+  state.round = { mode, variant, regions, count, items, i, results, streak, best, t: Date.now() };
   save();
 }
 
@@ -447,7 +471,7 @@ function savedRound() {
 function resumeRound() {
   const r = savedRound();
   if (!r) { state.round = null; save(); renderHome(); return; }
-  round = { ...r, streak: r.streak || 0, best: r.best || 0 };
+  round = { ...r, regions: normalizeRegions(r.regions, r.region), streak: r.streak || 0, best: r.best || 0 };
   round.i = Math.max(r.i || 0, r.results.length);
   show('quiz');
   nextQuestion();
@@ -478,7 +502,7 @@ function nextQuestion() {
   const { mode, variant } = round;
   q = { id, mode, variant, answered: false, hinted: false, pick: null, seq: ++flightSeq };
   map.clear();
-  if (mode !== 'gewaesser' && round.region !== 'welt') map.dimOutside(countriesIn(round.region).map(c => c.iso));
+  if (mode !== 'gewaesser' && round.regions.length < ALL_CONTINENTS.length) map.dimOutside(countriesIn(round.regions).map(c => c.iso));
   renderHud();
 
   if (mode === 'laender' && variant === 'name') {
@@ -489,7 +513,7 @@ function nextQuestion() {
   } else if (mode === 'laender' && variant === 'find') {
     const c = C.get(id);
     findQuestion(c);
-    map.showRegion(round.region);
+    map.showRegions(round.regions);
   } else if (mode === 'hauptstaedte' && variant === 'capital') {
     const c = C.get(id);
     textQuestion({ prompt: `Wie heißt die Hauptstadt ${emph(gen(c))}?`, placeholder: 'Stadt eingeben …', searcher: capitalSearch, answer: c.capital.name, emptyText: 'Keine Stadt gefunden – anders schreiben?' });
@@ -512,7 +536,7 @@ function nextQuestion() {
     map.flyToWater(id).then(() => { if (q && q.seq === seq && flightSeq === seq && !q.answered) map.ringFor(box); });
   } else if (mode === 'flaggen' && variant === 'flag') {
     textQuestion({ prompt: 'Zu welchem Land gehört diese Flagge?', placeholder: 'Land eingeben …', searcher: countrySearch, answer: C.get(id).name, bigFlag: id, emptyText: 'Kein Land gefunden – anders schreiben?' });
-    map.showRegion(round.region);
+    map.showRegions(round.regions);
   } else if (mode === 'flaggen' && variant === 'pick') {
     flagPickQuestion(C.get(id));
     map.setCountryClass(id, 'is-target');
@@ -880,7 +904,7 @@ function finishRound() {
   const missed = r.results.filter(x => !x.ok);
   const def = MODES[r.mode];
   const variantLabel = def.variants.find(v => v.id === r.variant)?.label;
-  const sub = r.mode === 'gewaesser' ? variantLabel : `${variantLabel} – ${regionLabel(r.region)}`;
+  const sub = r.mode === 'gewaesser' ? variantLabel : `${variantLabel} – ${regionsLabel(r.regions)}`;
   const nameFor = id => r.mode === 'gewaesser' ? WB.get(id).name
     : r.mode === 'hauptstaedte' && r.variant === 'capital' ? `${C.get(id).capital.name} (${C.get(id).name})`
     : r.mode === 'hauptstaedte' ? `${C.get(id).name} (${C.get(id).capital.name})` : C.get(id).name;
@@ -905,9 +929,9 @@ function finishRound() {
     for (const x of r.results) map.setWaterClass(x.id, x.ok ? 'is-right' : 'is-wrong');
     map.showRegion('welt');
   } else {
-    if (r.region !== 'welt') map.dimOutside(countriesIn(r.region).map(c => c.iso));
+    if (r.regions.length < ALL_CONTINENTS.length) map.dimOutside(countriesIn(r.regions).map(c => c.iso));
     for (const x of r.results) map.setCountryClass(x.id, x.ok ? 'is-right' : 'is-wrong');
-    map.showRegion(r.region);
+    map.showRegions(r.regions);
   }
 }
 
@@ -1036,7 +1060,7 @@ function renderProgress() {
   if (m === 'gewaesser') {
     rows = [['Ozeane & Meere', WATER.filter(w => w.group === 'meer').map(w => w.id)], ['Seen', WATER.filter(w => w.group === 'see').map(w => w.id)]];
   } else {
-    rows = REGIONS.filter(r => r.id !== 'welt').map(r => [r.label, countriesIn(r.id).map(c => c.iso)]);
+    rows = CONTINENTS.map(r => [r.label, countriesIn([r.id]).map(c => c.iso)]);
     rows.unshift(['Ganze Welt', COUNTRIES.map(c => c.iso)]);
   }
   $('#view-progress').innerHTML = `
@@ -1197,7 +1221,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 5;
+const APP_VERSION = 6;
 let updateReady = false;
 
 async function checkUpdate() {
@@ -1409,7 +1433,13 @@ function wire() {
       return;
     }
     if (t.dataset.variant) { setup.variant = t.dataset.variant; renderSetup(); if (setup.mode === 'gewaesser') focusSetupRegion(); return; }
-    if (t.dataset.region) { setup.region = t.dataset.region; renderSetup(); focusSetupRegion(); return; }
+    if (t.dataset.region) {
+      const id = t.dataset.region;
+      const on = setup.regions.includes(id);
+      if (on && setup.regions.length > 1) setup.regions = setup.regions.filter(x => x !== id);
+      else if (!on) setup.regions = [...setup.regions, id];
+      renderSetup(); focusSetupRegion(); return;
+    }
     if (t.dataset.count) { setup.count = t.dataset.count === 'alle' ? 'alle' : +t.dataset.count; renderSetup(); return; }
     if (t.dataset.flag && q && !q.answered) {
       const ok = t.dataset.flag === q.id;
@@ -1432,7 +1462,7 @@ function wire() {
         break;
       case 'retry': {
         const missed = round.results.filter(x => !x.ok).map(x => x.id);
-        startRound({ mode: round.mode, variant: round.variant, region: round.region, count: missed.length }, shuffle(missed), { remember: false });
+        startRound({ mode: round.mode, variant: round.variant, regions: round.regions, count: missed.length }, shuffle(missed), { remember: false });
         break;
       }
       case 'again': openSetup(round.mode); break;

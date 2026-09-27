@@ -295,6 +295,14 @@ export class WorldMap {
     return this.flyToBox(this.lonLatBox(REGION_BOX[region] || REGION_BOX.welt), { pad: 1.02, minSize: 10, ...opts });
   }
 
+  // Wie showRegion, aber für mehrere gleichzeitig gewählte Kontinente – die Kamera zeigt ihre Vereinigung.
+  showRegions(ids, opts = {}) {
+    const boxes = (ids || []).map(id => REGION_BOX[id]).filter(Boolean);
+    if (!boxes.length) return this.showRegion('welt', opts);
+    const box = boxes.reduce((a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])]);
+    return this.flyToBox(this.lonLatBox(box), { pad: 1.02, minSize: 10, ...opts });
+  }
+
   // ---------- Zuschnitt auf Ziele ----------
   _pieces(hits) {
     const pieces = [];
