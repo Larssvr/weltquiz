@@ -1,7 +1,7 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
-import { W } from './map.js?v=9';
-import { NUMBERS } from './data/numbers.js?v=9';
+import { W } from './map.js?v=10';
+import { NUMBERS } from './data/numbers.js?v=10';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -872,7 +872,7 @@ export function createGames(ctx) {
     veil(true);
     map.showRegion('welt', { duration: 0 });
     card(`<div class="q-head"><h2 class="q-prompt">Welches Land hat diese Form?</h2></div>
-      <div class="shape-wrap"><svg class="shape" viewBox="0 0 ${s.w} ${s.h}" role="img" aria-label="Umriss eines Landes"><path d="${s.d}" fill-rule="evenodd"/></svg></div>
+      <div class="shape-wrap"><svg class="shape" viewBox="0 0 ${s.w} ${s.h}" role="img" aria-label="Umriss eines Landes"><path d="${s.d}" fill-rule="evenodd"/>${s.lakes ? `<path class="lake" d="${s.lakes}" fill-rule="evenodd"/>` : ''}</svg></div>
       <div class="opts4">${g.q.opts.map(x => `<button class="opt" type="button" data-gact="shape" data-iso="${x}">${esc(C.get(x).name)}</button>`).join('')}</div>
       <div class="below" id="shape-skip"><button class="chip-btn" type="button" data-gact="shape-skip">Weiß ich nicht</button></div>
       <div id="shape-after"></div>`);

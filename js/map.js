@@ -435,6 +435,8 @@ export class WorldMap {
   /**
    * Umriss eines Landes als SVG-Pfad, eingepasst in w × h – so, wie es auf dieser Karte aussieht.
    * Weit entfernte Außengebiete (z. B. Inseln am anderen Ende der Welt) bleiben weg.
+   * lakes: die Seen im Land als eigener Pfad – in den Grenzdaten gehören sie zur Landfläche,
+   * auf der Karte werden sie darübergemalt (Uganda ohne Victoriasee wäre kaum zu erkennen).
    */
   silhouette(code, w = 260, h = 170) {
     const focus = this.countryBox(code);
@@ -452,10 +454,17 @@ export class WorldMap {
     const [[x0, y0], [x1, y1]] = ringsBox(rings);
     const s = Math.min(w / Math.max(x1 - x0, 1e-6), h / Math.max(y1 - y0, 1e-6)) * 0.92;
     const ox = (w - (x1 - x0) * s) / 2, oy = (h - (y1 - y0) * s) / 2;
-    const d = rings.map(r => 'M' + r.map(([x, y]) => `${((x - x0) * s + ox).toFixed(1)},${((y - y0) * s + oy).toFixed(1)}`).join('L') + 'Z').join('');
+    const toPath = rs => rs.map(r => 'M' + r.map(([x, y]) => `${((x - x0) * s + ox).toFixed(1)},${((y - y0) * s + oy).toFixed(1)}`).join('L') + 'Z').join('');
+    const d = toPath(rings);
+    const lakeRings = [];
+    for (const lw of this.waterHit) {
+      const b = lw.box;
+      if (!lw.w.lake || b[1][0] < x0 || b[0][0] > x1 || b[1][1] < y0 || b[0][1] > y1) continue;
+      lakeRings.push(...lw.rings);
+    }
     // Anteil der Fläche am Rahmen: verstreute Atolle (Kiribati, Malediven …) füllen fast nichts – kein erkennbarer Umriss
     const fill = rings.reduce((a, r) => a + Math.abs(ringArea(r)), 0) / Math.max((x1 - x0) * (y1 - y0), 1e-9);
-    return { d, w, h, points: rings.reduce((n, r) => n + r.length, 0), fill };
+    return { d, lakes: toPath(lakeRings), w, h, points: rings.reduce((n, r) => n + r.length, 0), fill };
   }
 
   /** Duell-Karte: je Land 'a' (nur Spieler A), 'b' (nur B), 'ab' (beide) oder nichts. */

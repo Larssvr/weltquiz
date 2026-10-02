@@ -442,6 +442,7 @@ p.who-note { margin: 14px 0 0; }
 .shape-wrap { display: grid; place-items: center; padding: 6px 0 12px; }
 .shape { width: min(100%, 300px); height: auto; max-height: 190px; display: block; }
 .shape path { fill: var(--ink); }
+.shape path.lake { fill: var(--paper); }   /* Seen ausgespart wie auf der Karte */
 .opts4 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .opts4 .opt { min-height: 48px; }
 .opts4 .opt:disabled { cursor: default; }
