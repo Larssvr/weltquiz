@@ -1,11 +1,11 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=10';
-import { Searcher } from './search.js?v=10';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=10';
-import { COUNTRIES } from './data/countries.js?v=10';
-import { WATER } from './data/water.js?v=10';
-import { WORLD_FACTS } from './data/world-facts.js?v=10';
-import { CITIES } from './data/cities.js?v=10';
-import { createGames } from './games.js?v=10';
+import { WorldMap, REGION_BOX, W } from './map.js?v=12';
+import { Searcher } from './search.js?v=12';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=12';
+import { COUNTRIES } from './data/countries.js?v=12';
+import { WATER } from './data/water.js?v=12';
+import { WORLD_FACTS } from './data/world-facts.js?v=12';
+import { CITIES } from './data/cities.js?v=12';
+import { createGames } from './games.js?v=12';
 
 /* ================= Daten ================= */
 
@@ -135,6 +135,32 @@ const state = (() => {
   return { stats: {}, sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null, games: {}, daily: {}, gdirty: 0, dailyRun: null };
 })();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* egal */ } };
+
+// Testdaten, die am 2. Oktober 2026 versehentlich aus einer lokalen Testversion in Emilias Konto geraten sind,
+// auch auf dem Gerät entfernen (an ihren genauen Zeitstempeln erkannt) – sonst würden sie wieder hochgeladen.
+(function scrubTestData() {
+  const statT = { 'flaggen/AO': 1790964827875, 'laender/DE': 1790964806756 };
+  const restore = { 'laender/DE': { n: 8, c: 8, s: 8, t: 1790803031418 } };
+  const gameAt = new Set([1790959452586, 1790959509321, 1790959552417, 1790959564060, 1790964400959, 1790966249101]);
+  const dailyT = { '2026-10-02': 1790964547475 };
+  let changed = false;
+  const clean = owner => {
+    if (!owner || typeof owner !== 'object') return;
+    for (const [key, t] of Object.entries(statT)) {
+      const [mode, id] = key.split('/');
+      if (owner.stats?.[mode]?.[id]?.t !== t) continue;
+      if (restore[key]) owner.stats[mode][id] = { ...restore[key] }; else delete owner.stats[mode][id];
+      if (owner.dirty?.[mode]) delete owner.dirty[mode][id];
+      changed = true;
+    }
+    for (const [k, v] of Object.entries(owner.games || {})) if (gameAt.has(v?.at)) { delete owner.games[k]; changed = true; }
+    for (const [d, t] of Object.entries(dailyT)) if (owner.daily?.[d]?.t === t) { delete owner.daily[d]; changed = true; }
+  };
+  clean(state);
+  for (const b of Object.values(state.bench || {})) clean(b);
+  for (const p of Object.values(state.remote?.players || {})) clean(p);
+  if (changed) save();
+})();
 
 function stat(mode, id) { return state.stats[mode]?.[id]; }
 function levelIn(stats, mode, id) {
@@ -1154,8 +1180,10 @@ function renderProgress() {
 
 /* ================= Spieler, Online-Speicher und Duell ================= */
 
-// Lokal lässt sich zum Testen ein anderer Server angeben (?api=…), damit echte Spielstände unberührt bleiben.
-const API = (location.hostname === 'localhost' && new URLSearchParams(location.search).get('api')) || 'https://weltquiz-api-production.up.railway.app';
+// Lokal (Entwicklung) nie mit dem echten Server reden: Standard ist ein Test-Server auf diesem Rechner,
+// ?api=… wählt einen anderen. So bleiben echte Spielstände garantiert unberührt.
+const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+const API = LOCAL ? (new URLSearchParams(location.search).get('api') || 'http://127.0.0.1:8787') : 'https://weltquiz-api-production.up.railway.app';
 const PLAYERS = [{ id: 'emilia', name: 'Emilia' }, { id: 'lars', name: 'Lars' }];
 const playerName = id => PLAYERS.find(p => p.id === id)?.name || id;
 const otherPlayer = id => PLAYERS.find(p => p.id !== id)?.id;
@@ -1358,7 +1386,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 10;
+const APP_VERSION = 12;
 let updateReady = false;
 
 async function checkUpdate() {

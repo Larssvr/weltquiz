@@ -1,7 +1,7 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
-import { W } from './map.js?v=10';
-import { NUMBERS } from './data/numbers.js?v=10';
+import { W, REGION_BOX } from './map.js?v=12';
+import { NUMBERS } from './data/numbers.js?v=12';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -27,11 +27,13 @@ const GAMES = [
   {
     id: 'blitz', name: 'Blitzrunde', desc: '60 Sekunden: Wie viele Länder findest du?',
     how: ['Ein Land wird genannt – tippe es auf der Karte an.', 'Richtig geht sofort weiter. Bei einem Fehler zeigt die Karte kurz die Lösung.', 'Rekorde gibt es je Region.'],
+    regions: true,
     unit: n => (n === 1 ? 'Land' : 'Länder'),
   },
   {
     id: 'pin', name: 'Städte-Pin', desc: 'Wo liegt die Stadt? Je näher dein Tipp, desto mehr Punkte.',
-    how: ['Fünf Hauptstädte und bekannte Städte.', 'Setz deinen Punkt auf die Karte – heranzoomen hilft beim Zielen.', 'Bis 25 km daneben gibt es volle 1000 Punkte, danach immer weniger.'],
+    how: ['Fünf Hauptstädte und bekannte Städte – weltweit oder auf einem Kontinent.', 'Setz deinen Punkt auf die Karte – heranzoomen hilft beim Zielen.', 'Bis 25 km daneben gibt es volle 1000 Punkte, danach immer weniger. Rekorde gibt es je Region.'],
+    regions: true,
     unit: () => 'Punkte',
   },
   {
@@ -61,6 +63,7 @@ export function createGames(ctx) {
 
   let screen = 'hub';     // hub | intro | result (im Panel „Minispiele“)
   let intro = { id: 'blitz', region: 'welt' };
+  const lastRegion = {};  // zuletzt gewählte Region je Spiel
   let game = null;        // laufendes Spiel
   let seq = 0;            // jede Runde bekommt eine Nummer – alte Zeitgeber verfallen
 
@@ -69,7 +72,12 @@ export function createGames(ctx) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
   const me = () => state.player;
-  const keyOf = (id, region = 'welt') => (id === 'blitz' ? 'blitz-' + region : GAMES.find(g => g.id === id)?.key || id);
+  const keyOf = (id, region = 'welt') => {
+    if (id === 'blitz') return 'blitz-' + region;
+    if (id === 'pin') return region === 'welt' ? 'pin' : 'pin-' + region;   // „pin“ bleibt der Welt-Rekord
+    return GAMES.find(g => g.id === id)?.key || id;
+  };
+  const regionCodes = region => COUNTRIES.filter(c => c.regions.includes(region)).map(c => c.iso);
   const bestOf = (pid, key) => ctx.gamesOf(pid)?.[key]?.best ?? null;
   const dayOf = (pid, day = today()) => ctx.dailyOf(pid)?.[day] || null;
   const nameFor = code => C.get(code)?.name || map.countryFeatures.find(f => f.properties.c === code)?.properties.n || code;
@@ -154,12 +162,12 @@ export function createGames(ctx) {
 
   function openIntro(id) {
     stop();
-    intro = { ...intro, id };
+    intro = { id, region: lastRegion[id] || 'welt' };
     screen = 'intro';
     renderIntro();
     ctx.show('games');
     map.clear();
-    map.showRegion(id === 'blitz' && intro.region !== 'welt' ? intro.region : 'welt');
+    map.showRegion(intro.region);
   }
 
   function renderIntro() {
@@ -170,9 +178,9 @@ export function createGames(ctx) {
       <h2 class="h2">${g.name}</h2>
       <p class="lead">${g.desc}</p>
       <ul class="how">${g.how.map(t => `<li>${t}</li>`).join('')}</ul>
-      ${g.id === 'blitz' ? `<div class="field"><p class="field-label">Wo?</p>
+      ${g.regions ? `<div class="field"><p class="field-label">Wo?</p>
         <div class="options">${regions.map(r => `<button type="button" class="opt" data-gopt="${r.id}" aria-pressed="${r.id === intro.region}">${r.label}</button>`).join('')}</div></div>` : ''}
-      <p class="field-label" style="margin-top:20px">Rekorde${g.id === 'blitz' ? ` – ${esc(regionLabel(intro.region))}` : ''}</p>
+      <p class="field-label" style="margin-top:20px">Rekorde${g.regions ? ` – ${esc(regionLabel(intro.region))}` : ''}</p>
       ${recordsHtml(keyOf(g.id, intro.region), g.unit) || '<p class="hint" style="margin:0">Noch hat niemand gespielt.</p>'}
       <div class="actions"><button class="btn primary wide" type="button" data-gact="start">Los geht's</button></div>`;
   }
@@ -180,7 +188,7 @@ export function createGames(ctx) {
   function start() {
     const id = intro.id;
     if (id === 'blitz') startBlitz(intro.region);
-    else if (id === 'pin') startPin({ daily: false });
+    else if (id === 'pin') startPin({ daily: false, region: intro.region });
     else if (id === 'nachbarn') startNachbarn();
     else if (id === 'vergleich') startVergleich();
     else if (id === 'umrisse') startUmrisse();
@@ -391,8 +399,18 @@ export function createGames(ctx) {
     };
   }
 
-  function pickPlaces(n, rnd = Math.random) {
-    const pool = placePool().slice();
+  // Ort auf dem Kontinent? Bei Ländern auf zwei Kontinenten (Russland, Türkei, Zypern) entscheidet die Lage des Ortes.
+  function inRegion(p, region) {
+    if (region === 'welt') return true;
+    const c = C.get(p.iso);
+    if (!c?.regions.includes(region)) return false;
+    if (c.regions.length === 1) return true;
+    const [x0, y0, x1, y1] = REGION_BOX[region];
+    return p.lon >= x0 && p.lon <= x1 && p.lat >= y0 && p.lat <= y1;
+  }
+
+  function pickPlaces(n, rnd = Math.random, region = 'welt') {
+    const pool = placePool().filter(p => inRegion(p, region));
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     const out = [], seen = new Set();
     for (const p of pool) {
@@ -420,14 +438,14 @@ export function createGames(ctx) {
     startPin({ daily: true });
   }
 
-  function startPin({ daily }) {
+  function startPin({ daily, region = 'welt' }) {
     const day = today();
     let g;
     if (daily) {
       const run = state.dailyRun?.day === day && state.dailyRun.player === me() ? state.dailyRun : null;
       g = begin({ id: 'daily', key: 'daily', day, places: pickPlaces(5, seeded('weltquiz-' + day)), i: run?.i || 0, total: run?.total || 0, results: run?.results || [] });
     } else {
-      g = begin({ id: 'pin', key: 'pin', places: pickPlaces(5), i: 0, total: 0, results: [] });
+      g = begin({ id: 'pin', key: keyOf('pin', region), region, places: pickPlaces(5, Math.random, region), i: 0, total: 0, results: [] });
     }
     pinQuestion(g);
   }
@@ -445,8 +463,7 @@ export function createGames(ctx) {
     if (g.i >= g.places.length) { finishPin(g); return; }
     const p = g.places[g.i];
     g.guess = null;
-    map.clear();
-    map.showRegion('welt');
+    pinView(g);
     pinHud(g);
     card(`<div class="q-head"><h2 class="q-prompt">Wo liegt <em>${esc(p.name)}</em>?</h2>${g.id === 'daily' ? '<span class="tag">Tagesrätsel</span>' : ''}</div>
       <p class="hint" id="pin-state">Tippe auf die Karte, wo du den Ort vermutest. Zum genauen Zielen heranzoomen.</p>
@@ -514,6 +531,14 @@ export function createGames(ctx) {
     pinQuestion(g);
   }
 
+  /** Karte für Städte-Pin: die gewählte Region, alles andere ausgegraut. */
+  function pinView(g, opts) {
+    map.clear();
+    const region = g.region || 'welt';
+    if (region !== 'welt') map.dimOutside(regionCodes(region));
+    map.showRegion(region, opts);
+  }
+
   function pinTable(results) {
     return `<ul class="res-list">${results.map(r => `<li><span>${esc(r.name)}</span><span class="res-km">${r.km == null ? 'kein Tipp' : r.km <= 25 ? 'Volltreffer' : fmt(r.km) + ' km'}</span><b>${fmt(r.pts)}</b></li>`).join('')}</ul>`;
   }
@@ -521,10 +546,9 @@ export function createGames(ctx) {
   function finishPin(g) {
     if (!alive(g)) return;
     pickable(false);
-    map.clearOverlay();
     // alle Orte auf einer Karte
+    pinView(g);
     for (const p of g.places) map.pin(p.lon, p.lat, p.name, 'right');
-    map.showRegion('welt');
     if (g.id === 'daily') {
       ctx.saveDaily(g.day, g.total);
       state.dailyRun = null;
@@ -535,7 +559,8 @@ export function createGames(ctx) {
       showDailyResult(g.day, g.results);
       return;
     }
-    showResult({ g, key: 'pin', score: g.total, title: 'Städte-Pin', big: fmt(g.total), unit: 'von 5.000 Punkten', details: pinTable(g.results) });
+    const where = g.region && g.region !== 'welt' ? ` – ${esc(regionLabel(g.region))}` : '';
+    showResult({ g, key: g.key, score: g.total, title: `Städte-Pin${where}`, big: fmt(g.total), unit: 'von 5.000 Punkten', details: pinTable(g.results) });
   }
 
   function showDailyResult(day, results = null) {
@@ -920,7 +945,7 @@ export function createGames(ctx) {
 
   function handleClick(t) {
     if (t.dataset.game) { openIntro(t.dataset.game); return true; }
-    if (t.dataset.gopt) { intro.region = t.dataset.gopt; renderIntro(); map.clear(); map.showRegion(intro.region); return true; }
+    if (t.dataset.gopt) { intro.region = lastRegion[intro.id] = t.dataset.gopt; renderIntro(); map.clear(); map.showRegion(intro.region); return true; }
     const act = t.dataset.gact;
     if (!act) return false;
     const g = game;
@@ -975,7 +1000,7 @@ export function createGames(ctx) {
     if (!state.player) return '';
     const rows = [];
     for (const g of GAMES) {
-      const keys = g.id === 'blitz' ? ['welt', ...CONTINENTS.map(r => r.id)].map(r => ['blitz-' + r, `Blitzrunde ${regionLabel(r)}`]) : [[keyOf(g.id), g.name]];
+      const keys = g.regions ? ['welt', ...CONTINENTS.map(r => r.id)].map(r => [keyOf(g.id, r), `${g.name} ${regionLabel(r)}`]) : [[keyOf(g.id), g.name]];
       for (const [key, label] of keys) {
         const vals = PLAYERS.map(p => bestOf(p.id, key));
         if (vals.every(v => v == null)) continue;

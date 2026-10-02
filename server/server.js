@@ -10,13 +10,27 @@ import path from 'node:path';
 const PORT = +process.env.PORT || 8080;
 const DIR = process.env.DATA_DIR || '/data';
 const FILE = path.join(DIR, 'weltquiz.json');
-const ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://larssvr.github.io,http://localhost:8766').split(',').map(s => s.trim());
+// Nur die echte Seite darf schreiben – lokale Testversionen reden mit einem eigenen Test-Server (ALLOWED_ORIGINS setzen)
+const ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://larssvr.github.io').split(',').map(s => s.trim());
 const PLAYERS = { emilia: 'Emilia', lars: 'Lars' };
 const MODES = new Set(['laender', 'hauptstaedte', 'gewaesser', 'flaggen']);
 const MAX_BODY = 1_000_000;
 
+// Testdaten, die am 2. Oktober 2026 versehentlich aus einer lokalen Testversion in Emilias Konto geraten sind.
+// Erkannt an ihrem genauen Zeitstempel: Sie werden beim Start entfernt und nie wieder angenommen. Wer sie noch
+// schickt, bekommt sie in der Antwort zurückgespiegelt – sonst würden ältere App-Versionen sie endlos neu senden.
+const QUARANTINE = {
+  emilia: {
+    stats: { 'flaggen/AO': 1790964827875, 'laender/DE': 1790964806756 },
+    restore: { 'laender/DE': { n: 8, c: 8, s: 8, t: 1790803031418 } },   // Stand vor dem Test
+    games: new Set([1790959452586, 1790959509321, 1790959552417, 1790959564060, 1790964400959, 1790966249101]),
+    daily: { '2026-10-02': 1790964547475 },
+  },
+};
+
 fs.mkdirSync(DIR, { recursive: true });
 let db = load();
+repair();
 
 function load() {
   try {
@@ -37,6 +51,41 @@ function persist() {
     const old = fs.readdirSync(DIR).filter(f => f.startsWith('backup-')).sort();
     while (old.length > 30) fs.unlinkSync(path.join(DIR, old.shift()));
   }
+}
+
+function repair() {
+  let changed = false;
+  for (const [player, q] of Object.entries(QUARANTINE)) {
+    const p = db.players[player];
+    if (!p) continue;
+    for (const [key, t] of Object.entries(q.stats)) {
+      const [mode, id] = key.split('/');
+      if (p.stats?.[mode]?.[id]?.t !== t) continue;
+      if (q.restore[key]) p.stats[mode][id] = { ...q.restore[key] }; else delete p.stats[mode][id];
+      changed = true;
+    }
+    for (const [key, v] of Object.entries(p.games || {})) if (q.games.has(v.at)) { delete p.games[key]; changed = true; }
+    for (const [day, t] of Object.entries(q.daily)) if (p.daily?.[day]?.t === t) { delete p.daily[day]; changed = true; }
+  }
+  if (!changed) return;
+  if (fs.existsSync(FILE)) fs.copyFileSync(FILE, path.join(DIR, `vor-bereinigung-${Date.now()}.json`));
+  persist();
+  console.log('Testdaten aus den Konten entfernt');
+}
+
+/** Nimmt gesperrte Einträge aus dem Eingehenden heraus und gibt sie zurück (zum Zurückspiegeln). */
+function takeQuarantined(player, stats, games, daily) {
+  const q = QUARANTINE[player];
+  const blocked = { stats: {}, games: {}, daily: {} };
+  if (!q) return blocked;
+  for (const [mode, items] of Object.entries(stats)) {
+    for (const [id, v] of Object.entries(items)) {
+      if (q.stats[mode + '/' + id] === v.t) { (blocked.stats[mode] ||= {})[id] = v; delete items[id]; }
+    }
+  }
+  for (const [key, v] of Object.entries(games)) if (q.games.has(v.at)) { blocked.games[key] = v; delete games[key]; }
+  for (const [day, v] of Object.entries(daily)) if (q.daily[day] === v.t) { blocked.daily[day] = v; delete daily[day]; }
+  return blocked;
 }
 
 // Ein Eintrag je Land/Gewässer: n = Versuche, c = richtig, s = richtig in Folge, t = letzte Antwort (ms)
@@ -176,9 +225,14 @@ const server = http.createServer((req, res) => {
       let body;
       try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(res, 400, { error: 'Kein gültiges JSON' }, origin); }
       if (!body || typeof body !== 'object') return send(res, 400, { error: 'Kein gültiges JSON' }, origin);
-      const p = mergeInto(player, cleanStats(body.stats), cleanGames(body.games), cleanDaily(body.daily));
+      const stats = cleanStats(body.stats), games = cleanGames(body.games), daily = cleanDaily(body.daily);
+      const blocked = takeQuarantined(player, stats, games, daily);
+      const p = mergeInto(player, stats, games, daily);
       try { persist(); } catch (e) { console.error('Speichern fehlgeschlagen', e); return send(res, 500, { error: 'Speichern fehlgeschlagen' }, origin); }
-      send(res, 200, { ok: true, updatedAt: p.updatedAt, stats: p.stats, games: p.games || {}, daily: p.daily || {} }, origin);
+      // Gesperrtes nur dem Absender zurückspiegeln, gespeichert wird es nicht
+      const echo = { ...p.stats };
+      for (const [mode, items] of Object.entries(blocked.stats)) echo[mode] = { ...(echo[mode] || {}), ...items };
+      send(res, 200, { ok: true, updatedAt: p.updatedAt, stats: echo, games: { ...(p.games || {}), ...blocked.games }, daily: { ...(p.daily || {}), ...blocked.daily } }, origin);
     });
     return;
   }

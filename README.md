@@ -19,7 +19,7 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 
 - **Tagesrätsel** – jeden Tag dieselben fünf Orte für beide, ein Versuch; das Ergebnis wird direkt verglichen
 - **Blitzrunde** – 60 Sekunden Länder antippen, Rekorde je Region
-- **Städte-Pin** – Ort auf der Karte setzen, Punkte nach Entfernung (bis 25 km volle Punktzahl)
+- **Städte-Pin** – Ort auf der Karte setzen, Punkte nach Entfernung (bis 25 km volle Punktzahl), weltweit oder je Kontinent
 - **Nachbarn** – alle Länder mit gemeinsamer Landgrenze finden
 - **Entweder-oder** – größer, mehr Einwohner, weiter nördlich? Serie bis zum ersten Fehler
 - **Umrisse** – Länder an ihrer Form erkennen, ohne Zeitdruck
@@ -35,6 +35,18 @@ läuft auf Railway mit Volume unter `/data`) – ebenso die Minispiel-Rekorde un
 Er führt Stände von mehreren Geräten zusammen, löscht nie etwas und legt jeden Tag eine Sicherungskopie an.
 Ohne Internet spielt man lokal weiter; der Stand wird später nachgeliefert. Fehlt dem Server etwas, das auf einem
 Gerät liegt, schickt die App es beim nächsten Abgleich von selbst nach.
+
+## Lokal testen
+
+Auf `localhost` spricht die App nie mit dem echten Server, sondern mit einem Test-Server auf dem eigenen Rechner
+(Standard `http://127.0.0.1:8787`, anderer per `?api=…`). Den startet man mit einer Kopie der Daten:
+
+```
+cd server
+PORT=8787 DATA_DIR=/tmp/weltquiz-test ALLOWED_ORIGINS=http://localhost:8766 node server.js
+```
+
+Der echte Server nimmt nur Anfragen von der veröffentlichten Seite an.
 
 ## Daten neu bauen
 
