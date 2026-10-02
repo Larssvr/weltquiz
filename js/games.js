@@ -1,7 +1,8 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
-import { W, REGION_BOX } from './map.js?v=12';
-import { NUMBERS } from './data/numbers.js?v=12';
+import { W, REGION_BOX } from './map.js?v=13';
+import { NUMBERS } from './data/numbers.js?v=13';
+import { DE_CITIES } from './data/de-cities.js?v=13';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -32,7 +33,9 @@ const GAMES = [
   },
   {
     id: 'pin', name: 'Städte-Pin', desc: 'Wo liegt die Stadt? Je näher dein Tipp, desto mehr Punkte.',
-    how: ['Fünf Hauptstädte und bekannte Städte – weltweit oder auf einem Kontinent.', 'Setz deinen Punkt auf die Karte – heranzoomen hilft beim Zielen.', 'Bis 25 km daneben gibt es volle 1000 Punkte, danach immer weniger. Rekorde gibt es je Region.'],
+    how: r => (r === 'de'
+      ? ['Fünf Städte in Deutschland – von Sylt bis Oberstdorf.', 'Setz deinen Punkt auf die Karte – heranzoomen hilft beim Zielen.', 'Hier zählt es genauer: volle 1000 Punkte nur bis 10 km daneben. Rekorde gibt es je Region.']
+      : ['Fünf Hauptstädte und bekannte Städte – weltweit, auf einem Kontinent oder in Deutschland.', 'Setz deinen Punkt auf die Karte – heranzoomen hilft beim Zielen.', 'Bis 25 km daneben gibt es volle 1000 Punkte, danach immer weniger. Rekorde gibt es je Region.']),
     regions: true,
     unit: () => 'Punkte',
   },
@@ -77,7 +80,9 @@ export function createGames(ctx) {
     if (id === 'pin') return region === 'welt' ? 'pin' : 'pin-' + region;   // „pin“ bleibt der Welt-Rekord
     return GAMES.find(g => g.id === id)?.key || id;
   };
-  const regionCodes = region => COUNTRIES.filter(c => c.regions.includes(region)).map(c => c.iso);
+  const regionCodes = region => (region === 'de' ? ['DE'] : COUNTRIES.filter(c => c.regions.includes(region)).map(c => c.iso));
+  const placeLabel = r => (r === 'de' ? 'Deutschland' : regionLabel(r));
+  const regionsOf = g => [{ id: 'welt', label: 'Welt' }, ...CONTINENTS, ...(g.id === 'pin' ? [{ id: 'de', label: 'Deutschland' }] : [])];
   const bestOf = (pid, key) => ctx.gamesOf(pid)?.[key]?.best ?? null;
   const dayOf = (pid, day = today()) => ctx.dailyOf(pid)?.[day] || null;
   const nameFor = code => C.get(code)?.name || map.countryFeatures.find(f => f.properties.c === code)?.properties.n || code;
@@ -172,15 +177,15 @@ export function createGames(ctx) {
 
   function renderIntro() {
     const g = GAMES.find(x => x.id === intro.id);
-    const regions = [{ id: 'welt', label: 'Welt' }, ...CONTINENTS];
+    const regions = regionsOf(g);
     $('#view-games').innerHTML = `
       <button class="back" type="button" data-gact="hub">‹ Minispiele</button>
       <h2 class="h2">${g.name}</h2>
       <p class="lead">${g.desc}</p>
-      <ul class="how">${g.how.map(t => `<li>${t}</li>`).join('')}</ul>
+      <ul class="how">${(typeof g.how === 'function' ? g.how(intro.region) : g.how).map(t => `<li>${t}</li>`).join('')}</ul>
       ${g.regions ? `<div class="field"><p class="field-label">Wo?</p>
         <div class="options">${regions.map(r => `<button type="button" class="opt" data-gopt="${r.id}" aria-pressed="${r.id === intro.region}">${r.label}</button>`).join('')}</div></div>` : ''}
-      <p class="field-label" style="margin-top:20px">Rekorde${g.regions ? ` – ${esc(regionLabel(intro.region))}` : ''}</p>
+      <p class="field-label" style="margin-top:20px">Rekorde${g.regions ? ` – ${esc(placeLabel(intro.region))}` : ''}</p>
       ${recordsHtml(keyOf(g.id, intro.region), g.unit) || '<p class="hint" style="margin:0">Noch hat niemand gespielt.</p>'}
       <div class="actions"><button class="btn primary wide" type="button" data-gact="start">Los geht's</button></div>`;
   }
@@ -409,13 +414,16 @@ export function createGames(ctx) {
     return p.lon >= x0 && p.lon <= x1 && p.lat >= y0 && p.lat <= y1;
   }
 
+  const dePlaces = () => DE_CITIES.map(c => ({ name: c.name, lat: c.lat, lon: c.lon, iso: 'DE', state: c.state, cap: c.cap, de: true }));
+
   function pickPlaces(n, rnd = Math.random, region = 'welt') {
-    const pool = placePool().filter(p => inRegion(p, region));
+    const pool = region === 'de' ? dePlaces() : placePool().filter(p => inRegion(p, region));
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     const out = [], seen = new Set();
     for (const p of pool) {
-      if (seen.has(p.iso)) continue;
-      seen.add(p.iso);
+      const key = p.de ? p.name : p.iso;   // in Deutschland verschiedene Städte, sonst verschiedene Länder
+      if (seen.has(key)) continue;
+      seen.add(key);
       out.push(p);
       if (out.length >= n) break;
     }
@@ -428,7 +436,23 @@ export function createGames(ctx) {
     return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(a)));
   }
 
-  const pinPoints = d => (d == null ? 0 : d <= 25 ? 1000 : Math.round(1000 * Math.exp(-(d - 25) / 1000)));
+  // Punkte nach Entfernung: weltweit volle Punkte bis 25 km, in Deutschland bis 10 km und steiler abfallend
+  const pinScale = region => (region === 'de' ? { full: 10, decay: 150 } : { full: 25, decay: 1000 });
+  const pinPoints = (d, region) => {
+    if (d == null) return 0;
+    const { full, decay } = pinScale(region);
+    return d <= full ? 1000 : Math.round(1000 * Math.exp(-(d - full) / decay));
+  };
+
+  /** Satz zur deutschen Stadt: Bundesland, Landeshauptstadt, Stadtstaat. */
+  function deSentence(p) {
+    const n = esc(p.name);
+    if (p.cap === 'bund') return `${n} ist die Hauptstadt Deutschlands und zugleich ein eigenes Bundesland.`;
+    if (p.name === p.state) return `${n} ist ein Stadtstaat – Stadt und Bundesland zugleich.`;
+    if (p.cap === 'land') return `${n} ist die Landeshauptstadt ${p.state === 'Saarland' ? 'des <b>Saarlandes</b>' : `von <b>${esc(p.state)}</b>`}.`;
+    const where = p.state === 'Saarland' ? 'im Saarland' : ['Bremen', 'Hamburg', 'Berlin'].includes(p.state) ? `im Land ${p.state}` : `in ${p.state}`;
+    return `${n} liegt ${emph(where, 'b')}.`;
+  }
 
   function openDaily() {
     stop();
@@ -491,9 +515,11 @@ export function createGames(ctx) {
     const p = g.places[g.i];
     const target = [p.lon, p.lat];
     const d = !skipped && g.guess ? km(g.guess, target) : null;
-    const pts = pinPoints(d);
+    const pts = pinPoints(d, g.region);
+    const full = d != null && d <= pinScale(g.region).full;
+    const near = g.region === 'de';   // Deutschland: Kamera näher heran
     g.total += pts;
-    g.results.push({ name: p.name, iso: p.iso, km: d == null ? null : Math.round(d), pts });
+    g.results.push({ name: p.name, iso: p.iso, km: d == null ? null : Math.round(d), pts, hit: full });
     if (g.id === 'daily') { state.dailyRun = { day: g.day, player: me(), i: g.i + 1, total: g.total, results: g.results }; ctx.save(); }
     pickable(false);
     pinHud(g);
@@ -508,16 +534,17 @@ export function createGames(ctx) {
       let bx = t[0];
       while (bx - a[0] > W / 2) bx -= W;
       while (a[0] - bx > W / 2) bx += W;
-      if (d >= 60) map.labelAt((a[0] + bx) / 2, (a[1] + t[1]) / 2, `${fmt(d)} km`, 'dist');
+      if (d >= (near ? 15 : 60)) map.labelAt((a[0] + bx) / 2, (a[1] + t[1]) / 2, `${fmt(d)} km`, 'dist');
       const box = [[Math.min(a[0], bx), Math.min(a[1], t[1])], [Math.max(a[0], bx), Math.max(a[1], t[1])]];
-      requestAnimationFrame(() => alive(g) && map.flyToBox(box, { pad: 1.5, minSize: 40 }));
+      requestAnimationFrame(() => alive(g) && map.flyToBox(box, { pad: 1.5, minSize: near ? 12 : 40 }));
     } else {
-      requestAnimationFrame(() => alive(g) && map.flyToPoint(p.lon, p.lat, { size: 160 }));
+      requestAnimationFrame(() => alive(g) && map.flyToPoint(p.lon, p.lat, { size: near ? 40 : 160 }));
     }
 
     const c = C.get(p.iso);
-    const where = p.capital ? `${esc(p.name)} ist die Hauptstadt ${emph(gen(c), 'b')}.` : `${esc(p.name)} liegt ${emph(inDat(c), 'b')}.`;
-    const verdict = d == null ? 'Kein Tipp – 0 Punkte.' : d <= 25 ? 'Volltreffer!' : `${fmt(d)} km daneben`;
+    const where = p.de ? deSentence(p)
+      : p.capital ? `${esc(p.name)} ist die Hauptstadt ${emph(gen(c), 'b')}.` : `${esc(p.name)} liegt ${emph(inDat(c), 'b')}.`;
+    const verdict = d == null ? 'Kein Tipp – 0 Punkte.' : full ? 'Volltreffer!' : `${fmt(d)} km daneben`;
     const last = g.i + 1 >= g.places.length;
     card(`<div class="result ${pts >= 700 ? 'right' : pts >= 250 ? 'mid' : 'wrong'}">${verdict}<span class="pts">+${fmt(pts)}</span></div>
       <p class="result-detail">${where}</p>
@@ -535,12 +562,12 @@ export function createGames(ctx) {
   function pinView(g, opts) {
     map.clear();
     const region = g.region || 'welt';
-    if (region !== 'welt') map.dimOutside(regionCodes(region));
+    if (region !== 'welt') map.dimOutside(regionCodes(region));   // Deutschland: nur Deutschland farbig
     map.showRegion(region, opts);
   }
 
   function pinTable(results) {
-    return `<ul class="res-list">${results.map(r => `<li><span>${esc(r.name)}</span><span class="res-km">${r.km == null ? 'kein Tipp' : r.km <= 25 ? 'Volltreffer' : fmt(r.km) + ' km'}</span><b>${fmt(r.pts)}</b></li>`).join('')}</ul>`;
+    return `<ul class="res-list">${results.map(r => `<li><span>${esc(r.name)}</span><span class="res-km">${r.km == null ? 'kein Tipp' : (r.hit ?? r.km <= 25) ? 'Volltreffer' : fmt(r.km) + ' km'}</span><b>${fmt(r.pts)}</b></li>`).join('')}</ul>`;
   }
 
   function finishPin(g) {
@@ -559,7 +586,7 @@ export function createGames(ctx) {
       showDailyResult(g.day, g.results);
       return;
     }
-    const where = g.region && g.region !== 'welt' ? ` – ${esc(regionLabel(g.region))}` : '';
+    const where = g.region && g.region !== 'welt' ? ` – ${esc(placeLabel(g.region))}` : '';
     showResult({ g, key: g.key, score: g.total, title: `Städte-Pin${where}`, big: fmt(g.total), unit: 'von 5.000 Punkten', details: pinTable(g.results) });
   }
 
@@ -1000,7 +1027,7 @@ export function createGames(ctx) {
     if (!state.player) return '';
     const rows = [];
     for (const g of GAMES) {
-      const keys = g.regions ? ['welt', ...CONTINENTS.map(r => r.id)].map(r => [keyOf(g.id, r), `${g.name} ${regionLabel(r)}`]) : [[keyOf(g.id), g.name]];
+      const keys = g.regions ? regionsOf(g).map(r => [keyOf(g.id, r.id), `${g.name} ${r.label}`]) : [[keyOf(g.id), g.name]];
       for (const [key, label] of keys) {
         const vals = PLAYERS.map(p => bestOf(p.id, key));
         if (vals.every(v => v == null)) continue;

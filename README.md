@@ -19,7 +19,7 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 
 - **Tagesrätsel** – jeden Tag dieselben fünf Orte für beide, ein Versuch; das Ergebnis wird direkt verglichen
 - **Blitzrunde** – 60 Sekunden Länder antippen, Rekorde je Region
-- **Städte-Pin** – Ort auf der Karte setzen, Punkte nach Entfernung (bis 25 km volle Punktzahl), weltweit oder je Kontinent
+- **Städte-Pin** – Ort auf der Karte setzen, Punkte nach Entfernung (bis 25 km volle Punktzahl), weltweit, je Kontinent oder in Deutschland (109 Städte, volle Punktzahl bis 10 km)
 - **Nachbarn** – alle Länder mit gemeinsamer Landgrenze finden
 - **Entweder-oder** – größer, mehr Einwohner, weiter nördlich? Serie bis zum ersten Fehler
 - **Umrisse** – Länder an ihrer Form erkennen, ohne Zeitdruck
@@ -64,6 +64,7 @@ npm run content    # js/data/*.js aus content/*.json
 
 - Karten: [Natural Earth](https://www.naturalearthdata.com) (gemeinfrei), Ländergrenzen in der deutschen Sichtweise (`admin_0_countries_deu`)
 - Einwohner (2024) und Fläche: Wikipedia, [Liste der Staaten der Erde](https://de.wikipedia.org/wiki/Liste_der_Staaten_der_Erde) (Stand Oktober 2026), gerundet in `js/data/numbers.js`
+- Städte in Deutschland: Natural Earth und [OpenStreetMap](https://www.openstreetmap.org/copyright) (© OpenStreetMap-Mitwirkende, ODbL), in `js/data/de-cities.js`
 - Flaggen: [svg-country-flags](https://github.com/hampusborgos/country-flags) (gemeinfrei, aus Wikimedia Commons)
 - Schriften: Barlow, Barlow Condensed und Spectral (SIL Open Font License), selbst gehostet
 - Lizenztexte der verwendeten Bibliotheken und Schriften: `licenses/`

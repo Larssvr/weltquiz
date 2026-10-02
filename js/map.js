@@ -31,6 +31,7 @@ export const REGION_BOX = {
   nordamerika: [-168, 7, -52, 72],
   suedamerika: [-82, -55, -34, 12.5],
   ozeanien: [112, -47, 190, 16],
+  de: [5.6, 47.2, 15.2, 55.1],   // Deutschland (Städte-Pin)
 };
 
 export class WorldMap {
