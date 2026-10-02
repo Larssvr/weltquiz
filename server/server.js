@@ -1,5 +1,6 @@
 // Weltquiz-Server: speichert den Lernfortschritt von Emilia und Lars, damit beide ihn auf jedem Gerät
-// haben und sich gegenseitig sehen. Ohne Abhängigkeiten, Daten als JSON-Datei auf dem Railway-Volume.
+// haben und sich gegenseitig sehen – dazu die Minispiel-Rekorde und die Ergebnisse des Tagesrätsels.
+// Ohne Abhängigkeiten, Daten als JSON-Datei auf dem Railway-Volume.
 // Schreiben führt immer zusammen und löscht nie etwas; jeden Tag entsteht eine Sicherungskopie.
 
 import http from 'node:http';
@@ -62,11 +63,58 @@ function cleanStats(stats) {
   return out;
 }
 
-function mergeInto(player, stats) {
+// Minispiele: je Spiel der beste Wert (best) und wann er erreicht wurde (at)
+const GAME_KEY = /^[a-z][a-z0-9-]{1,39}$/;
+// Tagesrätsel: je Tag ein Ergebnis (score) mit Zeitpunkt (t)
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
+
+function cleanNum(x, max = 1e7) {
+  return Number.isFinite(+x) && +x >= 0 ? Math.min(Math.round(+x), max) : null;
+}
+
+function cleanTime(x) {
+  const limit = Date.now() + 864e5;
+  return Number.isFinite(+x) && +x > 0 && +x < limit ? Math.floor(+x) : 0;
+}
+
+function cleanGames(games) {
+  const out = {};
+  if (!games || typeof games !== 'object') return out;
+  for (const [key, v] of Object.entries(games).slice(0, 80)) {
+    if (!GAME_KEY.test(key) || !v || typeof v !== 'object') continue;
+    const best = cleanNum(v.best);
+    if (best != null) out[key] = { best, at: cleanTime(v.at) };
+  }
+  return out;
+}
+
+function cleanDaily(daily) {
+  const out = {};
+  if (!daily || typeof daily !== 'object') return out;
+  for (const [day, v] of Object.entries(daily).slice(-500)) {
+    if (!DAY_KEY.test(day) || !v || typeof v !== 'object') continue;
+    const score = cleanNum(v.score), t = cleanTime(v.t);
+    if (score != null && t) out[day] = { score, t };
+  }
+  return out;
+}
+
+function mergeInto(player, stats, games = {}, daily = {}) {
   const p = db.players[player] ||= { name: PLAYERS[player], stats: {}, updatedAt: 0 };
   for (const [mode, items] of Object.entries(stats)) {
     const m = p.stats[mode] ||= {};
     for (const [id, v] of Object.entries(items)) m[id] = mergeItem(m[id], v);
+  }
+  // Rekorde: der bessere Wert bleibt
+  const g = p.games ||= {};
+  for (const [key, v] of Object.entries(games)) {
+    const cur = g[key];
+    if (!cur || v.best > cur.best || (v.best === cur.best && v.at && (!cur.at || v.at < cur.at))) g[key] = v;
+  }
+  // Tagesrätsel: der erste Versuch des Tages zählt
+  const d = p.daily ||= {};
+  for (const [day, v] of Object.entries(daily)) {
+    if (!d[day] || v.t < d[day].t) d[day] = v;
   }
   p.updatedAt = Date.now();
   return p;
@@ -105,7 +153,7 @@ const server = http.createServer((req, res) => {
     const players = {};
     for (const id of Object.keys(PLAYERS)) {
       const p = db.players[id];
-      players[id] = { name: PLAYERS[id], stats: p?.stats || {}, updatedAt: p?.updatedAt || 0 };
+      players[id] = { name: PLAYERS[id], stats: p?.stats || {}, games: p?.games || {}, daily: p?.daily || {}, updatedAt: p?.updatedAt || 0 };
     }
     return send(res, 200, { players, now: Date.now() }, origin);
   }
@@ -127,9 +175,10 @@ const server = http.createServer((req, res) => {
       if (res.writableEnded) return;
       let body;
       try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(res, 400, { error: 'Kein gültiges JSON' }, origin); }
-      const p = mergeInto(player, cleanStats(body.stats));
+      if (!body || typeof body !== 'object') return send(res, 400, { error: 'Kein gültiges JSON' }, origin);
+      const p = mergeInto(player, cleanStats(body.stats), cleanGames(body.games), cleanDaily(body.daily));
       try { persist(); } catch (e) { console.error('Speichern fehlgeschlagen', e); return send(res, 500, { error: 'Speichern fehlgeschlagen' }, origin); }
-      send(res, 200, { ok: true, updatedAt: p.updatedAt, stats: p.stats }, origin);
+      send(res, 200, { ok: true, updatedAt: p.updatedAt, stats: p.stats, games: p.games || {}, daily: p.daily || {} }, origin);
     });
     return;
   }

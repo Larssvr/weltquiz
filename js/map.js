@@ -370,9 +370,92 @@ export class WorldMap {
       .classed('m0 m1 m2 m3', false).classed('cmp-a cmp-b cmp-ab', false);
     this.waterSel.classed('is-target is-right is-wrong is-pick cmp-a cmp-b cmp-ab', false);
     this.lakeSel.classed('is-target is-right is-wrong is-pick cmp-a cmp-b cmp-ab', false);
+    this.clearOverlay();
+    this.svg.classed('mastery', false).classed('compare', false);
+  }
+
+  clearOverlay() {
     this.overlay.selectAll('*').remove();
     this.overlayItems = [];
-    this.svg.classed('mastery', false).classed('compare', false);
+    this._guess = null;
+  }
+
+  /** Karteneinheiten → [lon, lat] */
+  lonLatAt([x, y]) {
+    return this.projection.invert([x, y]);
+  }
+
+  /** Städte-Pin: dein Tipp als Punkt – ersetzt den vorigen. */
+  guessPin(lon, lat) {
+    if (this._guess) {
+      this._guess.el.remove();
+      this.overlayItems = this.overlayItems.filter(it => it !== this._guess);
+    }
+    const [x, y] = this.projection([lon, lat]);
+    const g = this.overlay.append('g').attr('class', 'guess');
+    g.append('circle').attr('r', 11).attr('class', 'guess-halo');
+    g.append('circle').attr('r', 6).attr('class', 'guess-dot');
+    this._guess = { x, y, el: g, kind: 'pin' };
+    this.overlayItems.push(this._guess);
+    this._placeOverlay();
+  }
+
+  /** Gestrichelte Linie zwischen zwei Orten ([lon, lat]), z. B. vom Tipp zum Ziel. */
+  line(a, b, cls = '') {
+    const [x, y] = this.projection(a), [x2, y2] = this.projection(b);
+    const g = this.overlay.insert('g', ':first-child').attr('class', ('mapline ' + cls).trim());
+    g.append('line');
+    this.overlayItems.push({ x, y, x2, y2, el: g, kind: 'line' });
+    this._placeOverlay();
+  }
+
+  /** Welche Flächen haben eine gemeinsame Grenze? Code → Set der Nachbar-Codes. */
+  neighborGraph() {
+    if (this._nb) return this._nb;
+    const geoms = this.topo.objects.countries.geometries;
+    const nb = topojson.neighbors(geoms);
+    const out = new Map();
+    geoms.forEach((g, i) => {
+      const c = g.properties.c;
+      for (const j of nb[i]) {
+        const d = geoms[j].properties.c;
+        if (d === c) continue;
+        if (!out.has(c)) out.set(c, new Set());
+        out.get(c).add(d);
+      }
+    });
+    return (this._nb = out);
+  }
+
+  /** Fläche eines Landes auf dieser Karte (Mercator, Karteneinheiten²) – zeigt, wie groß es wirkt. */
+  shownArea(code) {
+    return this.countryFeatures.filter(f => f.properties.c === code).reduce((s, f) => s + this.path.area(f), 0);
+  }
+
+  /**
+   * Umriss eines Landes als SVG-Pfad, eingepasst in w × h – so, wie es auf dieser Karte aussieht.
+   * Weit entfernte Außengebiete (z. B. Inseln am anderen Ende der Welt) bleiben weg.
+   */
+  silhouette(code, w = 260, h = 170) {
+    const focus = this.countryBox(code);
+    const pad = Math.max(focus[1][0] - focus[0][0], focus[1][1] - focus[0][1]) * 0.15;
+    const rings = [];
+    for (const piece of this.hit) {
+      if (piece.c !== code) continue;
+      piece.rings.forEach((r, i) => {
+        const b = piece.ringBoxes[i];
+        if (b[1][0] < focus[0][0] - pad || b[0][0] > focus[1][0] + pad || b[1][1] < focus[0][1] - pad || b[0][1] > focus[1][1] + pad) return;
+        rings.push(r);
+      });
+    }
+    if (!rings.length) return null;
+    const [[x0, y0], [x1, y1]] = ringsBox(rings);
+    const s = Math.min(w / Math.max(x1 - x0, 1e-6), h / Math.max(y1 - y0, 1e-6)) * 0.92;
+    const ox = (w - (x1 - x0) * s) / 2, oy = (h - (y1 - y0) * s) / 2;
+    const d = rings.map(r => 'M' + r.map(([x, y]) => `${((x - x0) * s + ox).toFixed(1)},${((y - y0) * s + oy).toFixed(1)}`).join('L') + 'Z').join('');
+    // Anteil der Fläche am Rahmen: verstreute Atolle (Kiribati, Malediven …) füllen fast nichts – kein erkennbarer Umriss
+    const fill = rings.reduce((a, r) => a + Math.abs(ringArea(r)), 0) / Math.max((x1 - x0) * (y1 - y0), 1e-9);
+    return { d, w, h, points: rings.reduce((n, r) => n + r.length, 0), fill };
   }
 
   /** Duell-Karte: je Land 'a' (nur Spieler A), 'b' (nur B), 'ab' (beide) oder nichts. */
@@ -524,6 +607,15 @@ export class WorldMap {
       while (x - cx > W / 2) x -= W;
       while (cx - x > W / 2) x += W;
       const [sx, sy] = t.apply([x, it.y]);
+      if (it.kind === 'line') {
+        // zweites Ende auf dem kürzesten Weg (auch über die Datumsgrenze)
+        let x2 = it.x2;
+        while (x2 - x > W / 2) x2 -= W;
+        while (x - x2 > W / 2) x2 += W;
+        const [sx2, sy2] = t.apply([x2, it.y2]);
+        it.el.select('line').attr('x1', sx.toFixed(1)).attr('y1', sy.toFixed(1)).attr('x2', sx2.toFixed(1)).attr('y2', sy2.toFixed(1));
+        continue;
+      }
       if (it.kind === 'ring' && it.box && !it.force) {
         const s = Math.max(it.box[1][0] - it.box[0][0], it.box[1][1] - it.box[0][1]) * t.k;
         it.el.attr('display', s < 16 ? null : 'none');
@@ -604,7 +696,7 @@ export class WorldMap {
     let [x, y] = this.transform.invert([sx, sy]);
     x = ((x % W) + W) % W;
     const tol = 14 / this.transform.k;
-    this.onClick(this.hitTest(x, y, tol, this.hitOptions || {}), e);
+    this.onClick(this.hitTest(x, y, tol, this.hitOptions || {}), e, [x, y]);
   }
 
   /**

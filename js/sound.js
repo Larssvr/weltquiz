@@ -196,4 +196,28 @@ export const sfx = {
     if (!ready()) return;
     noise({ d: 0.6, g: 0.03, type: 'bandpass', f: 350, to: 2400, q: 1.1, send: 0.1 });
   },
+  /** Minispiele: kurzer Treffer-Ton (je höher die Serie, desto höher der Ton) */
+  blip(n = 0) {
+    if (!ready()) return;
+    const f = 880 * Math.pow(2, Math.min(n, 12) / 24);
+    tone({ f, d: 0.12, type: 'triangle', g: 0.1, send: 0.15 });
+    tone({ f: f * 1.5, t: 0.05, d: 0.16, type: 'sine', g: 0.07, send: 0.25 });
+  },
+  /** Minispiele: kurzes Brummen bei einem Fehler */
+  buzz() {
+    if (!ready()) return;
+    tone({ f: 196, d: 0.22, type: 'square', g: 0.06, bend: 0.85, filter: { f: 900, to: 400 }, send: 0.05 });
+  },
+  /** Countdown: Ticken, das letzte Mal heller */
+  tick(last = false) {
+    if (!ready()) return;
+    tone({ f: last ? 1318.5 : 988, d: last ? 0.3 : 0.07, type: 'sine', g: last ? 0.12 : 0.08, send: 0.1 });
+  },
+  /** Neuer Rekord: Fanfare mit Funkeln */
+  record() {
+    if (!ready()) return;
+    sfx.fanfare(1);
+    [2093, 2637, 3136].forEach((f, i) => bell(f, 0.9 + i * 0.09, 0.7, 0.06));
+    noise({ t: 0.9, d: 0.8, g: 0.04, f: 7000, send: 0.7 });
+  },
 };
