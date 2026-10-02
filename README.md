@@ -22,7 +22,7 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 - **Städte-Pin** – Ort auf der Karte setzen, Punkte nach Entfernung (bis 25 km volle Punktzahl)
 - **Nachbarn** – alle Länder mit gemeinsamer Landgrenze finden
 - **Entweder-oder** – größer, mehr Einwohner, weiter nördlich? Serie bis zum ersten Fehler
-- **Umrisse** – Länder an ihrer Form erkennen, auf Zeit
+- **Umrisse** – Länder an ihrer Form erkennen, ohne Zeitdruck
 
 ## Technik
 

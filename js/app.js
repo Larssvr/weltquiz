@@ -1,11 +1,11 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=8';
-import { Searcher } from './search.js?v=8';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=8';
-import { COUNTRIES } from './data/countries.js?v=8';
-import { WATER } from './data/water.js?v=8';
-import { WORLD_FACTS } from './data/world-facts.js?v=8';
-import { CITIES } from './data/cities.js?v=8';
-import { createGames } from './games.js?v=8';
+import { WorldMap, REGION_BOX, W } from './map.js?v=9';
+import { Searcher } from './search.js?v=9';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=9';
+import { COUNTRIES } from './data/countries.js?v=9';
+import { WATER } from './data/water.js?v=9';
+import { WORLD_FACTS } from './data/world-facts.js?v=9';
+import { CITIES } from './data/cities.js?v=9';
+import { createGames } from './games.js?v=9';
 
 /* ================= Daten ================= */
 
@@ -1358,7 +1358,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 8;
+const APP_VERSION = 9;
 let updateReady = false;
 
 async function checkUpdate() {

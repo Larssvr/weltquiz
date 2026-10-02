@@ -1,7 +1,7 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
-import { W } from './map.js?v=8';
-import { NUMBERS } from './data/numbers.js?v=8';
+import { W } from './map.js?v=9';
+import { NUMBERS } from './data/numbers.js?v=9';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -45,9 +45,11 @@ const GAMES = [
     unit: () => 'richtig in Folge',
   },
   {
-    id: 'umrisse', name: 'Umrisse', desc: 'Erkenne Länder an ihrer Form. Je schneller, desto mehr Punkte.',
-    how: ['Zehn Umrisse, vier Antworten zur Auswahl.', 'Bis zu 100 Punkte pro Land – nach 10 Sekunden ist die Zeit um.', 'Die Karte bleibt so lange abgedeckt.'],
-    unit: () => 'Punkte',
+    id: 'umrisse', name: 'Umrisse', desc: 'Erkenne Länder an ihrer Form – ganz ohne Zeitdruck.',
+    how: ['Zehn Umrisse, vier Antworten zur Auswahl.', 'Keine Uhr: Schau dir jede Form in Ruhe an.', 'Die Karte bleibt abgedeckt, bis du geantwortet hast.'],
+    // eigene Rekordliste: die alten Rekorde (Punkte mit Zeitbonus) sind mit „erkannt von 10“ nicht vergleichbar
+    key: 'umrisse10',
+    unit: () => 'von 10 erkannt',
   },
 ];
 
@@ -67,7 +69,7 @@ export function createGames(ctx) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
   const me = () => state.player;
-  const keyOf = (id, region = 'welt') => (id === 'blitz' ? 'blitz-' + region : id);
+  const keyOf = (id, region = 'welt') => (id === 'blitz' ? 'blitz-' + region : GAMES.find(g => g.id === id)?.key || id);
   const bestOf = (pid, key) => ctx.gamesOf(pid)?.[key]?.best ?? null;
   const dayOf = (pid, day = today()) => ctx.dailyOf(pid)?.[day] || null;
   const nameFor = code => C.get(code)?.name || map.countryFeatures.find(f => f.properties.c === code)?.properties.n || code;
@@ -849,15 +851,15 @@ export function createGames(ctx) {
 
   function startUmrisse() {
     const pool = [...shapePool().keys()];
-    const g = begin({ id: 'umrisse', key: 'umrisse', targets: shuffle(pool).slice(0, 10), i: 0, points: 0, rows: [] });
+    const g = begin({ id: 'umrisse', key: keyOf('umrisse'), targets: shuffle(pool).slice(0, 10), i: 0, rows: [] });
     map.showRegion('welt');
     umrisseQuestion(g);
   }
 
   function umrisseHud(g) {
-    const sec = Math.ceil((g.left ?? 10000) / 1000);
-    hud(`<i class="time${sec <= 3 ? ' low' : ''}" style="width:${((g.left ?? 10000) / 10000 * 100).toFixed(1)}%"></i>`,
-      `<span class="long">Form ${Math.min(g.i + 1, 10)} von 10</span><span>${g.points} Punkte</span>`);
+    const right = g.rows.filter(r => r.ok).length;
+    hud(g.targets.map((_, i) => `<i class="${g.rows[i] ? (g.rows[i].ok ? 'r' : 'w') : i === g.i ? 'now' : ''}"></i>`).join(''),
+      `<span class="long">Form ${Math.min(g.i + 1, 10)} von 10</span><span>${right} erkannt</span>`);
   }
 
   function umrisseQuestion(g) {
@@ -872,21 +874,18 @@ export function createGames(ctx) {
     card(`<div class="q-head"><h2 class="q-prompt">Welches Land hat diese Form?</h2></div>
       <div class="shape-wrap"><svg class="shape" viewBox="0 0 ${s.w} ${s.h}" role="img" aria-label="Umriss eines Landes"><path d="${s.d}" fill-rule="evenodd"/></svg></div>
       <div class="opts4">${g.q.opts.map(x => `<button class="opt" type="button" data-gact="shape" data-iso="${x}">${esc(C.get(x).name)}</button>`).join('')}</div>
+      <div class="below" id="shape-skip"><button class="chip-btn" type="button" data-gact="shape-skip">Weiß ich nicht</button></div>
       <div id="shape-after"></div>`);
-    g.left = 10000;
     umrisseHud(g);
-    clock(g, 10000, () => umrisseHud(g), () => umrisseAnswer(g, null));
   }
 
   function umrisseAnswer(g, chosen) {
     const q = g.q;
     if (!alive(g) || !q || q.answered) return;
     q.answered = true;
-    clearInterval(g.clock);
     const ok = chosen === q.iso;
-    const pts = ok ? 50 + Math.round(50 * Math.max(0, g.left) / 10000) : 0;
-    g.points += pts;
-    g.rows.push({ iso: q.iso, ok, pts });
+    g.rows.push({ iso: q.iso, ok });
+    $('#shape-skip')?.remove();
     if (ok) sfx.correct(); else sfx.wrong();
     umrisseHud(g);
     $('#view-game').querySelectorAll('[data-gact="shape"]').forEach(btn => {
@@ -896,7 +895,7 @@ export function createGames(ctx) {
     });
     const c = C.get(q.iso);
     const last = g.i + 1 >= g.targets.length;
-    $('#shape-after').innerHTML = `<div class="result ${ok ? 'right' : 'wrong'}" style="margin-top:10px">${ok ? 'Richtig!' : chosen ? 'Leider nein' : 'Zeit um'}<span class="pts">+${pts}</span></div>
+    $('#shape-after').innerHTML = `<div class="result ${ok ? 'right' : 'wrong'}" style="margin-top:10px">${ok ? 'Richtig!' : chosen ? 'Leider nein' : 'Aufgelöst'}</div>
       <p class="result-detail">${ok ? `Das ${pl(c, 'ist', 'sind')} ${emph(nom(c), 'b')}.` : `Das ${pl(c, 'war', 'waren')} ${emph(nom(c), 'b')}.`}</p>
       <div class="next-row"><button class="btn primary" type="button" data-gact="next">${last ? 'Zum Ergebnis' : 'Nächste Form'}</button></div>`;
     $('#view-game [data-gact="next"]').focus({ preventScroll: true });
@@ -913,9 +912,8 @@ export function createGames(ctx) {
     for (const r of g.rows) map.setCountryClass(r.iso, r.ok ? 'is-right' : 'is-wrong');
     map.showRegion('welt');
     const right = g.rows.filter(r => r.ok).length;
-    const details = `<p class="lead">${right} von ${g.rows.length} erkannt.</p>
-      <ul class="res-list">${g.rows.map(r => `<li><span>${esc(C.get(r.iso).name)}</span><span class="res-km">${r.ok ? 'erkannt' : 'nicht erkannt'}</span><b>${r.pts}</b></li>`).join('')}</ul>`;
-    showResult({ g, key: 'umrisse', score: g.points, title: 'Umrisse', big: g.points, unit: 'von 1.000 Punkten', details });
+    const details = `<ul class="res-list">${g.rows.map(r => `<li><span>${esc(C.get(r.iso).name)}</span><span class="res-km">${r.ok ? 'erkannt' : 'nicht erkannt'}</span><b>${r.ok ? '✓' : '–'}</b></li>`).join('')}</ul>`;
+    showResult({ g, key: g.key, score: right, title: 'Umrisse', big: right, unit: 'von 10 erkannt', details });
   }
 
   /* ================= Klicks und Einbindung ================= */
@@ -937,6 +935,7 @@ export function createGames(ctx) {
       case 'nb-giveup': if (g?.id === 'nachbarn') nachbarnEnd(g); break;
       case 'vs': if (g?.id === 'vergleich') vergleichAnswer(g, +t.dataset.side); break;
       case 'shape': if (g?.id === 'umrisse') umrisseAnswer(g, t.dataset.iso); break;
+      case 'shape-skip': if (g?.id === 'umrisse') umrisseAnswer(g, null); break;
       case 'next':
         if (!g) break;
         if (g.id === 'pin' || g.id === 'daily') pinNext(g);
@@ -976,7 +975,7 @@ export function createGames(ctx) {
     if (!state.player) return '';
     const rows = [];
     for (const g of GAMES) {
-      const keys = g.id === 'blitz' ? ['welt', ...CONTINENTS.map(r => r.id)].map(r => ['blitz-' + r, `Blitzrunde ${regionLabel(r)}`]) : [[g.id, g.name]];
+      const keys = g.id === 'blitz' ? ['welt', ...CONTINENTS.map(r => r.id)].map(r => ['blitz-' + r, `Blitzrunde ${regionLabel(r)}`]) : [[keyOf(g.id), g.name]];
       for (const [key, label] of keys) {
         const vals = PLAYERS.map(p => bestOf(p.id, key));
         if (vals.every(v => v == null)) continue;
