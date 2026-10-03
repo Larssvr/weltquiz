@@ -1,6 +1,6 @@
 // Minispiel „Heiß & kalt“: ein geheimes Land finden. Jeder Tipp verrät, wie weit es entfernt ist (von Grenze zu
 // Grenze) und in welcher Richtung es liegt; die Karte färbt die Tipps nach Nähe. Stile in css/games/heiss.css.
-import { W } from '../map.js?v=15';
+import { W } from '../map.js?v=16';
 
 const ROUNDS = 3;     // geheime Länder je Spiel
 const TRIES = 10;     // Versuche je Land: 10 Punkte für den ersten, 1 für den zehnten

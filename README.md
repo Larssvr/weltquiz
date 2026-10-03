@@ -23,6 +23,13 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 - **Nachbarn** – alle Länder mit gemeinsamer Landgrenze aus dem Kopf nennen (eintippen, Tippfehler egal); die Karte zeigt einen Nachbarn erst, wenn er genannt ist. Grenzen über ferne Landesteile (Französisch-Guayana, Ceuta und Melilla) zählen als Extrapunkt.
 - **Entweder-oder** – größer, mehr Einwohner, weiter nördlich? Serie bis zum ersten Fehler
 - **Umrisse** – Länder an ihrer Form erkennen, ohne Zeitdruck
+- **Reiseroute** – von einem Land in ein anderes, nur über Landgrenzen: Land für Land das nächste Nachbarland nennen; der kürzeste Weg bringt die meisten Punkte
+- **Heiß & kalt** – ein geheimes Land finden: Jeder Tipp verrät Entfernung (von Grenze zu Grenze) und Richtung, die Karte färbt die Tipps nach Nähe
+- **Alle nennen** – alle Länder eines Kontinents oder der ganzen Welt gegen die Uhr eintippen, ohne Vorschläge
+- **Ohne Grenzen** – die Karte zeigt nur Land und Meer; Punkt dorthin setzen, wo das Land liegt
+- **Schätz mal** – Einwohner, Fläche und Entfernung zwischen Hauptstädten mit einem Regler schätzen
+
+Die neueren Spiele liegen als eigene Module in `js/games/` (Schnittstelle: Kommentarblock „Spiele als Module“ in `js/games.js`, gemeinsame Geometrie in `js/games/geo.js`) mit Stilen in `css/games/`.
 
 „Beenden“ mitten im Spiel zeigt das Ergebnis mit dem bisherigen Stand – ein Rekord zählt also auch dann.
 

@@ -1,15 +1,15 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
 // Weitere Spiele kommen als eigene Module aus js/games/ dazu (Schnittstelle: „Spiele als Module“ ganz unten).
-import { W, REGION_BOX } from './map.js?v=15';
-import { NUMBERS } from './data/numbers.js?v=15';
-import { DE_CITIES } from './data/de-cities.js?v=15';
-import * as geo from './games/geo.js?v=15';
-import route from './games/route.js?v=15';
-import heiss from './games/heiss.js?v=15';
-import alle from './games/alle.js?v=15';
-import blind from './games/blind.js?v=15';
-import schaetzen from './games/schaetzen.js?v=15';
+import { W, REGION_BOX } from './map.js?v=16';
+import { NUMBERS } from './data/numbers.js?v=16';
+import { DE_CITIES } from './data/de-cities.js?v=16';
+import * as geo from './games/geo.js?v=16';
+import route from './games/route.js?v=16';
+import heiss from './games/heiss.js?v=16';
+import alle from './games/alle.js?v=16';
+import blind from './games/blind.js?v=16';
+import schaetzen from './games/schaetzen.js?v=16';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -1308,7 +1308,7 @@ export function createGames(ctx) {
    *
    *   export default function (api) { return { …Definition… }; }    // oder null: Spiel noch nicht fertig
    *
-   * Es steht oben in PLUGINS (Import mit ?v=15) und wird beim Start der App einmal aufgerufen.
+   * Es steht oben in PLUGINS (Import mit ?v=16) und wird beim Start der App einmal aufgerufen.
    * Eigene Stile gehören nach css/games/<id>.css – Klassen mit eigener Vorsilbe, z. B. .rt-…
    *
    * Definition (Pflicht: id, name, desc, how, swatch, key, unit, start):
