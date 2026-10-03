@@ -1,7 +1,7 @@
 // Geometrie für Minispiele: Entfernungen zwischen Ländern und Orten, Mittelpunkte, Himmelsrichtungen.
 // Reine Funktionen über der Weltkarte (WorldMap aus js/map.js). Karteneinheiten sind Mercator: Die Welt ist W breit
 // und wiederholt sich waagerecht – Länder an der Datumsgrenze reichen deshalb auch über x < 0 oder x > W hinaus.
-import { W } from '../map.js?v=17';
+import { W } from '../map.js?v=18';
 
 const R = 6371;   // Erdradius in km
 

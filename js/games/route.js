@@ -208,7 +208,6 @@ export default function route(api) {
     for (const code of codes) { const b = map.countryBox(code); box = box ? unionBox(box, b) : b; }
     requestAnimationFrame(() => api.alive(g) && map.flyToBox(box, { pad: 1.3, minSize: 30 }));
   }
-  const routeCodes = j => [j.s, j.t, ...j.path];
 
   /* ---------- Ablauf ---------- */
 
@@ -278,7 +277,7 @@ export default function route(api) {
     const text = gap ? `${no} – dazwischen liegt ${gap}.` : `${no}.`;
     if (j.mistakes >= MAX_MISTAKES) { endTrip(g, false, `${text} Das war der dritte Fehler.`); return; }
     say(g, text, true);
-    fly(g, [...routeCodes(j), code]);
+    // Kamera bleibt stehen: Ein weit entferntes falsches Land (Japan) würde sonst die ganze Welt ins Bild holen
   }
 
   function move(g, code) {
@@ -291,7 +290,8 @@ export default function route(api) {
     sfx.blip(j.steps);
     if (code === j.t) { endTrip(g, true); return; }
     say(g, `${here(C.get(code))} Weiter Richtung ${C.get(j.t).name}.`);
-    fly(g, routeCodes(j));
+    // kein Herauszoomen bei jeder Eingabe: nur nachschieben, wenn das neue Land nicht im Bild ist (Zoom bleibt)
+    requestAnimationFrame(() => api.alive(g) && g.j === j && map.ensureVisible(map.countryBox(code)));
   }
 
   /** Reise werten und abschließen (auch für „Beenden“ mitten in der Reise). */
@@ -330,7 +330,8 @@ export default function route(api) {
       <div class="next-row"><button class="btn primary" type="button" data-gact="next">${last ? 'Zum Ergebnis' : 'Nächste Reise'}</button></div></div>`);
     api.arm(g);
     api.focusNext();
-    fly(g, [...j.roles.keys()]);
+    // Auflösung: Start, Ziel, Besuchtes und der kürzeste Weg – weit entfernte falsche Länder nicht mit ins Bild
+    fly(g, [...j.roles].filter(([, role]) => role !== 'wrong').map(([code]) => code));
   }
 
   function finish(g) {

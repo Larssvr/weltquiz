@@ -1,6 +1,6 @@
 // Minispiel „Schätz mal“: Einwohner, Fläche und Entfernungen mit einem Regler schätzen.
 // Bei Einwohnern und Fläche zählt der Faktor, um den man danebenliegt – so bekommt man ein Gefühl für Größenordnungen.
-import { W } from '../map.js?v=17';
+import { W } from '../map.js?v=18';
 
 const STEPS = 1000;   // Auflösung des Reglers
 const NUDGE = 5;      // „weniger“ und „mehr“: mindestens so viele Reglerschritte

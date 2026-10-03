@@ -1,6 +1,6 @@
 // Minispiel „Alle nennen“: Wie viele Länder eines Kontinents (oder der ganzen Welt) fallen dir ein, bevor die Zeit abläuft?
 // Namen werden ohne Vorschläge getippt; jeder richtige zählt sofort und färbt das Land grün. Am Ende sieht man, was gefehlt hat.
-import { norm } from '../search.js?v=17';
+import { norm } from '../search.js?v=18';
 
 const MINUTES = { welt: 20, europa: 6, asien: 6, afrika: 7, nordamerika: 3, suedamerika: 2, ozeanien: 2 };
 const WAIT_MS = 900;       // so lange ohne weiteres Tippen, wenn der Name noch länger werden kann (Niger → Nigeria)
