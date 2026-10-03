@@ -1,8 +1,15 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
+// Weitere Spiele kommen als eigene Module aus js/games/ dazu (Schnittstelle: „Spiele als Module“ ganz unten).
 import { W, REGION_BOX } from './map.js?v=15';
 import { NUMBERS } from './data/numbers.js?v=15';
 import { DE_CITIES } from './data/de-cities.js?v=15';
+import * as geo from './games/geo.js?v=15';
+import route from './games/route.js?v=15';
+import heiss from './games/heiss.js?v=15';
+import alle from './games/alle.js?v=15';
+import blind from './games/blind.js?v=15';
+import schaetzen from './games/schaetzen.js?v=15';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -61,6 +68,10 @@ const GAMES = [
   },
 ];
 
+// Spiele aus eigenen Modulen (js/games/<id>.js) – in dieser Reihenfolge stehen sie in der Übersicht, vor denen oben.
+// Ein Modul, das null liefert, ist noch nicht fertig und erscheint nirgends.
+const PLUGINS = [route, heiss, alle, blind, schaetzen];
+
 export function createGames(ctx) {
   const {
     map, state, sfx, C, COUNTRIES, CITIES, PLAYERS, CONTINENTS,
@@ -72,20 +83,28 @@ export function createGames(ctx) {
   const lastRegion = {};  // zuletzt gewählte Region je Spiel
   let game = null;        // laufendes Spiel
   let seq = 0;            // jede Runde bekommt eine Nummer – alte Zeitgeber verfallen
+  const plugins = new Map();   // Spiele aus Modulen: id → Definition (gefüllt ganz unten, wenn alle Helfer stehen)
 
   const today = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
   const me = () => state.player;
+  const defOf = id => plugins.get(id) || GAMES.find(g => g.id === id);
+  const allGames = () => [...plugins.values(), ...GAMES];
   const keyOf = (id, region = 'welt') => {
+    const p = plugins.get(id);
+    if (p) return typeof p.key === 'function' ? p.key(region) : p.key || id;
     if (id === 'blitz') return 'blitz-' + region;
     if (id === 'pin') return region === 'welt' ? 'pin' : 'pin-' + region;   // „pin“ bleibt der Welt-Rekord
     return GAMES.find(g => g.id === id)?.key || id;
   };
   const regionCodes = region => (region === 'de' ? ['DE'] : COUNTRIES.filter(c => c.regions.includes(region)).map(c => c.iso));
   const placeLabel = r => (r === 'de' ? 'Deutschland' : regionLabel(r));
-  const regionsOf = g => [{ id: 'welt', label: 'Welt' }, ...CONTINENTS, ...(g.id === 'pin' ? [{ id: 'de', label: 'Deutschland' }] : [])];
+  const regionsOf = g => {
+    const own = g.regionList?.();
+    return own?.length ? own : [{ id: 'welt', label: 'Welt' }, ...CONTINENTS, ...(g.id === 'pin' ? [{ id: 'de', label: 'Deutschland' }] : [])];
+  };
   const bestOf = (pid, key) => ctx.gamesOf(pid)?.[key]?.best ?? null;
   const dayOf = (pid, day = today()) => ctx.dailyOf(pid)?.[day] || null;
   const nameFor = code => C.get(code)?.name || map.countryFeatures.find(f => f.properties.c === code)?.properties.n || code;
@@ -171,9 +190,9 @@ export function createGames(ctx) {
       <p class="lead">Kurz und schnell. Eure Rekorde stehen nebeneinander – auch im Duell.</p>
       ${dailyBox()}
       <ul class="legend-list game-list">
-        ${GAMES.map(g => `<li><button class="legend-row" type="button" data-game="${g.id}">
-          <span class="swatch">${SW[g.id]}</span>
-          <span><span class="name">${g.name}</span><span class="desc">${g.desc}</span>${recordsHtml(keyOf(g.id), g.unit, { compact: true })}</span>
+        ${allGames().map(g => `<li><button class="legend-row" type="button" data-game="${g.id}">
+          <span class="swatch">${SW[g.id] || ''}</span>
+          <span><span class="name">${g.name}${g.badge ? ` <span class="tag mini">${esc(g.badge)}</span>` : ''}</span><span class="desc">${g.desc}</span>${recordsHtml(keyOf(g.id, regionsOf(g)[0].id), g.unit, { compact: true })}</span>
         </button></li>`).join('')}
       </ul>`;
   }
@@ -182,7 +201,9 @@ export function createGames(ctx) {
 
   function openIntro(id) {
     stop();
-    intro = { id, region: lastRegion[id] || 'welt' };
+    // zuletzt gewählte Region – sofern das Spiel sie (noch) anbietet, sonst die erste seiner Liste
+    const regions = regionsOf(defOf(id));
+    intro = { id, region: regions.some(r => r.id === lastRegion[id]) ? lastRegion[id] : regions[0].id };
     screen = 'intro';
     renderIntro();
     ctx.show('games');
@@ -191,7 +212,7 @@ export function createGames(ctx) {
   }
 
   function renderIntro() {
-    const g = GAMES.find(x => x.id === intro.id);
+    const g = defOf(intro.id);
     const regions = regionsOf(g);
     $('#view-games').innerHTML = `
       <button class="back" type="button" data-gact="hub">‹ Minispiele</button>
@@ -200,14 +221,15 @@ export function createGames(ctx) {
       <ul class="how">${(typeof g.how === 'function' ? g.how(intro.region) : g.how).map(t => `<li>${t}</li>`).join('')}</ul>
       ${g.regions ? `<div class="field"><p class="field-label">Wo?</p>
         <div class="options">${regions.map(r => `<button type="button" class="opt" data-gopt="${r.id}" aria-pressed="${r.id === intro.region}">${r.label}</button>`).join('')}</div></div>` : ''}
-      <p class="field-label" style="margin-top:20px">Rekorde${g.regions ? ` – ${esc(placeLabel(intro.region))}` : ''}</p>
+      <p class="field-label" style="margin-top:20px">Rekorde${g.regions ? ` – ${esc(regions.find(r => r.id === intro.region)?.label || placeLabel(intro.region))}` : ''}</p>
       ${recordsHtml(keyOf(g.id, intro.region), g.unit) || '<p class="hint" style="margin:0">Noch hat niemand gespielt.</p>'}
       <div class="actions"><button class="btn primary wide" type="button" data-gact="start">Los geht's</button></div>`;
   }
 
   function start() {
     const id = intro.id;
-    if (id === 'blitz') startBlitz(intro.region);
+    if (plugins.has(id)) plugins.get(id).start(intro.region);
+    else if (id === 'blitz') startBlitz(intro.region);
     else if (id === 'pin') startPin({ daily: false, region: intro.region });
     else if (id === 'nachbarn') startNachbarn();
     else if (id === 'vergleich') startVergleich();
@@ -229,11 +251,13 @@ export function createGames(ctx) {
 
   /** Laufendes Spiel ohne Ergebnis beenden (Zeitgeber, Karte, Abdeckung). */
   function stop() {
-    if (game) { clearInterval(game.clock); clearTimeout(game.timer); }
+    const g = game;
+    if (g) { clearInterval(g.clock); clearTimeout(g.timer); }
     game = null;
     seq++;
     veil(false);
     pickable(false);
+    if (g) hook(plugins.get(g.id), 'cleanup', g);
   }
 
   /* ---------- Ergebnis ---------- */
@@ -243,7 +267,7 @@ export function createGames(ctx) {
     if (res.isRecord) sfx.record();
     const other = state.player && PLAYERS.find(p => p.id !== state.player);
     const theirs = other ? bestOf(other.id, key) : null;
-    const def = GAMES.find(x => x.id === g.id);
+    const def = defOf(g.id);
     let line = '';
     if (res.isRecord) line = `<p class="record-badge">Neuer Rekord!${res.prev != null ? ` Vorher: ${fmt(res.prev)}` : ''}</p>`;
     else if (res.prev != null) line = `<p class="lead">Dein Rekord: ${fmt(res.prev)} ${esc(def.unit(res.prev))}</p>`;
@@ -256,6 +280,7 @@ export function createGames(ctx) {
     seq++;
     pickable(false);
     veil(false);
+    hook(plugins.get(g.id), 'cleanup', g);
     $('#view-games').innerHTML = `
       <button class="back" type="button" data-gact="hub">‹ Minispiele</button>
       <h2 class="h2">${title}</h2>
@@ -464,12 +489,6 @@ export function createGames(ctx) {
     return out;
   }
 
-  function km([lon1, lat1], [lon2, lat2]) {
-    const r = Math.PI / 180;
-    const a = Math.sin((lat2 - lat1) * r / 2) ** 2 + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin((lon2 - lon1) * r / 2) ** 2;
-    return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(a)));
-  }
-
   // Punkte nach Entfernung: weltweit volle Punkte bis 25 km, in Deutschland bis 10 km und steiler abfallend
   const pinScale = region => (region === 'de' ? { full: 10, decay: 150 } : { full: 25, decay: 1000 });
   const pinPoints = (d, region) => {
@@ -565,7 +584,7 @@ export function createGames(ctx) {
     g.answered = g.i;
     const p = g.places[g.i];
     const target = [p.lon, p.lat];
-    const d = !skipped && g.guess ? km(g.guess, target) : null;
+    const d = !skipped && g.guess ? geo.km(g.guess, target) : null;
     const pts = pinPoints(d, g.region);
     const full = d != null && d <= pinScale(g.region).full;
     const near = g.region === 'de';   // Deutschland: Kamera näher heran
@@ -743,18 +762,23 @@ export function createGames(ctx) {
     nachbarnHud(g);
     card(`<div class="q-head"><h2 class="q-prompt">Welche Länder grenzen an ${emph(acc(c))}?</h2></div>
       <p class="hint" id="nb-state"></p>
-      <form class="answer" id="nb-form" autocomplete="off">
-        <input id="nb-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nb-suggest"
-          placeholder="Nachbarland eingeben …" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Nachbarland">
-        <button class="btn primary ok" type="submit" disabled>OK</button>
-        <ul class="suggest" id="nb-suggest" role="listbox" hidden></ul>
-      </form>
+      ${nameFormHtml({ placeholder: 'Nachbarland eingeben …', label: 'Nachbarland' })}
       <div class="below"><button class="chip-btn" type="button" data-gact="nb-giveup">Aufgeben</button><span class="miss-dots" id="nb-dots"></span></div>`);
     $('#view-game').classList.add('asking');   // Vorschläge dürfen über die Karte hinausragen
     arm(g);
     nachbarnState(g);
     wireNameInput(id => nachbarnGuess(g, id));
     if (!matchMedia('(pointer: coarse)').matches) $('#nb-input').focus({ preventScroll: true });
+  }
+
+  /** Eingabefeld für einen Ländernamen mit Vorschlagsliste (Nachbarn und Spiele aus Modulen) – verbunden mit wireNameInput. */
+  function nameFormHtml({ placeholder = 'Land eingeben …', label = 'Land' } = {}) {
+    return `<form class="answer" id="nb-form" autocomplete="off">
+        <input id="nb-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nb-suggest"
+          placeholder="${esc(placeholder)}" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="${esc(label)}">
+        <button class="btn primary ok" type="submit" disabled>OK</button>
+        <ul class="suggest" id="nb-suggest" role="listbox" hidden></ul>
+      </form>`;
   }
 
   /** Eingabefeld mit Vorschlägen: Tippen auf einen Vorschlag gilt sofort, Enter wählt erst aus und schickt dann ab. */
@@ -1140,7 +1164,12 @@ export function createGames(ctx) {
     if (!act) return false;
     const g = game;
     // Klick kurz nach neuen Knöpfen (Doppelklick): ignorieren statt ungesehen die nächste Frage zu beantworten
-    if (g && performance.now() < (g.readyAt || 0) && !['hub', 'daily', 'start', 'again'].includes(act)) return true;
+    const nav = ['hub', 'daily', 'start', 'again'].includes(act);
+    if (g && performance.now() < (g.readyAt || 0) && !nav) return true;
+    // Spiel aus einem Modul: „Weiter“ und seine eigenen Knöpfe
+    const p = g && !nav ? plugins.get(g.id) : null;
+    if (p && act === 'next') { p.next?.(g); return true; }
+    if (p?.actions && Object.prototype.hasOwnProperty.call(p.actions, act)) { p.actions[act](g, t); return true; }
     switch (act) {
       case 'hub': openHub(); break;
       case 'daily': openDaily(); break;
@@ -1186,6 +1215,7 @@ export function createGames(ctx) {
 
   /** Spiel mit dem bisherigen Stand abschließen. false, wenn noch nichts gespielt ist. */
   function finishEarly(g) {
+    if (plugins.has(g.id)) return !!plugins.get(g.id).finishEarly?.(g);
     if (g.id === 'blitz' && (g.score || g.missed.length)) { g.over = true; finishBlitz(g); return true; }
     if (g.id === 'pin' && g.results.length) { g.places = g.places.slice(0, g.results.length); finishPin(g); return true; }
     if (g.id === 'nachbarn') {
@@ -1200,6 +1230,7 @@ export function createGames(ctx) {
 
   /** Bisheriger Stand als Zahl für die Rekordliste (null: noch nichts gespielt). */
   function scoreSoFar(g) {
+    if (plugins.has(g.id)) return hook(plugins.get(g.id), 'scoreSoFar', g) ?? null;
     if (g.id === 'blitz') return g.score;
     if (g.id === 'pin') return g.results.length ? g.total : null;
     if (g.id === 'nachbarn') return g.points + (g.cur && !g.cur.done ? g.cur.found.size + g.cur.bonus.size : 0);
@@ -1232,8 +1263,8 @@ export function createGames(ctx) {
   function duelHtml() {
     if (!state.player) return '';
     const rows = [];
-    for (const g of GAMES) {
-      const keys = g.regions ? regionsOf(g).map(r => [keyOf(g.id, r.id), `${g.name} ${r.label}`]) : [[keyOf(g.id), g.name]];
+    for (const g of allGames()) {
+      const keys = g.regions ? regionsOf(g).map(r => [keyOf(g.id, r.id), `${g.name} ${r.label}`]) : [[keyOf(g.id, regionsOf(g)[0].id), g.name]];
       for (const [key, label] of keys) {
         const vals = PLAYERS.map(p => bestOf(p.id, key));
         if (vals.every(v => v == null)) continue;
@@ -1260,9 +1291,122 @@ export function createGames(ctx) {
   }
 
   function onEnter() {
-    const btn = $('#view-game [data-gact="next"]') || $('#view-game [data-gact="pin-ok"]:not(:disabled)');
+    const btn = $('#view-game [data-gact="next"]') || $('#view-game [data-gact="pin-ok"]:not(:disabled)') || $('#view-game [data-enter]:not(:disabled)');
     if (btn) { btn.click(); return true; }
     return false;
+  }
+
+  /* ================= Spiele als Module ================= */
+
+  // Haken eines Spielmoduls aufrufen: Ein Fehler darin darf weder die Navigation noch andere Spiele lahmlegen
+  function hook(p, name, ...args) {
+    try { return p?.[name]?.(...args); } catch (err) { console.error(err); return undefined; }
+  }
+
+  /**
+   * Schnittstelle für Minispiele in eigenen Modulen. Ein Modul js/games/<id>.js exportiert
+   *
+   *   export default function (api) { return { …Definition… }; }    // oder null: Spiel noch nicht fertig
+   *
+   * Es steht oben in PLUGINS (Import mit ?v=15) und wird beim Start der App einmal aufgerufen.
+   * Eigene Stile gehören nach css/games/<id>.css – Klassen mit eigener Vorsilbe, z. B. .rt-…
+   *
+   * Definition (Pflicht: id, name, desc, how, swatch, key, unit, start):
+   *   id              eindeutig; data-game in der Übersicht und g.id des laufenden Spiels
+   *   name, desc      Name und eine Zeile Beschreibung für die Übersicht (Text)
+   *   how             Sätze für die Spielvorstellung: ['…', '…'] oder region => ['…']
+   *   badge           optional: kleines Schild neben dem Namen, z. B. 'neu'
+   *   swatch          Symbol in der Übersicht: '<svg viewBox="0 0 34 24">…</svg>'
+   *   regions         optional true: Regionswahl in der Vorstellung, Rekorde je Region (auch im Duell)
+   *   regionList      optional () => [{ id, label }]; sonst Welt und die sechs Kontinente. Der erste Eintrag ist die
+   *                   Vorgabe und sein Rekord steht in der Übersicht. Eine gemerkte Region, die fehlt, fällt auf ihn zurück.
+   *   key             region => Rekordschlüssel, z. B. r => 'route-' + r (ohne Regionen das Argument übergehen).
+   *                   Nie ändern – sonst sind die Rekorde weg; eine andere Wertung bekommt einen neuen Schlüssel.
+   *   unit            n => Einheit hinter der Zahl, z. B. n => (n === 1 ? 'Punkt' : 'Punkte')
+   *   start(region)   g = api.begin({ id, key, … }) aufrufen, dann Karte und Spielkarte aufbauen
+   *   actions         { 'rt-giveup'(g, t) {}, … } für Knöpfe mit data-gact="rt-giveup"; g = laufendes Spiel, t = der Knopf.
+   *                   Gilt nur, solange das Spiel läuft. Eigene Vorsilbe; hub, daily, start, again, next sind vergeben.
+   *   next(g)         Knopf data-gact="next" („Weiter“, „Zum Ergebnis“) – Enter drückt ihn auch
+   *   finishEarly(g)  „Beenden“: mit dem bisherigen Stand api.showResult(…) aufrufen und true liefern;
+   *                   false, wenn noch nichts gespielt ist – dann geht es zurück zur Vorstellung
+   *   scoreSoFar(g)   bisheriger Stand als Zahl oder null; wird Rekord, wenn man über Logo oder Spielerwechsel geht
+   *   cleanup(g)      optional: eigene Modi zurücksetzen (Klassen am SVG oder an #map, eigene Ebenen, Zeitgeber,
+   *                   Ereignisse). Läuft bei JEDEM Spielende, auch in showResult vor der Ergebnisseite. Länderklassen
+   *                   aus map.setCountryClass nimmt map.clear() ab – die bleiben so auf der Ergebnisseite stehen.
+   *
+   * Spielregeln für Module:
+   *   - Jeder Zeitgeber, Kameraflug und Rückruf prüft zuerst api.alive(g): Das Spiel kann längst vorbei sein.
+   *     api.clock hört mit dem Spiel von selbst auf; eigene Intervalle und Ereignisse räumt cleanup ab.
+   *   - Nach neuen Knöpfen api.arm(g), sonst beantwortet ein Doppelklick gleich die nächste Frage mit.
+   *   - Den wichtigsten Knopf einer Frage (z. B. OK) mit data-enter markieren: Enter drückt ihn, wenn es kein „Weiter“ gibt.
+   *   - Karte antippen: map.onClick = (hit, e, [x, y]) => …, map.hitOptions = { water: false, … } und
+   *     $('#map').classList.add('pickable'); api.pickable(false) nimmt alles wieder weg, api.begin ebenso.
+   *
+   * api – aus der App:
+   *   map             die Weltkarte (js/map.js): flyToBox, flyToCountry, flyToPoint, showRegion, refit, countryBox,
+   *                   setCountryClass(code, cls, on), dimOutside, labelCountry, labelAt, pin, guessPin, line,
+   *                   clearOverlay, clear, hitTest, lonLatAt, projection, neighborGraph, silhouette …
+   *                   map.clear() nimmt auch jede Klasse ab, die je über setCountryClass gesetzt wurde.
+   *   state, save     gespeicherter Stand (state.player: 'emilia' | 'lars' | null) · speichern
+   *   sfx             Töne: correct, wrong, hint, select, whoosh, buzz, blip(n), streak(n), tick(last), record, fanfare(anteil)
+   *   C, COUNTRIES    Länder als Map ISO → Land und als Liste: { iso, name, aliases, capital: { name, lat, lon },
+   *                   otherCapitals, languages, currency, facts, regions: ['europa', …] }
+   *   CITIES          weitere Städte: { name, lat, lon, iso }
+   *   PLAYERS         [{ id, name }] · CONTINENTS: [{ id, label }] ohne Welt
+   *   $, esc          document.querySelector · Text für HTML maskieren
+   *   flagUrl(iso), shuffle(a) (gemischte Kopie), nameOf(code, props) (Name auch für Gebiete der Karte)
+   *   nom, acc, gen, inDat (Land)   „die Türkei“, „den Iran“, „der Türkei“ / „von Deutschland“, „in der Türkei“
+   *   pl(c, eins, mehrere), capFirst(text), emph(wendung, tag = 'em') (hebt nur den Namen hervor)
+   *   unionBox(a, b)  Rahmen um zwei Rahmen in Karteneinheiten (auch über die Datumsgrenze)
+   *   regionLabel(id), playerName(id)
+   *   countrySearch   Ländersuche, Tippfehler egal: search(text) → [{ item: { id, label }, via }], exact(text) → item | null
+   *
+   * api – aus den Minispielen:
+   *   fmt(n), dec(n, d), clockText(ms), genName(name)   „1.234“, „3,5“, „1:05“, „Emilias“ / „Lars’“
+   *   pick(a), today(), me()     Zufallselement · 'JJJJ-MM-TT' · Spieler-ID oder null
+   *   hud(bar, text)  Kopfzeile: Balken aus <i>-Teilen (Klassen r, m, w, now; time mit style="width:…%") und Text aus
+   *                   <span>s (.long nur breit, .short nur schmal, .clock für die Uhr)
+   *   card(html)      Spielkarte (#view-game) füllen · focusNext(): Knopf „Weiter“ fokussieren und ins Bild holen
+   *   pickable(on)    Karte antippbar (aus: auch map.onClick und map.hitOptions weg) · veil(on): Karte abdecken
+   *   begin({ id, key, … }) → g   neues Spiel: beendet ein laufendes, zeigt die Spielkarte, leert die Karte.
+   *                   Weiter mit dem zurückgegebenen g (eine Kopie mit g.seq)
+   *   alive(g), arm(g)           läuft g noch? · kurz keine Klicks annehmen
+   *   showResult({ g, key, score, title, big, unit, details })   Ergebnisseite; speichert score als Rekord unter key.
+   *                   title und details sind HTML, big die große Zahl, unit Text. Wirkt nur für das laufende Spiel.
+   *   refitMap()      nach dem Spiel: Kartenausschnitt für die Ergebnisseite neu einpassen (macht showResult schon);
+   *                   im laufenden Spiel stattdessen map.refit()
+   *   clock(g, ms, onTick, onEnd)   Spieluhr: g.left, g.total; steht still, solange die App im Hintergrund ist
+   *   countdown(g, then)         3 – 2 – 1 in der Spielkarte, dann then()
+   *   regionCodes(region), placeLabel(region)   ISO-Codes eines Kontinents ('de' → ['DE'], 'welt' → []) · Name
+   *   bestOf(pid, key)           Rekord eines Spielers (pid null: eigener), null = noch keiner
+   *   neighborsOf(iso)           Nachbarstaaten mit gemeinsamer Landgrenze (Set), wie bei Nachbarn
+   *   extrasOf(iso)              Nachbarn nur über ferne Landesteile: Map ISO → 'Französisch-Guayana' …
+   *   nameFor(code)              Name, auch für Gebiete ohne Eintrag in C
+   *   popText(n), areaText(n), NUMBERS   „83,2 Mio.“, „357.000 km²“ · { ISO: { pop, area } }
+   *   nameFormHtml({ placeholder, label })   Ländereingabe mit Vorschlägen wie bei Nachbarn (ids nb-form, nb-input, nb-suggest)
+   *   wireNameInput(onPick)      verbindet sie, onPick(iso) bei Auswahl. Ablauf: card(`… ${nameFormHtml(…)} …`);
+   *                   $('#view-game').classList.add('asking') (Vorschläge dürfen über die Karte ragen); wireNameInput(…);
+   *                   ohne Touch noch $('#nb-input').focus({ preventScroll: true })
+   *   geo             Geometrie (js/games/geo.js): km, coreRings, corePoints, betweenKm, toCountryKm, centerOf,
+   *                   direction, WINDS, ARROWS
+   */
+  const api = {
+    map, state, save: ctx.save, sfx, C, COUNTRIES, CITIES, PLAYERS, CONTINENTS,
+    $, esc, flagUrl, shuffle, nameOf, nom, acc, gen, inDat, pl, capFirst, emph, unionBox, regionLabel, playerName,
+    countrySearch: ctx.countrySearch,
+    fmt, dec, clockText, genName, pick, today, me, hud, card, focusNext, pickable, veil, begin, alive, arm,
+    showResult: o => { if (alive(o.g)) showResult(o); },
+    refitMap, clock, countdown, regionCodes, placeLabel, bestOf, neighborsOf, extrasOf, nameFor, popText, areaText, NUMBERS,
+    nameFormHtml, wireNameInput, geo,
+  };
+
+  for (const make of PLUGINS) {
+    let def = null;
+    try { def = make(api); } catch (err) { console.error(err); }
+    if (!def) continue;
+    if (defOf(def.id) || def.id === 'daily') { console.error(`Minispiel „${def.id}“ gibt es schon`); continue; }
+    plugins.set(def.id, def);
+    if (def.swatch) SW[def.id] = def.swatch;
   }
 
   return {

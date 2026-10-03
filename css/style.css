@@ -462,6 +462,7 @@ p.who-note { margin: 14px 0 0; }
 
 /* Übersicht, Vorstellung, Ergebnis */
 .game-list .legend-row { grid-template-columns: 34px 1fr; }
+.tag.mini { display: inline-block; vertical-align: 2px; margin: 0 0 0 6px; padding: 1px 5px 2px; font-size: 11px; line-height: 1.2; letter-spacing: 0.04em; text-transform: uppercase; }   /* „neu“ neben dem Spielnamen */
 .rec { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; font-size: 14px; color: var(--muted); }
 .rec b { font-family: var(--font-cond); font-size: 17px; font-variant-numeric: tabular-nums; }
 .rec .p-emilia b { color: var(--pa); }

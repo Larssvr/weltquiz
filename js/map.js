@@ -44,6 +44,7 @@ export class WorldMap {
     this.onClick = null;
     this.labelMode = false;
     this.overlayItems = [];   // {x, y, el, kind}
+    this.countryClasses = new Set();   // alles, was setCountryClass je gesetzt hat – clear() nimmt es wieder ab
     this._build();
   }
 
@@ -399,6 +400,7 @@ export class WorldMap {
   clear() {
     this.landSel.classed('is-target is-right is-wrong is-pick is-out is-hover', false)
       .classed('m0 m1 m2 m3', false).classed('cmp-a cmp-b cmp-ab', false);
+    if (this.countryClasses.size) this.landSel.classed([...this.countryClasses].join(' '), false);
     this.waterSel.classed('is-target is-right is-wrong is-pick cmp-a cmp-b cmp-ab', false);
     this.lakeSel.classed('is-target is-right is-wrong is-pick cmp-a cmp-b cmp-ab', false);
     this.clearOverlay();
@@ -508,6 +510,7 @@ export class WorldMap {
   }
 
   setCountryClass(code, cls, on = true) {
+    if (on && cls) this.countryClasses.add(cls);
     this.landSel.filter(f => f.properties.c === code).classed(cls, on).raise();
   }
 

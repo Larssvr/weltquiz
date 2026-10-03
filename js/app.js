@@ -281,7 +281,8 @@ function watchKeyboard() {
     document.documentElement.style.setProperty('--kb', kbHeight + 'px');
     if (Math.abs(kbHeight - prev) > 60) {
       clearTimeout(refitTimer);
-      refitTimer = setTimeout(refitQuestion, 180);
+      // in Minispielen mit Eingabefeld: Kartenausschnitt in den freien Bereich zwischen Spielkarte und Tastatur
+      refitTimer = setTimeout(() => { if (view === 'game') map.refit({ duration: 350 }); else refitQuestion(); }, 180);
     }
   };
   vv.addEventListener('resize', update);
