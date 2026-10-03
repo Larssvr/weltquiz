@@ -1,1 +1,34 @@
-/* Minispiel „alle“ (js/games/alle.js): eigene Stile, Klassen mit eigener Vorsilbe. */
+/* Minispiel „Alle nennen“ (js/games/alle.js): eigene Stile, Klassen mit eigener Vorsilbe. */
+
+.all-head { margin-bottom: 12px; }
+.all-count { font-family: var(--font-cond); font-weight: 600; font-size: 17px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.all-count b { font-size: 24px; color: var(--ink); }
+.all-state { margin: 8px 0 0; min-height: 1.45em; }
+.all-state b { color: var(--right-ink); }
+#view-game .all-state + .below { margin-top: 6px; }
+
+/* Kein Land erkannt: kurz wackeln, der Rand bleibt rot bis zum nächsten Tippen */
+.answer input.all-shake, .answer input.all-shake:focus { border-color: var(--wrong); box-shadow: 0 0 0 3px rgba(224, 68, 42, 0.22); animation: all-shake 0.36s ease-in-out; }
+@keyframes all-shake {
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+@media (max-width: 700px) {
+  .all-head { margin-bottom: 10px; }
+  .all-count b { font-size: 21px; }
+}
+
+/* Handy quer: Zustand und „Mehr fallen mir nicht ein“ in einer Zeile – mehr Platz für die Karte */
+@media (max-height: 500px) {
+  .all-head { margin-bottom: 8px; }
+  .all-foot { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .all-foot .all-state { flex: 1; min-width: 0; margin: 0; }
+  #view-game .all-foot .below { margin: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer input.all-shake { animation: none; }
+}
