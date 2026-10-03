@@ -39,3 +39,19 @@
   .rt-done > .next-row { margin-top: 0; }
   .rt-done > .result-detail { font-size: 15.5px; }
 }
+
+/* Schwierigkeit (Klasse an #map, nur während einer Reise): Mittel ohne Grenzen, Schwer nur Start, Ziel und Genanntes.
+   Ohne Übergang beim Verdecken – kein Zwischenbild mit Farben; das Aufdecken danach blendet weich ein. */
+/* bei Schwer auch das Gradnetz: Es läge nur über dem Meer und zeichnete so die Küsten nach */
+.map.rt-mittel .borders, .map.rt-schwer .borders, .map.rt-schwer .coast, .map.rt-schwer .graticule { opacity: 0; }
+.map.rt-mittel .land path:not(.is-target):not(.is-goal):not(.is-right):not(.is-wrong):not(.is-pick):not(.ice) {
+  fill: #ecdcb4; stroke: #ecdcb4; stroke-width: 0.9; stroke-linejoin: round; vector-effect: non-scaling-stroke; transition: none;
+}
+.map.rt-schwer .land path:not(.is-target):not(.is-goal):not(.is-right):not(.is-wrong):not(.is-pick) {
+  fill: var(--sea); stroke: var(--sea); stroke-width: 0.9; vector-effect: non-scaling-stroke; transition: none;
+}
+.map.rt-schwer .lakes path { stroke: none; }
+/* ohne Grenzlinien: aneinanderstoßende markierte Länder mit dunklerem Rand auseinanderhalten */
+.map.rt-mittel .land path.is-right, .map.rt-schwer .land path.is-right { stroke: var(--right-ink); }
+.map.rt-mittel .land path.is-wrong, .map.rt-schwer .land path.is-wrong { stroke: var(--wrong-ink); }
+.map.rt-mittel .land path.is-target, .map.rt-schwer .land path.is-target { stroke: #8f1449; }

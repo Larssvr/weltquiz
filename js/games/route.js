@@ -24,6 +24,16 @@ const SHIFTS = [0, 19, -19, 38, -38];   // so weit darf ein Schild ausweichen, b
 
 const SMALL = new Set(['von', 'vom', 'nach', 'in', 'ins', 'im', 'der', 'die', 'das', 'dem', 'den']);
 
+// Schwierigkeit: Wie viel verrät die Karte über die Länder dazwischen? (Klasse an #map, css/games/route.css)
+const LEVELS = [
+  { id: 'einfach', label: 'Einfach' },   // alle Länder zu sehen, ohne Namen
+  { id: 'mittel', label: 'Mittel' },     // Land und Meer, aber keine Grenzen
+  { id: 'schwer', label: 'Schwer' },     // nur Start, Ziel und was man genannt hat
+];
+const MODE_CLASSES = ['rt-mittel', 'rt-schwer'];
+// „einfach“ behält den Schlüssel von vorher – so bleiben die bisherigen Rekorde gültig
+const keyFor = (region, level) => 'route-' + region + (level && level !== 'einfach' ? '-' + level : '');
+
 const SWATCH = '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#a9d3ea"/><path d="M0 9l7-3 6 2 6-3 7 1 8-2v20H0z" fill="#f3d29b"/><path d="M13 8l6-3 7 1 8-2v8l-8 3-6-1-4-3z" fill="#cfe1a9"/><path d="M15 13l6 1 8-3 5-1v14H17z" fill="#f2c0c7"/><path d="M13 8l2 5 2 11M15 13l6 1 8-3 5-1" fill="none" stroke="#85766a" stroke-width="1"/><path d="M5.5 18.5c5-1 7-7 12-7.5s6 0 9.5-4.5" fill="none" stroke="#2a2833" stroke-width="1.2" stroke-dasharray="2.5 2"/><circle cx="5.5" cy="18.5" r="2.4" fill="#d6246e" stroke="#fff" stroke-width="1"/><path d="M27.5 8V1.5" stroke="#2a2833" stroke-width="1.2"/><path d="M27.5 1.5h5l-1.4 1.6 1.4 1.6h-5z" fill="#2a2833"/></svg>';
 
 export default function route(api) {
@@ -186,6 +196,13 @@ export default function route(api) {
     }
   }
 
+  /** Karte verdecken (während der Reise, je nach Schwierigkeit) oder aufdecken (Auflösung, Ergebnis). */
+  function hide(g, on) {
+    const el = $('#map');
+    el.classList.remove(...MODE_CLASSES);
+    if (on && g.level !== 'einfach') el.classList.add('rt-' + g.level);
+  }
+
   function fly(g, codes) {
     let box = null;
     for (const code of codes) { const b = map.countryBox(code); box = box ? unionBox(box, b) : b; }
@@ -208,6 +225,7 @@ export default function route(api) {
     const { s, t, d } = g.trips[g.i];
     const j = g.j = { s, t, d, cur: s, focus: s, path: [s], steps: 0, mistakes: 0, roles: new Map(), claims: new Set(), done: false };
     map.clear();
+    hide(g, true);
     setRole(j, s, 'start');
     setRole(j, t, 'goal');
     labels(j);
@@ -290,6 +308,7 @@ export default function route(api) {
     const j = g.j;
     if (!api.alive(g) || !j || j.done) return;
     const pts = closeTrip(g, arrived);
+    hide(g, false);   // Auflösung: die ganze Karte, damit man den Weg im Zusammenhang sieht
     const extra = j.steps - j.d;
     let detail;
     if (arrived && !extra) {
@@ -317,14 +336,17 @@ export default function route(api) {
   function finish(g) {
     if (!api.alive(g)) return;
     // Überblick: alle Starts und Ziele dieses Spiels
+    hide(g, false);
     map.clear();
     for (const r of g.rows) { map.setCountryClass(r.s, 'is-target'); map.setCountryClass(r.t, 'is-goal'); }
     map.showRegion(g.region);
-    const where = g.region !== 'welt' ? ` – ${esc(regionLabel(g.region))}` : '';
+    const lvl = g.level !== 'einfach' ? LEVELS.find(l => l.id === g.level).label : '';
+    const where = [g.region !== 'welt' ? regionLabel(g.region) : '', lvl].filter(Boolean).map(esc).join(' · ');
+    const title = where ? `Reiseroute – ${where}` : 'Reiseroute';
     // Reise oben, Schritte darunter: lange Ländernamen brauchen die ganze Breite
     const rows = g.rows.map(r => `<li><span>${esc(C.get(r.s).name)} → ${esc(C.get(r.t).name)}<span class="res-km">${r.arrived
       ? `${r.steps} ${r.steps === 1 ? 'Schritt' : 'Schritte'} (kürzester Weg ${r.d})` : 'nicht angekommen'}</span></span><b>${r.pts}</b></li>`).join('');
-    api.showResult({ g, key: g.key, score: g.total, title: `Reiseroute${where}`, big: g.total, unit: `von ${g.trips.length * 10} Punkten`,
+    api.showResult({ g, key: g.key, score: g.total, title, big: g.total, unit: `von ${g.trips.length * 10} Punkten`,
       details: `<ul class="res-list rt-res">${rows}</ul>` });
   }
 
@@ -338,16 +360,19 @@ export default function route(api) {
       'Nenne Land für Land dein nächstes Nachbarland, bis du im Ziel ankommst. Tippfehler sind kein Problem.',
       // „Jeder Schritt mehr“ statt „jeder Umweg“: Ein Umweg von drei Schritten kostet auch dreimal
       'Der kürzeste Weg bringt 10 Punkte. Jeder Schritt mehr kostet 2 Punkte, jedes falsche Land 1 Punkt. Nach drei falschen Ländern ist die Reise vorbei.',
+      'Einfach: Die Karte zeigt alle Länder, nur ohne Namen. Mittel: keine Grenzen. Schwer: nur Start, Ziel und die Länder, die du schon genannt hast.',
     ],
+    levels: LEVELS,
     swatch: SWATCH,
     regions: true,
     // Ozeanien hat keine Landgrenzen zwischen seinen Staaten – es fällt hier von selbst heraus
     regionList: () => [{ id: 'welt', label: regionLabel('welt') }, ...CONTINENTS.filter(r => pairsOf(r.id).length >= MIN_PAIRS)],
-    key: region => 'route-' + region,
+    key: keyFor,
     unit,
-    start(region) {
+    start(region, level) {
       if (pairsOf(region).length < MIN_PAIRS) region = 'welt';
-      const g = live = api.begin({ id: 'route', key: 'route-' + region, region, trips: pickTrips(region), i: 0, total: 0, rows: [], j: null });
+      if (!LEVELS.some(l => l.id === level)) level = 'einfach';
+      const g = live = api.begin({ id: 'route', key: keyFor(region, level), region, level, trips: pickTrips(region), i: 0, total: 0, rows: [], j: null });
       map.zoom.on('zoom.rt', declutter);
       trip(g);
     },
@@ -371,6 +396,7 @@ export default function route(api) {
       map.zoom.on('zoom.rt', null);
       live = null;
       $('#view-game').classList.remove('asking');
+      $('#map').classList.remove(...MODE_CLASSES);   // die Karte darf nie verdeckt zurückbleiben
     },
   };
 }

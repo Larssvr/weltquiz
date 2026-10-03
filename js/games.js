@@ -1,15 +1,15 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
 // Weitere Spiele kommen als eigene Module aus js/games/ dazu (Schnittstelle: „Spiele als Module“ ganz unten).
-import { W, REGION_BOX } from './map.js?v=16';
-import { NUMBERS } from './data/numbers.js?v=16';
-import { DE_CITIES } from './data/de-cities.js?v=16';
-import * as geo from './games/geo.js?v=16';
-import route from './games/route.js?v=16';
-import heiss from './games/heiss.js?v=16';
-import alle from './games/alle.js?v=16';
-import blind from './games/blind.js?v=16';
-import schaetzen from './games/schaetzen.js?v=16';
+import { W, REGION_BOX } from './map.js?v=17';
+import { NUMBERS } from './data/numbers.js?v=17';
+import { DE_CITIES } from './data/de-cities.js?v=17';
+import * as geo from './games/geo.js?v=17';
+import route from './games/route.js?v=17';
+import heiss from './games/heiss.js?v=17';
+import alle from './games/alle.js?v=17';
+import blind from './games/blind.js?v=17';
+import schaetzen from './games/schaetzen.js?v=17';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -79,8 +79,9 @@ export function createGames(ctx) {
   } = ctx;
 
   let screen = 'hub';     // hub | intro | result (im Panel „Minispiele“)
-  let intro = { id: 'blitz', region: 'welt' };
+  let intro = { id: 'blitz', region: 'welt', level: null };
   const lastRegion = {};  // zuletzt gewählte Region je Spiel
+  const lastLevel = {};   // zuletzt gewählte Schwierigkeit je Spiel (nur Spiele mit levels)
   let game = null;        // laufendes Spiel
   let seq = 0;            // jede Runde bekommt eine Nummer – alte Zeitgeber verfallen
   const plugins = new Map();   // Spiele aus Modulen: id → Definition (gefüllt ganz unten, wenn alle Helfer stehen)
@@ -92,9 +93,9 @@ export function createGames(ctx) {
   const me = () => state.player;
   const defOf = id => plugins.get(id) || GAMES.find(g => g.id === id);
   const allGames = () => [...plugins.values(), ...GAMES];
-  const keyOf = (id, region = 'welt') => {
+  const keyOf = (id, region = 'welt', level = null) => {
     const p = plugins.get(id);
-    if (p) return typeof p.key === 'function' ? p.key(region) : p.key || id;
+    if (p) return typeof p.key === 'function' ? p.key(region, level ?? p.levels?.[0]?.id ?? null) : p.key || id;
     if (id === 'blitz') return 'blitz-' + region;
     if (id === 'pin') return region === 'welt' ? 'pin' : 'pin-' + region;   // „pin“ bleibt der Welt-Rekord
     return GAMES.find(g => g.id === id)?.key || id;
@@ -202,8 +203,12 @@ export function createGames(ctx) {
   function openIntro(id) {
     stop();
     // zuletzt gewählte Region – sofern das Spiel sie (noch) anbietet, sonst die erste seiner Liste
-    const regions = regionsOf(defOf(id));
-    intro = { id, region: regions.some(r => r.id === lastRegion[id]) ? lastRegion[id] : regions[0].id };
+    const def = defOf(id), regions = regionsOf(def), levels = def.levels || [];
+    intro = {
+      id,
+      region: regions.some(r => r.id === lastRegion[id]) ? lastRegion[id] : regions[0].id,
+      level: levels.some(l => l.id === lastLevel[id]) ? lastLevel[id] : levels[0]?.id ?? null,
+    };
     screen = 'intro';
     renderIntro();
     ctx.show('games');
@@ -213,22 +218,25 @@ export function createGames(ctx) {
 
   function renderIntro() {
     const g = defOf(intro.id);
-    const regions = regionsOf(g);
+    const regions = regionsOf(g), levels = g.levels || [];
+    const where = [g.regions ? regions.find(r => r.id === intro.region)?.label || placeLabel(intro.region) : '', levels.find(l => l.id === intro.level)?.label || ''].filter(Boolean).join(' · ');
     $('#view-games').innerHTML = `
       <button class="back" type="button" data-gact="hub">‹ Minispiele</button>
       <h2 class="h2">${g.name}</h2>
       <p class="lead">${g.desc}</p>
-      <ul class="how">${(typeof g.how === 'function' ? g.how(intro.region) : g.how).map(t => `<li>${t}</li>`).join('')}</ul>
+      <ul class="how">${(typeof g.how === 'function' ? g.how(intro.region, intro.level) : g.how).map(t => `<li>${t}</li>`).join('')}</ul>
       ${g.regions ? `<div class="field"><p class="field-label">Wo?</p>
         <div class="options">${regions.map(r => `<button type="button" class="opt" data-gopt="${r.id}" aria-pressed="${r.id === intro.region}">${r.label}</button>`).join('')}</div></div>` : ''}
-      <p class="field-label" style="margin-top:20px">Rekorde${g.regions ? ` – ${esc(regions.find(r => r.id === intro.region)?.label || placeLabel(intro.region))}` : ''}</p>
-      ${recordsHtml(keyOf(g.id, intro.region), g.unit) || '<p class="hint" style="margin:0">Noch hat niemand gespielt.</p>'}
+      ${levels.length ? `<div class="field"><p class="field-label">Schwierigkeit</p>
+        <div class="options">${levels.map(l => `<button type="button" class="opt" data-glevel="${l.id}" aria-pressed="${l.id === intro.level}">${l.label}</button>`).join('')}</div></div>` : ''}
+      <p class="field-label" style="margin-top:20px">Rekorde${where ? ` – ${esc(where)}` : ''}</p>
+      ${recordsHtml(keyOf(g.id, intro.region, intro.level), g.unit) || '<p class="hint" style="margin:0">Noch hat niemand gespielt.</p>'}
       <div class="actions"><button class="btn primary wide" type="button" data-gact="start">Los geht's</button></div>`;
   }
 
   function start() {
     const id = intro.id;
-    if (plugins.has(id)) plugins.get(id).start(intro.region);
+    if (plugins.has(id)) plugins.get(id).start(intro.region, intro.level);
     else if (id === 'blitz') startBlitz(intro.region);
     else if (id === 'pin') startPin({ daily: false, region: intro.region });
     else if (id === 'nachbarn') startNachbarn();
@@ -1160,6 +1168,7 @@ export function createGames(ctx) {
   function handleClick(t) {
     if (t.dataset.game) { openIntro(t.dataset.game); return true; }
     if (t.dataset.gopt) { intro.region = lastRegion[intro.id] = t.dataset.gopt; renderIntro(); map.clear(); map.showRegion(intro.region); return true; }
+    if (t.dataset.glevel) { intro.level = lastLevel[intro.id] = t.dataset.glevel; renderIntro(); return true; }
     const act = t.dataset.gact;
     if (!act) return false;
     const g = game;
@@ -1264,7 +1273,9 @@ export function createGames(ctx) {
     if (!state.player) return '';
     const rows = [];
     for (const g of allGames()) {
-      const keys = g.regions ? regionsOf(g).map(r => [keyOf(g.id, r.id), `${g.name} ${r.label}`]) : [[keyOf(g.id, regionsOf(g)[0].id), g.name]];
+      const regs = g.regions ? regionsOf(g).map(r => [r.id, ` ${r.label}`]) : [[regionsOf(g)[0].id, '']];
+      const lvls = g.levels?.length ? g.levels.map(l => [l.id, ` · ${l.label}`]) : [[null, '']];
+      const keys = regs.flatMap(([r, rl]) => lvls.map(([l, ll]) => [keyOf(g.id, r, l), g.name + rl + ll]));
       for (const [key, label] of keys) {
         const vals = PLAYERS.map(p => bestOf(p.id, key));
         if (vals.every(v => v == null)) continue;
@@ -1308,7 +1319,7 @@ export function createGames(ctx) {
    *
    *   export default function (api) { return { …Definition… }; }    // oder null: Spiel noch nicht fertig
    *
-   * Es steht oben in PLUGINS (Import mit ?v=16) und wird beim Start der App einmal aufgerufen.
+   * Es steht oben in PLUGINS (Import mit ?v=17) und wird beim Start der App einmal aufgerufen.
    * Eigene Stile gehören nach css/games/<id>.css – Klassen mit eigener Vorsilbe, z. B. .rt-…
    *
    * Definition (Pflicht: id, name, desc, how, swatch, key, unit, start):
@@ -1320,10 +1331,12 @@ export function createGames(ctx) {
    *   regions         optional true: Regionswahl in der Vorstellung, Rekorde je Region (auch im Duell)
    *   regionList      optional () => [{ id, label }]; sonst Welt und die sechs Kontinente. Der erste Eintrag ist die
    *                   Vorgabe und sein Rekord steht in der Übersicht. Eine gemerkte Region, die fehlt, fällt auf ihn zurück.
-   *   key             region => Rekordschlüssel, z. B. r => 'route-' + r (ohne Regionen das Argument übergehen).
+   *   levels          optional [{ id, label }]: Schwierigkeit zur Wahl in der Vorstellung, die erste ist die Vorgabe.
+   *                   Rekorde dann je Region und Schwierigkeit (auch im Duell); how(region, level) bekommt sie mit.
+   *   key             (region, level) => Rekordschlüssel, z. B. r => 'route-' + r (ohne Regionen das Argument übergehen).
    *                   Nie ändern – sonst sind die Rekorde weg; eine andere Wertung bekommt einen neuen Schlüssel.
    *   unit            n => Einheit hinter der Zahl, z. B. n => (n === 1 ? 'Punkt' : 'Punkte')
-   *   start(region)   g = api.begin({ id, key, … }) aufrufen, dann Karte und Spielkarte aufbauen
+   *   start(region, level)   g = api.begin({ id, key, … }) aufrufen, dann Karte und Spielkarte aufbauen
    *   actions         { 'rt-giveup'(g, t) {}, … } für Knöpfe mit data-gact="rt-giveup"; g = laufendes Spiel, t = der Knopf.
    *                   Gilt nur, solange das Spiel läuft. Eigene Vorsilbe; hub, daily, start, again, next sind vergeben.
    *   next(g)         Knopf data-gact="next" („Weiter“, „Zum Ergebnis“) – Enter drückt ihn auch
