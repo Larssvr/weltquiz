@@ -1,1 +1,23 @@
-/* Minispiel „blind“ (js/games/blind.js): eigene Stile, Klassen mit eigener Vorsilbe. */
+/* Minispiel „Ohne Grenzen“ (js/games/blind.js): Die Karte zeigt nur Land und Meer. Klassen an #map: blind, bl-reveal. */
+
+.map.blind {
+  --bl-land: #ecdcb4;   /* Sand: alle Länder der Region */
+  --bl-out: #d6d4ce;    /* Grau: außerhalb der Region */
+}
+/* Alle Länder gleich – der dünne Rand in derselben Farbe deckt die Haarfugen zwischen den Flächen, die sonst die
+   Grenzen nachzeichnen. Ohne Übergang: Beim Abdecken darf kein Zwischenbild mit Farben stehen bleiben. */
+.map.blind .land path {
+  fill: var(--bl-land); stroke: var(--bl-land); stroke-width: 0.9; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+  transition: none;
+}
+.map.blind .land path.ice { fill: #f6f8fa; stroke: #f6f8fa; }
+.map.blind .land path.is-out { fill: var(--bl-out); stroke: var(--bl-out); }
+.map.blind .borders { opacity: 0; }
+
+/* Aufdecken: Grenzen blenden mit den Farben ein; Ringe um winzige Inselstaaten in Grün wie das Land */
+.map.bl-reveal .borders { transition: opacity 0.35s ease; }
+.map.bl-reveal .ring-line, .map.bl-reveal .ring-pulse { stroke: var(--right); }
+
+@media (prefers-reduced-motion: reduce) {
+  .map.bl-reveal .borders { transition: none; }
+}
