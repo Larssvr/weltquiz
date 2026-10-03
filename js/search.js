@@ -56,6 +56,7 @@ export class Searcher {
     const q = compact(qn);
     if (!q) return [];
     const max = allowed(q.length);
+    const raw = String(query).trim().toLowerCase();
     const out = [];
     for (const it of this.items) {
       let best = 0, via = null;
@@ -74,6 +75,8 @@ export class Searcher {
             ...k.words.map(w => dist(q, w.slice(0, q.length), max)));
           if (d <= max) s = 600 - d * 90 - Math.min(40, Math.abs(k.c.length - q.length));
         }
+        // genau so angefangen, mit Umlauten und Akzenten: „Ös“ meint Österreich, nicht Osttimor
+        if (s >= 820 && k.raw.toLowerCase().startsWith(raw)) s += 15;
         if (s > best) { best = s; via = k.raw; }
       }
       if (best > 0) out.push({ item: it, score: best, via: via === it.label ? null : via });

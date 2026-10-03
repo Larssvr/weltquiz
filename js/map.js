@@ -153,6 +153,9 @@ export class WorldMap {
     const r = this.container.getBoundingClientRect();
     const vw = Math.max(1, r.width), vh = Math.max(1, r.height);
     if (this._initialized && vw === this.vw && vh === this.vh) return;   // nichts geändert: laufende Flüge nicht abbrechen
+    // Kurzzeitig winzige Fläche (z. B. verdecktes Fenster): Was dort berechnet wird, ist danach unbrauchbar
+    const wasTiny = this._tiny;
+    this._tiny = vw < 100 || vh < 100;
     this.vw = vw; this.vh = vh;
     this.svg.attr('viewBox', null).attr('width', this.vw).attr('height', this.vh);
     this.kMin = Math.max(Math.min(this.vh / H, this.vw / W) * 0.98, this.vw / (2 * W));
@@ -160,6 +163,9 @@ export class WorldMap {
     if (!this._initialized) {
       this._initialized = true;
       this.showRegion('welt', { duration: 0 });
+    } else if (wasTiny && !this._tiny && this._lastView) {
+      // wieder normal groß: die zuletzt gewünschte Ansicht neu einnehmen
+      this.refit({ duration: 0 });
     } else if (!this._flying) {
       // während eines Kameraflugs nicht eingreifen – der Flug normalisiert am Ende selbst
       this.svg.call(this.zoom.transform, this._constrain(this.transform, [[0, 0], [this.vw, this.vh]]));
@@ -168,12 +174,21 @@ export class WorldMap {
 
   _constrain(t, extent) {
     const vw = extent[1][0] - extent[0][0], vh = extent[1][1] - extent[0][1];
-    const k = t.k;
-    let ty = t.y;
+    let k = t.k, tx = t.x, ty = t.y;
+    const kMin = this.kMin || 0.3;
+    if (!(k > 0 && Number.isFinite(k) && Number.isFinite(tx) && Number.isFinite(ty))) {
+      // unbrauchbarer Stand: ganze Welt zeigen
+      k = kMin; tx = vw / 2 - W / 2 * k; ty = vh / 2 - H / 2 * k;
+    } else if (k < kMin || k > 60) {
+      // nie kleiner als die ganze Welt (z. B. nach einem abgebrochenen Flug) – die Bildmitte bleibt, wo sie ist
+      const nk = Math.min(60, Math.max(kMin, k));
+      tx = vw / 2 - (vw / 2 - tx) * nk / k;
+      ty = vh / 2 - (vh / 2 - ty) * nk / k;
+      k = nk;
+    }
     const worldH = H * k;
     if (worldH <= vh) ty = Math.min(Math.max(ty, 0), vh - worldH);
     else ty = Math.min(0, Math.max(vh - worldH, ty));
-    let tx = t.x;
     const cx = (vw / 2 - tx) / k;
     const shift = Math.floor(cx / W);
     tx += shift * W * k;
@@ -192,6 +207,7 @@ export class WorldMap {
     // laufenden Flug zuerst beenden (er rückt die Kamera dabei um eine Weltbreite zurecht),
     // erst danach das Ziel berechnen – sonst fliegt die Kamera einmal um die Welt
     this._stopFlight();
+    if (!rect) this._lastView = { box, opts: { pad, minSize, maxK } };
     rect = rect || this.freeRect();
     let [[x0, y0], [x1, y1]] = box;
     let bw = x1 - x0, bh = y1 - y0;
@@ -216,6 +232,12 @@ export class WorldMap {
     return this._go(t, duration);
   }
 
+  /** Die zuletzt gewünschte Ansicht neu einpassen – z. B. wenn jetzt ein anderes Panel die Karte verdeckt. */
+  refit(opts = {}) {
+    if (!this._lastView) return Promise.resolve();
+    return this.flyToBox(this._lastView.box, { ...this._lastView.opts, ...opts });
+  }
+
   _stopFlight() {
     if (this._flying) this.svg.interrupt();
   }
@@ -223,6 +245,7 @@ export class WorldMap {
   _go(t, duration) {
     const d = REDUCED_MOTION ? 0 : duration ?? this._durationTo(t);
     this.svg.interrupt();
+    this._target = t;
     if (!d) {
       this.svg.call(this.zoom.transform, this._constrain(t, [[0, 0], [this.vw, this.vh]]));
       return Promise.resolve();
@@ -266,9 +289,16 @@ export class WorldMap {
 
   /** Schiebt die Karte nur, wenn der Mittelpunkt von box hinter einem Panel liegt (Zoom bleibt). */
   ensureVisible(box) {
+    // Läuft noch ein Flug, von seinem Ziel ausgehen – sonst bliebe die Kamera im halb herausgezoomten Zwischenstand stehen
+    const base = this._flying ? this._target : null;
     this._stopFlight();
     const rect = this.freeRect();
-    const t = this.transform;
+    let t = this.transform;
+    if (base) {
+      // Ziel in die Weltkopie der jetzigen Ansicht schieben, damit der Rest des Flugs kurz bleibt
+      const shift = Math.round(((this.vw / 2 - base.x) / base.k - (this.vw / 2 - t.x) / t.k) / W) * W;
+      t = d3.zoomIdentity.translate(base.x + shift * base.k, base.y).scale(base.k);
+    }
     const cxW = (box[0][0] + box[1][0]) / 2, cyW = (box[0][1] + box[1][1]) / 2;
     const curCx = (this.vw / 2 - t.x) / t.k;
     let x = cxW;
@@ -276,7 +306,7 @@ export class WorldMap {
     while (curCx - x > W / 2) x += W;
     const [sx, sy] = t.apply([x, cyW]);
     const m = 30;
-    if (sx > rect.x0 + m && sx < rect.x1 - m && sy > rect.y0 + m && sy < rect.y1 - m) return Promise.resolve();
+    if (sx > rect.x0 + m && sx < rect.x1 - m && sy > rect.y0 + m && sy < rect.y1 - m) return base ? this._go(t) : Promise.resolve();
     const rcx = (rect.x0 + rect.x1) / 2, rcy = (rect.y0 + rect.y1) / 2;
     let nt = d3.zoomIdentity.translate(t.x + (rcx - sx), t.y + (rcy - sy)).scale(t.k);
     const worldH = H * t.k;

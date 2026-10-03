@@ -1,8 +1,8 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
-import { W, REGION_BOX } from './map.js?v=13';
-import { NUMBERS } from './data/numbers.js?v=13';
-import { DE_CITIES } from './data/de-cities.js?v=13';
+import { W, REGION_BOX } from './map.js?v=14';
+import { NUMBERS } from './data/numbers.js?v=14';
+import { DE_CITIES } from './data/de-cities.js?v=14';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -11,8 +11,9 @@ const dec = (n, d = 1) => n.toLocaleString('de-DE', { minimumFractionDigits: d, 
 
 // Grenzen, die in den Kartendaten fehlen (Botswana–Sambia: 150 m bei Kazungula; Israel–Syrien: Golan)
 const EXTRA_BORDERS = [['BW', 'ZM'], ['IL', 'SY']];
-// Gebiete ohne eigenen Staat, die trotzdem als Nachbar zählen
-const NEIGHBOR_AREAS = new Set(['EH', 'GI']);
+// Grenzen über Landesteile fern vom Kernland: Wer sie nennt, bekommt einen Extrapunkt – fehlen tun sie aber nicht
+const OVERSEAS = [['FR', 'BR', 'Französisch-Guayana'], ['FR', 'SR', 'Französisch-Guayana'], ['ES', 'MA', 'Ceuta und Melilla']];
+const ARM_MS = 350;   // so lange nach neuen Knöpfen zählt kein Klick (Doppelklick landet sonst auf dem nächsten Knopf)
 
 const SW = {
   minispiele: '<svg viewBox="0 0 34 24"><rect width="34" height="24" fill="#f5e79b"/><path d="M19 2L9 14h7l-2 8 11-13h-7z" fill="#d6246e" stroke="#2a2833" stroke-width="1" stroke-linejoin="round"/></svg>',
@@ -40,8 +41,10 @@ const GAMES = [
     unit: () => 'Punkte',
   },
   {
-    id: 'nachbarn', name: 'Nachbarn', desc: 'Tippe alle Nachbarländer an.',
-    how: ['Fünf Länder, jeweils alle Nachbarn mit gemeinsamer Landgrenze finden.', 'Jeder Nachbar gibt einen Punkt, alle ohne Fehler drei Punkte extra.', 'Nach drei falschen Ländern ist das Land vorbei.'],
+    id: 'nachbarn', name: 'Nachbarn', desc: 'Nenne alle Nachbarländer eines Landes.',
+    how: ['Fünf Länder: Nenne jeweils alle Nachbarn mit gemeinsamer Landgrenze – Tippfehler sind kein Problem.', 'Die Karte zeigt einen Nachbarn erst, wenn du ihn genannt hast. Jeder gibt einen Punkt, alle ohne Fehler drei Punkte extra.', 'Nach drei falschen Ländern ist das Land vorbei.'],
+    // eigene Rekordliste: früher wurde angetippt statt genannt
+    key: 'nachbarn2',
     unit: () => 'Punkte',
   },
   {
@@ -94,7 +97,18 @@ export function createGames(ctx) {
   }
 
   function card(html) {
-    $('#view-game').innerHTML = html;
+    const el = $('#view-game');
+    el.classList.remove('asking');
+    el.innerHTML = html;
+  }
+
+  /** „Weiter“ bekommt den Fokus (Enter) – und rückt ins Bild, falls die Karte auf flachen Bildschirmen scrollt. */
+  function focusNext() {
+    const btn = $('#view-game [data-gact="next"]');
+    if (!btn) return;
+    btn.focus({ preventScroll: true });
+    const box = $('#view-game');
+    if (box.scrollHeight > box.clientHeight) box.scrollTop = box.scrollHeight;
   }
 
   function pickable(on) {
@@ -129,6 +143,7 @@ export function createGames(ctx) {
 
   function openHub() {
     stop();
+    settleDaily();
     screen = 'hub';
     renderHub();
     ctx.show('games');
@@ -209,6 +224,8 @@ export function createGames(ctx) {
   }
 
   const alive = g => game && game.seq === g.seq;
+  // neue Frage oder neues Ergebnis: kurz keine Klicks annehmen
+  const arm = g => { g.readyAt = performance.now() + ARM_MS; };
 
   /** Laufendes Spiel ohne Ergebnis beenden (Zeitgeber, Karte, Abdeckung). */
   function stop() {
@@ -232,7 +249,7 @@ export function createGames(ctx) {
     else if (res.prev != null) line = `<p class="lead">Dein Rekord: ${fmt(res.prev)} ${esc(def.unit(res.prev))}</p>`;
     if (other && theirs != null) {
       const mine = Math.max(score, res.prev ?? 0);
-      line += `<p class="lead">${esc(genName(other.name))} Rekord: <b class="p-${other.id}-ink">${fmt(theirs)}</b>${mine > theirs ? ' – du liegst vorn.' : mine === theirs ? ' – Gleichstand.' : ` – noch ${fmt(theirs - mine)} bis zur Führung.`}</p>`;
+      line += `<p class="lead">${esc(genName(other.name))} Rekord: <b class="p-${other.id}-ink">${fmt(theirs)}</b>${mine > theirs ? ' – du liegst vorn.' : mine === theirs ? ' – Gleichstand.' : ` – noch ${fmt(theirs - mine + 1)} bis zur Führung.`}</p>`;
     }
     screen = 'result';
     game = null;
@@ -250,6 +267,13 @@ export function createGames(ctx) {
         <button class="btn" type="button" data-gact="hub">Andere Spiele</button>
       </div>`;
     ctx.show('games');
+    refitMap();
+  }
+
+  /** Die Ergebnisseite verdeckt einen anderen Teil der Karte als das Spiel: Ausschnitt neu einpassen. */
+  function refitMap() {
+    const s = seq;
+    requestAnimationFrame(() => { if (s === seq && !game) map.refit(); });
   }
 
   /* ---------- Zeitgeber ---------- */
@@ -262,7 +286,9 @@ export function createGames(ctx) {
     g.clock = setInterval(() => {
       if (!alive(g)) { clearInterval(g.clock); return; }
       const now = performance.now();
-      if (document.visibilityState === 'visible') g.left -= now - last;   // im Hintergrund läuft die Zeit nicht weiter
+      // im Hintergrund läuft die Zeit nicht weiter – auch nicht, wenn das Handy die App ganz angehalten hatte
+      // (dann kommt der erste Takt danach mit einer riesigen Lücke)
+      if (document.visibilityState === 'visible') g.left -= Math.min(now - last, 250);
       last = now;
       if (g.left <= 0) { g.left = 0; clearInterval(g.clock); onTick(); onEnd(); return; }
       onTick();
@@ -318,6 +344,7 @@ export function createGames(ctx) {
       <h2 class="q-prompt">Wo ${pl(c, 'liegt', 'liegen')} ${emph(nom(c))}?</h2>
       <button class="chip-btn" type="button" data-gact="blitz-skip">Weiter</button>
     </div>`);
+    arm(g);
     map.hitOptions = { water: false, prefer: g.target };
     map.onClick = hit => blitzTap(g, hit);
     $('#map').classList.add('pickable');
@@ -325,7 +352,10 @@ export function createGames(ctx) {
 
   function blitzTap(g, hit) {
     if (!alive(g) || g.busy || g.over || !hit || hit.type !== 'country' || hit.code === 'AQ') return;
+    // Doppeltipp: Der zweite Tipp auf das eben gefundene Land ist kein Fehler bei der nächsten Frage
+    if (hit.code !== g.target && hit.code === g.lastHit?.code && performance.now() - g.lastHit.at < 600) return;
     if (hit.code === g.target) {
+      g.lastHit = { code: hit.code, at: performance.now() };
       g.score++;
       g.streak++;
       g.hits.push(g.target);
@@ -375,10 +405,12 @@ export function createGames(ctx) {
     const missed = [...new Set(g.missed)].filter(id => !g.hits.includes(id));
     for (const id of missed) map.setCountryClass(id, 'is-wrong');
     const names = missed.map(id => C.get(id).name);
+    // „Kein Fehler“ nur, wenn wirklich nichts danebenging – und überhaupt etwas gefunden wurde
     const details = names.length ? `<p class="field-label" style="margin-top:14px">Diesmal nicht gefunden</p>
       <p class="name-list">${names.slice(0, 14).map(esc).join(', ')}${names.length > 14 ? ` und ${names.length - 14} weitere` : ''}</p>
-      <p class="hint" style="margin-top:6px">Auf der Karte rot, deine Treffer grün.</p>` : '<p class="lead">Kein einziger Fehler!</p>';
-    showResult({ g, key: g.key, score: g.score, title: `Zeit um – ${esc(regionLabel(g.region))}`, big: g.score, unit: g.score === 1 ? 'Land' : 'Länder', details });
+      <p class="hint" style="margin-top:6px">Auf der Karte rot, deine Treffer grün.</p>`
+      : !g.missed.length && g.score > 0 ? '<p class="lead">Kein einziger Fehler!</p>' : '';
+    showResult({ g, key: g.key, score: g.score, title: `${g.left > 0 ? 'Blitzrunde' : 'Zeit um'} – ${esc(regionLabel(g.region))}`, big: g.score, unit: g.score === 1 ? 'Land' : 'Länder', details });
   }
 
   /* ================= Städte-Pin und Tagesrätsel ================= */
@@ -404,12 +436,14 @@ export function createGames(ctx) {
     };
   }
 
-  // Ort auf dem Kontinent? Bei Ländern auf zwei Kontinenten (Russland, Türkei, Zypern) entscheidet die Lage des Ortes.
+  // Ort auf dem Kontinent? Bei Ländern auf zwei Kontinenten entscheidet die Lage des Ortes.
   function inRegion(p, region) {
     if (region === 'welt') return true;
     const c = C.get(p.iso);
     if (!c?.regions.includes(region)) return false;
     if (c.regions.length === 1) return true;
+    // Türkei: Europa ist nur Ostthrakien nördlich des Marmarameers (mit Istanbul), der Rest ist Kleinasien
+    if (p.iso === 'TR' && (region === 'europa' || region === 'asien')) return (p.lon < 29.1 && p.lat > 40.6) === (region === 'europa');
     const [x0, y0, x1, y1] = REGION_BOX[region];
     return p.lon >= x0 && p.lon <= x1 && p.lat >= y0 && p.lat <= y1;
   }
@@ -448,14 +482,29 @@ export function createGames(ctx) {
   function deSentence(p) {
     const n = esc(p.name);
     if (p.cap === 'bund') return `${n} ist die Hauptstadt Deutschlands und zugleich ein eigenes Bundesland.`;
+    if (p.name === 'Bremen') return `${n} bildet zusammen mit Bremerhaven das Bundesland ${emph('Bremen', 'b')}.`;
     if (p.name === p.state) return `${n} ist ein Stadtstaat – Stadt und Bundesland zugleich.`;
     if (p.cap === 'land') return `${n} ist die Landeshauptstadt ${p.state === 'Saarland' ? 'des <b>Saarlandes</b>' : `von <b>${esc(p.state)}</b>`}.`;
     const where = p.state === 'Saarland' ? 'im Saarland' : ['Bremen', 'Hamburg', 'Berlin'].includes(p.state) ? `im Land ${p.state}` : `in ${p.state}`;
     return `${n} liegt ${emph(where, 'b')}.`;
   }
 
+  /**
+   * Angefangenes Tagesrätsel von einem früheren Tag (z. B. über Mitternacht liegen gelassen):
+   * Es zählt mit dem bisherigen Stand – wie bei „Beenden“. Ein schon gespeichertes Ergebnis bleibt.
+   */
+  function settleDaily() {
+    const run = state.dailyRun;
+    if (!run || run.player !== me() || (game?.id === 'daily' && game.day === run.day)) return;
+    if (!dayOf(me(), run.day) && run.day === today()) return;   // läuft heute noch
+    if (!dayOf(me(), run.day) && run.results?.length) ctx.saveDaily(run.day, run.total);
+    state.dailyRun = null;
+    ctx.save();
+  }
+
   function openDaily() {
     stop();
+    settleDaily();
     const day = today();
     const mine = dayOf(me(), day);
     if (mine) { showDailyResult(day); return; }
@@ -487,14 +536,16 @@ export function createGames(ctx) {
     if (g.i >= g.places.length) { finishPin(g); return; }
     const p = g.places[g.i];
     g.guess = null;
-    pinView(g);
-    pinHud(g);
+    // erst die Karte des Spiels zeigen, dann den Ausschnitt wählen – er richtet sich nach ihrer Höhe
     card(`<div class="q-head"><h2 class="q-prompt">Wo liegt <em>${esc(p.name)}</em>?</h2>${g.id === 'daily' ? '<span class="tag">Tagesrätsel</span>' : ''}</div>
       <p class="hint" id="pin-state">Tippe auf die Karte, wo du den Ort vermutest. Zum genauen Zielen heranzoomen.</p>
       <div class="below">
         <button class="chip-btn" type="button" data-gact="pin-skip">Keine Ahnung</button>
         <button class="btn primary ok" type="button" data-gact="pin-ok" disabled>OK</button>
       </div>`);
+    arm(g);
+    pinView(g);
+    pinHud(g);
     map.hitOptions = null;
     map.onClick = (hit, e, xy) => {
       if (!alive(g) || !xy) return;
@@ -520,7 +571,12 @@ export function createGames(ctx) {
     const near = g.region === 'de';   // Deutschland: Kamera näher heran
     g.total += pts;
     g.results.push({ name: p.name, iso: p.iso, km: d == null ? null : Math.round(d), pts, hit: full });
-    if (g.id === 'daily') { state.dailyRun = { day: g.day, player: me(), i: g.i + 1, total: g.total, results: g.results }; ctx.save(); }
+    if (g.id === 'daily') {
+      state.dailyRun = { day: g.day, player: me(), i: g.i + 1, total: g.total, results: g.results };
+      // fünfter Ort beantwortet: Ergebnis sofort speichern, nicht erst bei „Zum Ergebnis“
+      if (g.i + 1 >= g.places.length) ctx.saveDaily(g.day, g.total);
+      ctx.save();
+    }
     pickable(false);
     pinHud(g);
     if (pts >= 700) sfx.correct(); else if (pts >= 250) sfx.hint(); else sfx.wrong();
@@ -549,7 +605,8 @@ export function createGames(ctx) {
     card(`<div class="result ${pts >= 700 ? 'right' : pts >= 250 ? 'mid' : 'wrong'}">${verdict}<span class="pts">+${fmt(pts)}</span></div>
       <p class="result-detail">${where}</p>
       <div class="next-row"><button class="btn primary" type="button" data-gact="next">${last ? 'Zum Ergebnis' : 'Nächster Ort'}</button></div>`);
-    $('#view-game [data-gact="next"]').focus({ preventScroll: true });
+    arm(g);
+    focusNext();
   }
 
   function pinNext(g) {
@@ -630,21 +687,31 @@ export function createGames(ctx) {
       map.clear();
       for (const p of places) map.pin(p.lon, p.lat, p.name, 'right');
       map.showRegion('welt');
-    }
+    } else refitMap();
   }
 
   /* ================= Nachbarn ================= */
 
+  /** Nachbarn über Landesteile fern vom Kernland: Land → Landesteil, über den die Grenze läuft. */
+  function extrasOf(iso) {
+    const out = new Map();
+    for (const [a, b, via] of OVERSEAS) { if (a === iso) out.set(b, via); if (b === iso) out.set(a, via); }
+    return out;
+  }
+
+  // Nur Staaten zählen – Gebiete wie Westsahara oder Gibraltar kann man nicht als Land eintippen.
+  // Grenzen über ferne Landesteile (Französisch-Guayana, Ceuta und Melilla) muss man nicht wissen.
   function neighborsOf(iso) {
     const graph = map.neighborGraph();
-    const set = new Set([...(graph.get(iso) || [])].filter(d => C.has(d) || NEIGHBOR_AREAS.has(d)));
+    const extra = extrasOf(iso);
+    const set = new Set([...(graph.get(iso) || [])].filter(d => C.has(d) && !extra.has(d)));
     for (const [a, b] of EXTRA_BORDERS) { if (a === iso) set.add(b); if (b === iso) set.add(a); }
     return set;
   }
 
   function startNachbarn() {
     const eligible = COUNTRIES.filter(c => neighborsOf(c.iso).size >= 2).map(c => c.iso);
-    const g = begin({ id: 'nachbarn', key: 'nachbarn', targets: shuffle(eligible).slice(0, 5), i: 0, points: 0, rows: [] });
+    const g = begin({ id: 'nachbarn', key: keyOf('nachbarn'), targets: shuffle(eligible).slice(0, 5), i: 0, points: 0, rows: [] });
     nachbarnQuestion(g);
   }
 
@@ -655,92 +722,183 @@ export function createGames(ctx) {
     }).join(''), `<span class="long">Land ${Math.min(g.i + 1, 5)} von 5</span><span>${g.points} Punkte</span>`);
   }
 
+  function nachbarnBox(cur) {
+    let box = map.countryBox(cur.iso);
+    for (const n of [...cur.nb, ...cur.bonus]) box = unionBox(box, map.countryBox(n));
+    return box;
+  }
+
+  // Man muss die Nachbarn wissen und nennen: Die Karte zeigt sie erst, wenn sie genannt sind.
   function nachbarnQuestion(g) {
     if (!alive(g)) return;
     if (g.i >= g.targets.length) { finishNachbarn(g); return; }
     const iso = g.targets[g.i];
     const c = C.get(iso);
-    g.cur = { iso, nb: neighborsOf(iso), found: new Set(), wrong: new Set(), mistakes: 0, done: false };
+    g.cur = { iso, nb: neighborsOf(iso), extra: extrasOf(iso), found: new Set(), bonus: new Set(), wrong: new Set(), mistakes: 0, done: false };
     map.clear();
     map.setCountryClass(iso, 'is-target');
     map.labelCountry(iso, c.name, '');
-    let box = map.countryBox(iso);
-    for (const n of g.cur.nb) box = unionBox(box, map.countryBox(n));
+    const box = nachbarnBox(g.cur);
     requestAnimationFrame(() => alive(g) && map.flyToBox(box, { pad: 1.2, minSize: 30 }));
     nachbarnHud(g);
-    card(`<div class="q-head"><h2 class="q-prompt">Alle Nachbarländer ${emph(gen(c))}</h2></div>
+    card(`<div class="q-head"><h2 class="q-prompt">Welche Länder grenzen an ${emph(acc(c))}?</h2></div>
       <p class="hint" id="nb-state"></p>
+      <form class="answer" id="nb-form" autocomplete="off">
+        <input id="nb-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nb-suggest"
+          placeholder="Nachbarland eingeben …" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Nachbarland">
+        <button class="btn primary ok" type="submit" disabled>OK</button>
+        <ul class="suggest" id="nb-suggest" role="listbox" hidden></ul>
+      </form>
       <div class="below"><button class="chip-btn" type="button" data-gact="nb-giveup">Aufgeben</button><span class="miss-dots" id="nb-dots"></span></div>`);
+    $('#view-game').classList.add('asking');   // Vorschläge dürfen über die Karte hinausragen
+    arm(g);
     nachbarnState(g);
-    map.hitOptions = { water: false };
-    map.onClick = hit => nachbarnTap(g, hit);
-    $('#map').classList.add('pickable');
+    wireNameInput(id => nachbarnGuess(g, id));
+    if (!matchMedia('(pointer: coarse)').matches) $('#nb-input').focus({ preventScroll: true });
+  }
+
+  /** Eingabefeld mit Vorschlägen: Tippen auf einen Vorschlag gilt sofort, Enter wählt erst aus und schickt dann ab. */
+  function wireNameInput(onPick) {
+    const input = $('#nb-input'), list = $('#nb-suggest'), ok = $('#nb-form .ok');
+    let results = [], active = -1, chosen = null;
+    const close = () => { list.hidden = true; input.setAttribute('aria-expanded', 'false'); };
+    const render = () => {
+      if (!input.value.trim()) { close(); return; }
+      list.innerHTML = results.length
+        ? results.map((r, i) => `<li id="nbs${i}" role="option" data-i="${i}" aria-selected="${i === active}"><b>${esc(r.item.label)}</b>${r.via ? `<span class="via">${esc(r.via)}</span>` : ''}</li>`).join('')
+        : '<li class="empty" role="option" aria-disabled="true">Kein Land gefunden – anders schreiben?</li>';
+      list.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+    };
+    const choose = item => { chosen = item; input.value = item.label; ok.disabled = false; close(); };
+    const submit = item => {
+      if (!item) return;
+      input.value = '';
+      chosen = null;
+      results = [];
+      ok.disabled = true;
+      close();
+      onPick(item.id);
+      if (document.body.contains(input)) input.focus({ preventScroll: true });
+    };
+    input.addEventListener('input', () => {
+      results = ctx.countrySearch.search(input.value);
+      active = results.length ? 0 : -1;
+      chosen = ctx.countrySearch.exact(input.value) || null;
+      ok.disabled = !chosen && !results.length;
+      render();
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' && results.length) { e.preventDefault(); active = (active + 1) % results.length; render(); }
+      else if (e.key === 'ArrowUp' && results.length) { e.preventDefault(); active = (active - 1 + results.length) % results.length; render(); }
+      else if (e.key === 'Escape') close();
+    });
+    list.addEventListener('pointerdown', e => {
+      const li = e.target.closest('li[data-i]');
+      if (!li) return;
+      e.preventDefault();
+      submit(results[+li.dataset.i].item);
+    });
+    $('#nb-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const top = results[active]?.item;
+      if (chosen && (list.hidden || !top || top === chosen)) submit(chosen);
+      else if (top) choose(top);   // erst auswählen, damit ein Tippfehler nicht gleich als Fehler zählt
+    });
+    input.addEventListener('blur', () => setTimeout(close, 120));
   }
 
   function nachbarnState(g, note = '') {
     const cur = g.cur;
-    const n = cur.nb.size;
-    $('#nb-state').textContent = note || `${cur.found.size} von ${n} gefunden. Tippe alle Länder an, die direkt angrenzen.`;
+    $('#nb-state').textContent = note || `${cur.found.size} von ${cur.nb.size} gefunden. Nenne alle Länder mit gemeinsamer Landgrenze.`;
     $('#nb-dots').innerHTML = [0, 1, 2].map(i => `<i class="${i < cur.mistakes ? 'on' : ''}" title="Fehler"></i>`).join('');
   }
 
-  function nachbarnTap(g, hit) {
+  function nachbarnGuess(g, code) {
     const cur = g.cur;
-    if (!alive(g) || !cur || cur.done || !hit || hit.type !== 'country') return;
-    const code = hit.code;
-    if (code === cur.iso || code === 'AQ' || cur.found.has(code) || cur.wrong.has(code)) return;
+    if (!alive(g) || !cur || cur.done || !C.has(code)) return;
+    const t = C.get(code);
+    if (code === cur.iso) { nachbarnState(g, `${capFirst(nom(t))} ${pl(t, 'ist', 'sind')} das Land selbst – gesucht sind die Nachbarn.`); return; }
+    if (cur.found.has(code) || cur.bonus.has(code)) { nachbarnState(g, `${capFirst(acc(t))} hast du schon genannt.`); return; }
+    if (cur.wrong.has(code)) { nachbarnState(g, `${capFirst(nom(t))} – das war schon falsch.`); return; }
     if (cur.nb.has(code)) {
       cur.found.add(code);
       map.setCountryClass(code, 'is-right');
-      map.labelCountry(code, nameFor(code), 'right');
+      map.labelCountry(code, t.name, 'right');
       sfx.blip(cur.found.size);
       if (cur.found.size === cur.nb.size) nachbarnEnd(g);
       else nachbarnState(g);
-    } else if (!C.has(code)) {
-      nachbarnState(g, `${nameOf(code, hit.props)} ist kein eigener Staat und zählt hier nicht.`);
-    } else {
-      cur.wrong.add(code);
-      cur.mistakes++;
-      map.setCountryClass(code, 'is-wrong');
-      map.labelCountry(code, nameFor(code), 'wrong');
-      sfx.buzz();
-      if (cur.mistakes >= 3) nachbarnEnd(g);
-      else { const t = C.get(code); nachbarnState(g, `${capFirst(nom(t))} ${pl(t, 'grenzt', 'grenzen')} nicht an ${acc(C.get(cur.iso))}.`); }
+      return;
     }
+    if (cur.extra.has(code)) {
+      // Grenze über einen fernen Landesteil: zählt extra
+      cur.bonus.add(code);
+      map.setCountryClass(code, 'is-right');
+      map.labelCountry(code, t.name, 'right');
+      sfx.blip(cur.found.size + cur.bonus.size);
+      const box = nachbarnBox(cur);
+      requestAnimationFrame(() => alive(g) && map.flyToBox(box, { pad: 1.2, minSize: 30 }));
+      nachbarnState(g, `Stimmt – über ${cur.extra.get(code)} ${pl(C.get(cur.iso), 'grenzt', 'grenzen')} ${nom(C.get(cur.iso))} an ${acc(t)}. Ein Extrapunkt!`);
+      return;
+    }
+    cur.wrong.add(code);
+    cur.mistakes++;
+    map.setCountryClass(code, 'is-wrong');
+    map.labelCountry(code, t.name, 'wrong');
+    sfx.buzz();
+    // falsches Land mit ins Bild nehmen, damit man sieht, wo es liegt
+    const box = unionBox(nachbarnBox(cur), map.countryBox(code));
+    requestAnimationFrame(() => alive(g) && map.flyToBox(box, { pad: 1.2, minSize: 30 }));
+    if (cur.mistakes >= 3) nachbarnEnd(g);
+    else nachbarnState(g, `${capFirst(nom(t))} ${pl(t, 'grenzt', 'grenzen')} nicht an ${acc(C.get(cur.iso))}.`);
+  }
+
+  /** Land abschließen und Punkte zählen: je Nachbar einer, Extrapunkte für ferne Grenzen, alle ohne Fehler +3. */
+  function nachbarnScore(g) {
+    const cur = g.cur;
+    cur.done = true;
+    const missing = [...cur.nb].filter(n => !cur.found.has(n));
+    const perfect = !missing.length && !cur.mistakes;
+    const pts = cur.found.size + cur.bonus.size + (perfect ? 3 : 0);
+    g.points += pts;
+    g.rows.push({ iso: cur.iso, found: cur.found.size, total: cur.nb.size, bonus: cur.bonus.size, mistakes: cur.mistakes, perfect, pts });
+    return { missing, perfect, pts };
   }
 
   function nachbarnEnd(g) {
     const cur = g.cur;
     if (!alive(g) || cur.done) return;
-    cur.done = true;
-    pickable(false);
-    const missing = [...cur.nb].filter(n => !cur.found.has(n));
+    const { missing, perfect, pts } = nachbarnScore(g);
     for (const m of missing) { map.setCountryClass(m, 'is-pick'); map.labelCountry(m, nameFor(m), ''); }
-    const perfect = !missing.length && !cur.mistakes;
-    const pts = cur.found.size + (perfect ? 3 : 0);
-    g.points += pts;
-    g.rows.push({ iso: cur.iso, found: cur.found.size, total: cur.nb.size, mistakes: cur.mistakes, perfect, pts });
     nachbarnHud(g);
     if (perfect) sfx.correct(); else if (!missing.length) sfx.select(); else sfx.wrong();
     const c = C.get(cur.iso);
-    const text = perfect ? `Perfekt: alle ${cur.nb.size} Nachbarn ohne Fehler. +3 Bonus!`
-      : !missing.length ? `Alle ${cur.nb.size} gefunden – mit ${cur.mistakes} ${cur.mistakes === 1 ? 'Fehler' : 'Fehlern'}.`
-        : `${cur.found.size} von ${cur.nb.size} gefunden. Gefehlt ${missing.length === 1 ? 'hat' : 'haben'}: ${missing.map(nameFor).join(', ')} (rosa markiert).`;
+    let text = perfect ? `Perfekt: alle ${cur.nb.size} Nachbarn ohne Fehler. +3 Bonus!`
+      : !missing.length ? `Alle ${cur.nb.size} genannt – mit ${cur.mistakes} ${cur.mistakes === 1 ? 'Fehler' : 'Fehlern'}.`
+        : `${cur.found.size} von ${cur.nb.size} genannt. Gefehlt ${missing.length === 1 ? 'hat' : 'haben'}: ${missing.map(nameFor).join(', ')} (rosa markiert).`;
+    // ferne Grenzen, die niemand kennen muss: als Wissen nachreichen
+    const unnamed = [...cur.extra].filter(([code]) => !cur.bonus.has(code));
+    for (const via of new Set(unnamed.map(([, v]) => v))) {
+      const names = unnamed.filter(([, v]) => v === via).map(([code]) => acc(C.get(code)));
+      text += ` Übrigens: Über ${via} ${pl(c, 'grenzt', 'grenzen')} ${nom(c)} auch an ${names.join(' und ')}.`;
+    }
     const last = g.i + 1 >= g.targets.length;
     card(`<div class="result ${perfect ? 'right' : !missing.length ? 'mid' : 'wrong'}">${esc(c.name)}<span class="pts">+${pts}</span></div>
       <p class="result-detail">${esc(text)}</p>
       <div class="next-row"><button class="btn primary" type="button" data-gact="next">${last ? 'Zum Ergebnis' : 'Nächstes Land'}</button></div>`);
-    let box = map.countryBox(cur.iso);
-    for (const n of cur.nb) box = unionBox(box, map.countryBox(n));
+    arm(g);
+    focusNext();
+    let box = nachbarnBox(cur);
+    for (const w of cur.wrong) box = unionBox(box, map.countryBox(w));
     requestAnimationFrame(() => alive(g) && map.flyToBox(box, { pad: 1.2, minSize: 30 }));
   }
 
   function finishNachbarn(g) {
-    const details = `<ul class="res-list">${g.rows.map(r => `<li><span>${esc(C.get(r.iso).name)}</span><span class="res-km">${r.found} von ${r.total}${r.perfect ? ' · perfekt' : ''}</span><b>${r.pts}</b></li>`).join('')}</ul>`;
+    const details = `<ul class="res-list">${g.rows.map(r => `<li><span>${esc(C.get(r.iso).name)}</span><span class="res-km">${r.found} von ${r.total}${r.bonus ? ` · +${r.bonus} extra` : ''}${r.perfect ? ' · perfekt' : ''}</span><b>${r.pts}</b></li>`).join('')}</ul>`;
     map.clear();
     for (const r of g.rows) map.setCountryClass(r.iso, r.perfect ? 'is-right' : 'is-pick');
     map.showRegion('welt');
-    showResult({ g, key: 'nachbarn', score: g.points, title: 'Nachbarn', big: g.points, unit: g.points === 1 ? 'Punkt' : 'Punkte', details });
+    showResult({ g, key: g.key, score: g.points, title: 'Nachbarn', big: g.points, unit: g.points === 1 ? 'Punkt' : 'Punkte', details });
   }
 
   /* ================= Entweder-oder ================= */
@@ -808,6 +966,7 @@ export function createGames(ctx) {
     card(`<div class="q-head"><h2 class="q-prompt">${KINDS[kind].q}</h2></div>
       <div class="duo">${opt(a, 0)}<span class="duo-or">oder</span>${opt(b, 1)}</div>
       <div id="vs-after"></div>`);
+    arm(g);
   }
 
   function vergleichHud(g) {
@@ -846,7 +1005,8 @@ export function createGames(ctx) {
     text = text.replace(/\.\.$/, '.');   // „… rund 53 Mio.“ nicht doppelt punkten
     $('#vs-after').innerHTML = `<p class="result-detail" style="margin-top:12px">${esc(text)}</p>${note ? `<p class="note">${esc(note)}</p>` : ''}
       <div class="next-row"><button class="btn primary" type="button" data-gact="next">${ok ? 'Weiter' : 'Zum Ergebnis'}</button></div>`;
-    $('#view-game [data-gact="next"]').focus({ preventScroll: true });
+    arm(g);
+    focusNext();
     g.over = !ok;
 
     // Karte: beide Länder, das richtige grün
@@ -865,13 +1025,14 @@ export function createGames(ctx) {
 
   function vergleichNext(g) {
     if (!alive(g)) return;
-    if (g.over) {
-      const s = g.streak;
-      showResult({ g, key: 'vergleich', score: s, title: 'Entweder-oder', big: s, unit: 'richtig in Folge',
-        details: s >= 10 ? '<p class="lead">Starke Serie!</p>' : '' });
-      return;
-    }
+    if (g.over) { finishVergleich(g); return; }
     vergleichQuestion(g);
+  }
+
+  function finishVergleich(g) {
+    const s = g.streak;
+    showResult({ g, key: 'vergleich', score: s, title: 'Entweder-oder', big: s, unit: 'richtig in Folge',
+      details: s >= 10 ? '<p class="lead">Starke Serie!</p>' : '' });
   }
 
   /* ================= Umrisse ================= */
@@ -928,6 +1089,7 @@ export function createGames(ctx) {
       <div class="opts4">${g.q.opts.map(x => `<button class="opt" type="button" data-gact="shape" data-iso="${x}">${esc(C.get(x).name)}</button>`).join('')}</div>
       <div class="below" id="shape-skip"><button class="chip-btn" type="button" data-gact="shape-skip">Weiß ich nicht</button></div>
       <div id="shape-after"></div>`);
+    arm(g);
     umrisseHud(g);
   }
 
@@ -950,7 +1112,8 @@ export function createGames(ctx) {
     $('#shape-after').innerHTML = `<div class="result ${ok ? 'right' : 'wrong'}" style="margin-top:10px">${ok ? 'Richtig!' : chosen ? 'Leider nein' : 'Aufgelöst'}</div>
       <p class="result-detail">${ok ? `Das ${pl(c, 'ist', 'sind')} ${emph(nom(c), 'b')}.` : `Das ${pl(c, 'war', 'waren')} ${emph(nom(c), 'b')}.`}</p>
       <div class="next-row"><button class="btn primary" type="button" data-gact="next">${last ? 'Zum Ergebnis' : 'Nächste Form'}</button></div>`;
-    $('#view-game [data-gact="next"]').focus({ preventScroll: true });
+    arm(g);
+    focusNext();
     // Karte aufdecken: Wo liegt das Land?
     veil(false);
     map.setCountryClass(q.iso, ok ? 'is-right' : 'is-target');
@@ -976,6 +1139,8 @@ export function createGames(ctx) {
     const act = t.dataset.gact;
     if (!act) return false;
     const g = game;
+    // Klick kurz nach neuen Knöpfen (Doppelklick): ignorieren statt ungesehen die nächste Frage zu beantworten
+    if (g && performance.now() < (g.readyAt || 0) && !['hub', 'daily', 'start', 'again'].includes(act)) return true;
     switch (act) {
       case 'hub': openHub(); break;
       case 'daily': openDaily(); break;
@@ -1000,7 +1165,10 @@ export function createGames(ctx) {
     return true;
   }
 
-  /** „Beenden“ oben rechts: Spiel abbrechen. Beim Tagesrätsel zählt dann der bisherige Stand. */
+  /**
+   * „Beenden“ oben rechts. Was schon gespielt ist, zählt (wie im normalen Quiz): Ergebnisseite mit Rekord.
+   * Ohne Fortschritt zurück zur Spielvorstellung. Beim Tagesrätsel wird vorher gefragt.
+   */
   function quit() {
     const g = game;
     if (!g) { openHub(); return; }
@@ -1010,9 +1178,47 @@ export function createGames(ctx) {
       finishPin(g);
       return;
     }
+    if (finishEarly(g)) return;
     const id = g.id;
     stop();
     openIntro(id);
+  }
+
+  /** Spiel mit dem bisherigen Stand abschließen. false, wenn noch nichts gespielt ist. */
+  function finishEarly(g) {
+    if (g.id === 'blitz' && (g.score || g.missed.length)) { g.over = true; finishBlitz(g); return true; }
+    if (g.id === 'pin' && g.results.length) { g.places = g.places.slice(0, g.results.length); finishPin(g); return true; }
+    if (g.id === 'nachbarn') {
+      const cur = g.cur;
+      if (cur && !cur.done && (cur.found.size || cur.bonus.size || cur.mistakes)) nachbarnScore(g);   // angefangenes Land zählt wie aufgegeben
+      if (g.rows.length) { finishNachbarn(g); return true; }
+    }
+    if (g.id === 'vergleich' && (g.streak || g.over)) { finishVergleich(g); return true; }
+    if (g.id === 'umrisse' && g.rows.length) { finishUmrisse(g); return true; }
+    return false;
+  }
+
+  /** Bisheriger Stand als Zahl für die Rekordliste (null: noch nichts gespielt). */
+  function scoreSoFar(g) {
+    if (g.id === 'blitz') return g.score;
+    if (g.id === 'pin') return g.results.length ? g.total : null;
+    if (g.id === 'nachbarn') return g.points + (g.cur && !g.cur.done ? g.cur.found.size + g.cur.bonus.size : 0);
+    if (g.id === 'vergleich') return g.streak;
+    if (g.id === 'umrisse') return g.rows.filter(r => r.ok).length;
+    return null;
+  }
+
+  /**
+   * Spiel verlassen, ohne die Ergebnisseite zu zeigen (Logo, Spielerwechsel): Ein Rekord zählt trotzdem.
+   * Das Tagesrätsel bleibt fortsetzbar.
+   */
+  function leave() {
+    const g = game;
+    if (g && g.id !== 'daily') {
+      const score = scoreSoFar(g);
+      if (score) ctx.saveRecord(g.key, score);
+    }
+    stop();
   }
 
   function homeRows() {
@@ -1060,7 +1266,9 @@ export function createGames(ctx) {
   }
 
   return {
-    SW, openHub, openDaily, handleClick, quit, stop, homeRows, duelHtml, signature, refresh, onEnter,
+    SW, openHub, openDaily, handleClick, quit, stop, leave, homeRows, duelHtml, signature, refresh, onEnter,
+    settle: settleDaily,
     playing: () => !!game,
+    peek: () => game,   // nur für Tests (?debug)
   };
 }

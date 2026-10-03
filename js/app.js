@@ -1,11 +1,11 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=13';
-import { Searcher } from './search.js?v=13';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=13';
-import { COUNTRIES } from './data/countries.js?v=13';
-import { WATER } from './data/water.js?v=13';
-import { WORLD_FACTS } from './data/world-facts.js?v=13';
-import { CITIES } from './data/cities.js?v=13';
-import { createGames } from './games.js?v=13';
+import { WorldMap, REGION_BOX, W } from './map.js?v=14';
+import { Searcher } from './search.js?v=14';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=14';
+import { COUNTRIES } from './data/countries.js?v=14';
+import { WATER } from './data/water.js?v=14';
+import { WORLD_FACTS } from './data/world-facts.js?v=14';
+import { CITIES } from './data/cities.js?v=14';
+import { createGames } from './games.js?v=14';
 
 /* ================= Daten ================= */
 
@@ -297,7 +297,7 @@ let games = null;    // Minispiele (js/games.js), sobald die Karte steht
 let flightSeq = 0;   // jede Ansicht/Frage bekommt eine neue Nummer; alte Kamera-Rückrufe verfallen
 
 function show(v) {
-  if (v !== 'game' && games?.playing()) games.stop();   // ein Spiel läuft nie unsichtbar weiter
+  if (v !== 'game' && games?.playing()) games.leave();   // ein Spiel läuft nie unsichtbar weiter (ein Rekord zählt aber)
   view = v;
   flightSeq++;
   document.body.dataset.view = v;
@@ -316,7 +316,7 @@ function show(v) {
 function goHome() {
   round = null;
   q = null;
-  games?.stop();
+  games?.leave();
   map.clear();
   renderHome();
   show('home');
@@ -1194,14 +1194,20 @@ function statsOf(pid) {
   return state.remote?.players?.[pid]?.stats || state.bench?.[pid]?.stats || {};
 }
 
+// Der andere Spieler: Online-Stand und das, was auf diesem Gerät für ihn geparkt ist (kann neuer sein,
+// wenn beide hier gespielt haben und noch nicht alles hochgeladen ist) – der bessere Rekord, der erste Versuch
 function gamesOf(pid) {
   if (!pid || pid === state.player) return state.games || {};
-  return state.remote?.players?.[pid]?.games || state.bench?.[pid]?.games || {};
+  const out = { ...(state.remote?.players?.[pid]?.games || {}) };
+  for (const [k, v] of Object.entries(state.bench?.[pid]?.games || {})) if (!out[k] || v.best > out[k].best) out[k] = v;
+  return out;
 }
 
 function dailyOf(pid) {
   if (!pid || pid === state.player) return state.daily || {};
-  return state.remote?.players?.[pid]?.daily || state.bench?.[pid]?.daily || {};
+  const out = { ...(state.remote?.players?.[pid]?.daily || {}) };
+  for (const [d, v] of Object.entries(state.bench?.[pid]?.daily || {})) if (!out[d] || v.t < out[d].t) out[d] = v;
+  return out;
 }
 
 /* ---------- Minispiel-Rekorde und Tagesrätsel ---------- */
@@ -1386,7 +1392,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 13;
+const APP_VERSION = 14;
 let updateReady = false;
 
 async function checkUpdate() {
@@ -1453,7 +1459,7 @@ function choosePlayer(id) {
   if (!PLAYERS.some(p => p.id === id)) return;
   if (state.player && state.player !== id) {
     // anderen Spieler auf dem Gerät parken
-    games?.stop();
+    games?.leave();
     state.bench[state.player] = { stats: state.stats, round: state.round, dirty: state.dirty, games: state.games, daily: state.daily, gdirty: state.gdirty, dailyRun: state.dailyRun };
     const b = state.bench[id] || {};
     state.stats = b.stats || {};
@@ -1474,6 +1480,7 @@ function choosePlayer(id) {
   state.player = id;
   const remoteMe = state.remote?.players?.[id];
   if (remoteMe) { mergeRemoteIntoLocal(remoteMe.stats); mergeRemoteGames(remoteMe.games, remoteMe.daily); }
+  games?.settle();   // liegen gebliebenes Tagesrätsel von gestern zählen
   save();
   renderPlayerChip();
   goHome();
@@ -1695,8 +1702,9 @@ async function main() {
   games = createGames({
     map, state, save, show, sfx, C, COUNTRIES, CITIES, PLAYERS, CONTINENTS,
     $, esc, flagUrl, shuffle, nameOf, nom, acc, gen, inDat, pl, capFirst, emph, unionBox, regionLabel, playerName,
-    gamesOf, dailyOf, saveRecord, saveDaily,
+    gamesOf, dailyOf, saveRecord, saveDaily, countrySearch,
   });
+  games.settle();   // Tagesrätsel, das gestern angefangen und liegen gelassen wurde
   wire();
   renderPlayerChip();
   if (state.player) { renderHome(); show('home'); } else openChooser(false);
