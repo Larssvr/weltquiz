@@ -1,11 +1,11 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=14';
-import { Searcher } from './search.js?v=14';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=14';
-import { COUNTRIES } from './data/countries.js?v=14';
-import { WATER } from './data/water.js?v=14';
-import { WORLD_FACTS } from './data/world-facts.js?v=14';
-import { CITIES } from './data/cities.js?v=14';
-import { createGames } from './games.js?v=14';
+import { WorldMap, REGION_BOX, W } from './map.js?v=15';
+import { Searcher } from './search.js?v=15';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=15';
+import { COUNTRIES } from './data/countries.js?v=15';
+import { WATER } from './data/water.js?v=15';
+import { WORLD_FACTS } from './data/world-facts.js?v=15';
+import { CITIES } from './data/cities.js?v=15';
+import { createGames } from './games.js?v=15';
 
 /* ================= Daten ================= */
 
@@ -81,6 +81,7 @@ const MODES = {
     variantLabel: 'Wie willst du spielen?',
     variants: [
       { id: 'flag', label: 'Flagge erkennen', hint: 'Du siehst eine Flagge und schreibst das Land.' },
+      { id: 'choose', label: 'Land auswählen', hint: 'Du siehst eine Flagge und wählst aus sechs Ländern.' },
       { id: 'pick', label: 'Flagge auswählen', hint: 'Du siehst ein Land und wählst aus vier Flaggen.' },
     ],
     regions: true,
@@ -593,6 +594,10 @@ function nextQuestion() {
   } else if (mode === 'flaggen' && variant === 'flag') {
     textQuestion({ prompt: 'Zu welchem Land gehört diese Flagge?', placeholder: 'Land eingeben …', searcher: countrySearch, answer: C.get(id).name, bigFlag: id, emptyText: 'Kein Land gefunden – anders schreiben?' });
     map.showRegions(round.regions);
+  } else if (mode === 'flaggen' && variant === 'choose') {
+    // Karte ohne Markierung: sonst verrät die Lage das Land
+    countryChoiceQuestion(C.get(id));
+    map.showRegions(round.regions);
   } else if (mode === 'flaggen' && variant === 'pick') {
     flagPickQuestion(C.get(id));
     map.setCountryClass(id, 'is-target');
@@ -782,6 +787,34 @@ function flagOptions(iso) {
   return shuffle([...out]);
 }
 
+/* ----- Land zur Flagge auswählen ----- */
+
+// Ablenker: zuerst Länder mit ähnlicher Flagge (höchstens drei), dann aus derselben Gegend
+function countryOptions(iso, n = 6) {
+  const out = new Set([iso]);
+  const similar = shuffle(FLAG_GROUPS.filter(g => g.includes(iso)).flat().filter(x => x !== iso && C.has(x)));
+  for (const x of similar) { if (out.size >= 4) break; out.add(x); }
+  const c = C.get(iso);
+  for (const x of shuffle(COUNTRIES.filter(x => x.regions.some(r => c.regions.includes(r))))) { if (out.size >= n) break; out.add(x.iso); }
+  for (const x of shuffle(COUNTRIES)) { if (out.size >= n) break; out.add(x.iso); }
+  // alphabetisch: so findet man den gesuchten Namen schneller
+  return [...out].sort((a, b) => C.get(a).name.localeCompare(C.get(b).name, 'de'));
+}
+
+function countryChoiceQuestion(c) {
+  $('#view-quiz').innerHTML = `
+    <img class="flag-big" src="${flagUrl(c.iso)}" alt="Gesuchte Flagge">
+    <div class="q-head">
+      <h2 class="q-prompt">Zu welchem Land gehört diese Flagge?</h2>
+      <div class="q-tools"><button class="chip-btn" type="button" data-act="hint">Tipp</button></div>
+    </div>
+    <p class="hint" id="hint" hidden></p>
+    <div class="opts6">
+      ${countryOptions(c.iso).map(iso => `<button class="opt" type="button" data-choice="${iso}">${esc(C.get(iso).name)}</button>`).join('')}
+    </div>
+    <div class="below"><button class="chip-btn" type="button" data-act="skip">Weiß ich nicht</button></div>`;
+}
+
 function flagPickQuestion(c) {
   const opts = flagOptions(c.iso);
   $('#view-quiz').innerHTML = `
@@ -921,11 +954,25 @@ function answer(ok, chosen) {
     });
     card.querySelector('.below')?.remove();
     card.insertAdjacentHTML('beforeend', `<div class="fb">${body}</div>`);
+  } else if (mode === 'flaggen' && variant === 'choose') {
+    // Auswahl stehen lassen: richtiges Land grün, deine Wahl rot
+    const grid = card.querySelector('.opts6');
+    grid.classList.add('answered');
+    grid.querySelectorAll('.opt').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.choice === id) b.classList.add('is-right');
+      else if (chosen && b.dataset.choice === chosen.id) b.classList.add('is-wrong');
+    });
+    card.querySelector('#hint')?.remove();
+    card.querySelector('.q-tools')?.remove();
+    card.querySelector('.below')?.remove();
+    card.insertAdjacentHTML('beforeend', `<div class="fb">${body}</div>`);
   } else {
     const keepFlag = card.querySelector('.flag-big');
     card.innerHTML = (keepFlag ? keepFlag.outerHTML : '') + body;
   }
   card.querySelector('[data-act="next"]').focus({ preventScroll: true });
+  if (card.scrollHeight > card.clientHeight) card.scrollTop = card.scrollHeight;   // flacher Bildschirm: „Weiter“ ins Bild
   const seq = flightSeq;   // ist schon die nächste Frage dran, bleibt die Kamera dort
   requestAnimationFrame(() => { if (fly && flightSeq === seq) fly(); });
 }
@@ -959,6 +1006,16 @@ function useHint() {
     const s = Math.max(110, (b[1][0] - b[0][0]) * 3.2);
     map.flyToBox([[cx - s / 2, cy - s * 0.3], [cx + s / 2, cy + s * 0.3]], { pad: 1, minSize: 10 });
     $('#find-state').textContent = `Tipp: ${findsWater ? 'Das Gewässer' : 'Das Land'} liegt in diesem Ausschnitt.`;
+    return;
+  }
+  if (q.mode === 'flaggen' && q.variant === 'choose') {
+    // drei der fünf falschen Länder streichen
+    const wrong = shuffle([...document.querySelectorAll('#view-quiz .opts6 .opt')].filter(b => b.dataset.choice !== q.id));
+    wrong.slice(0, 3).forEach(b => { b.disabled = true; b.classList.add('is-out'); });
+    $('[data-act="hint"]')?.remove();
+    const el = $('#hint');
+    el.hidden = false;
+    el.textContent = 'Tipp: Drei falsche Länder sind gestrichen.';
     return;
   }
   const a = q.answerText || '';
@@ -1392,7 +1449,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 14;
+const APP_VERSION = 15;
 let updateReady = false;
 
 async function checkUpdate() {
@@ -1628,6 +1685,10 @@ function wire() {
     if (t.dataset.flag && q && !q.answered) {
       const ok = t.dataset.flag === q.id;
       answer(ok, { id: t.dataset.flag, label: C.get(t.dataset.flag).name });
+      return;
+    }
+    if (t.dataset.choice && q && !q.answered) {
+      answer(t.dataset.choice === q.id, { id: t.dataset.choice, label: C.get(t.dataset.choice).name });
       return;
     }
     if (t.dataset.pmode) { progressMode = t.dataset.pmode; renderProgress(); return; }

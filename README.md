@@ -9,7 +9,7 @@ Ein Geografie-Spiel im Browser: Länder auf der Karte erkennen, Hauptstädte, Me
 - **Länder erkennen** – ein Land ist markiert, du schreibst den Namen (oder umgekehrt: Name → auf der Karte antippen)
 - **Hauptstädte** – Land → Hauptstadt oder Hauptstadt → Land, inkl. „Stolperstädten“ wie Sydney oder Istanbul
 - **Meere, Seen & Ozeane** – 136 Gewässer
-- **Flaggen** – Flagge → Land oder Land → eine von vier (ähnlichen) Flaggen
+- **Flaggen** – Flagge → Land (eintippen oder aus sechs Ländern wählen) oder Land → eine von vier (ähnlichen) Flaggen
 - **Entdecken** – freie Karte mit Infos zu jedem Land und Gewässer
 - **Fakten** – über 900 überraschende Fakten zu Ländern, Meeren und der Welt
 - **Fortschritt** – was du sicher weißt, auch die Karte des anderen Spielers

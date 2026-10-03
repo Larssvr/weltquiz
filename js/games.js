@@ -1,8 +1,8 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
-import { W, REGION_BOX } from './map.js?v=14';
-import { NUMBERS } from './data/numbers.js?v=14';
-import { DE_CITIES } from './data/de-cities.js?v=14';
+import { W, REGION_BOX } from './map.js?v=15';
+import { NUMBERS } from './data/numbers.js?v=15';
+import { DE_CITIES } from './data/de-cities.js?v=15';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“

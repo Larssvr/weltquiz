@@ -449,9 +449,16 @@ p.who-note { margin: 14px 0 0; }
 .shape path.lake { fill: var(--paper); }   /* Seen ausgespart wie auf der Karte */
 .opts4 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .opts4 .opt { min-height: 48px; }
-.opts4 .opt:disabled { cursor: default; }
-.opts4 .opt.is-right { background: var(--right); border-color: var(--right); color: #fff; }
-.opts4 .opt.is-wrong { background: var(--wrong); border-color: var(--wrong); color: #fff; }
+.opts4 .opt:disabled, .opts6 .opt:disabled { cursor: default; }
+.opts4 .opt.is-right, .opts6 .opt.is-right { background: var(--right); border-color: var(--right); color: #fff; }
+.opts4 .opt.is-wrong, .opts6 .opt.is-wrong { background: var(--wrong); border-color: var(--wrong); color: #fff; }
+/* Flagge → Land: sechs Namen zur Auswahl */
+.opts6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.opts6 .opt { min-height: 52px; padding: 8px 10px; overflow-wrap: anywhere; hyphens: auto; }
+.opts6 .opt:hover:not(:disabled) { background: var(--paper-tint); }
+.opts6 .opt.is-out { opacity: 0.35; text-decoration: line-through; }
+.opts6.answered .opt:not(.is-right):not(.is-wrong) { opacity: 0.55; }
+.opts6 + .fb { margin-top: 12px; }
 
 /* Übersicht, Vorstellung, Ergebnis */
 .game-list .legend-row { grid-template-columns: 34px 1fr; }
@@ -542,6 +549,8 @@ p.who-note { margin: 14px 0 0; }
   .q-prompt { font-size: 21px; margin-bottom: 10px; }
   .suggest { top: calc(100% + 6px); bottom: auto; right: 0; max-height: max(140px, min(40vh, calc(100vh - var(--kb) - 260px))); }
   .flag-big { height: 96px; margin-bottom: 10px; }
+  .opts6 { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .opts6 .opt { min-height: 46px; }
   .flag-opt { height: 84px; }
   .flag-opt img { max-height: 64px; }
   .result { font-size: 24px; }
@@ -565,6 +574,9 @@ p.who-note { margin: 14px 0 0; }
   .shape-wrap { padding: 0 0 6px; }
   .opts4 { grid-template-columns: repeat(4, 1fr); }
   .opts4 .opt { min-height: 42px; }
+  .opts6 { grid-template-columns: repeat(3, 1fr); }
+  .opts6 .opt { min-height: 40px; }
+  .flag-big { height: 64px; margin-bottom: 8px; }
   .duo-opt { min-height: 96px; }
 }
 
