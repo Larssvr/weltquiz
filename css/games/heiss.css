@@ -1,1 +1,85 @@
 /* Minispiel „heiss“ (js/games/heiss.js): eigene Stile, Klassen mit eigener Vorsilbe. */
+
+/* Karte im Spiel: alles Land neutral, die Tipps nach Nähe gefärbt – je röter, desto näher.
+   Ein Rand in der Farbe der Stufe macht auch winzige Länder auf der Weltkarte sichtbar. */
+.map.heatmode .land path { fill: #e9e5de; }
+.map.heatmode .land path.heat-0, .map.heatmode .land path.heat-1, .map.heatmode .land path.heat-2,
+.map.heatmode .land path.heat-3, .map.heatmode .land path.heat-4, .map.heatmode .land path.heat-5 {
+  stroke-width: 2.4; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+}
+.map.heatmode .land path.heat-0 { fill: #fdf0c4; stroke: #d2ae45; }
+.map.heatmode .land path.heat-1 { fill: #fbd98a; stroke: #d9a13a; }
+.map.heatmode .land path.heat-2 { fill: #f8b25c; stroke: #d6872b; }
+.map.heatmode .land path.heat-3 { fill: #ef7f45; stroke: #c95a22; }
+.map.heatmode .land path.heat-4 { fill: #dd4a33; stroke: #ad2e1b; }
+.map.heatmode .land path.heat-5 { fill: #a8172a; stroke: #760a1a; }
+/* Auflösung schlägt Hitze und neutrales Land */
+.map.heatmode .land path.is-right { fill: var(--right); stroke: var(--right); }
+.map.heatmode .land path.is-target { fill: var(--target); stroke: var(--target); }
+/* Ringe um winzige getippte Länder: Tinte statt Zielfarbe – sie zeigen nicht das gesuchte Land */
+.map.heatmode .ring.hk-ring .ring-line, .map.heatmode .ring.hk-ring .ring-pulse { stroke: var(--ink); }
+.maplabel.hk text { font-size: 15.5px; }
+
+/* Spielkarte */
+.hk-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; margin: 0 0 8px; }
+.hk-head .q-prompt { flex: none; margin: 2px 0 0; }
+.hk-where { margin: 0; font-size: 15px; color: var(--muted); }
+.hk-state { margin: 0 0 8px; font-size: 16px; line-height: 1.4; }
+.hk-heat { display: inline-block; padding: 0 6px; border-radius: 3px; font-size: 14.5px; font-weight: 700; line-height: 1.45; white-space: nowrap; color: #5b4a12; }
+.hk-heat.hk-h3 { color: #4a1a06; }
+.hk-heat.hk-h4, .hk-heat.hk-h5 { color: #fff; }
+.hk-h0 { background: #fdf0c4; }
+.hk-h1 { background: #fbd98a; }
+.hk-h2 { background: #f8b25c; }
+.hk-h3 { background: #ef7f45; }
+.hk-h4 { background: #dd4a33; }
+.hk-h5 { background: #a8172a; }
+
+/* bisherige Tipps, die nächsten zuerst – höchstens zwei Zeilen, der Rest scrollt */
+.hk-chips {
+  position: relative; list-style: none; margin: 0 0 10px; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 5px; max-height: 58px; overflow-y: auto; overscroll-behavior: contain;
+}
+.hk-chip {
+  display: inline-flex; align-items: center; gap: 4px; max-width: 100%; min-width: 0;
+  padding: 1px 8px 1px 6px; border: 1px solid var(--line); border-radius: 12px;
+  font-size: 13.5px; line-height: 1.5; white-space: nowrap; background: var(--paper);
+}
+.hk-chip.is-last { border-color: var(--ink); }
+.hk-chip.is-again { animation: hk-again 1.2s ease-out; }
+@keyframes hk-again { 0%, 40% { background: #fbd98a; border-color: var(--ink); } 100% { background: var(--paper); } }
+.hk-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22); }
+.hk-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.hk-dist { color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+.hk-count { font-size: 14px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hk-count.is-last { color: var(--wrong-ink); }
+
+@media (max-width: 700px) {
+  .hk-head { margin-bottom: 6px; }
+  .hk-state { font-size: 15.5px; margin-bottom: 6px; }
+}
+
+/* Handy quer: Unten ließe die Spielkarte kaum Karte übrig – sie dockt links an wie die Panels, die Karte bleibt rechts frei */
+@media (max-height: 500px) and (min-width: 701px) {
+  .card.hk-card {
+    --dock: left;
+    left: calc(16px + env(safe-area-inset-left)); right: auto; transform: none;
+    top: calc(var(--top) + 8px); bottom: auto;
+    width: min(390px, 47%); padding: 12px 16px;
+    max-height: calc(100% - var(--top) - 16px - env(safe-area-inset-bottom));
+  }
+  .hk-card .q-prompt { font-size: 21px; }
+  .hk-card .result { font-size: 24px; }
+  .hk-card .fact-text { font-size: 16px; }
+  /* Eingabe gleich unter die Frage, Rückmeldung darunter: So haben die Vorschläge unter dem Feld Platz
+     (darüber stießen sie an die Kopfzeile, weiter unten ragten sie aus dem Bild) */
+  .card.hk-card.asking { display: flex; flex-direction: column; }
+  .hk-card.asking .answer { order: 1; margin-bottom: 10px; }
+  .hk-card.asking .hk-state, .hk-card.asking .hk-chips, .hk-card.asking .below { order: 2; }
+  .hk-card.asking .below { margin-top: 2px; }
+  .hk-card .suggest { top: calc(100% + 6px); bottom: auto; right: 0; max-height: min(200px, calc(100vh - 190px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hk-chip.is-again { animation: none; }
+}
