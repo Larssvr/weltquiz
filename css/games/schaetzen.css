@@ -1,1 +1,87 @@
 /* Minispiel „schaetzen“ (js/games/schaetzen.js): eigene Stile, Klassen mit eigener Vorsilbe. */
+
+/* Regler: die Schätzung groß darüber, die Enden der Skala darunter */
+.est-scale { --est-thumb: 32px; margin: 0 0 8px; }
+.est-val {
+  display: block; text-align: center;
+  font-family: var(--font-cond); font-weight: 700; font-size: 34px; line-height: 1.1; font-variant-numeric: tabular-nums;
+}
+.est-track { position: relative; }
+.est-range {
+  display: block; width: 100%; height: 42px; margin: 0; padding: 0;
+  background: none; -webkit-appearance: none; appearance: none; cursor: pointer;
+}
+.est-range:focus { outline: none; }
+.est-range::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: var(--line); }
+.est-range::-moz-range-track { height: 8px; border-radius: 4px; background: var(--line); }
+.est-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; box-sizing: border-box;
+  width: var(--est-thumb); height: var(--est-thumb); margin-top: calc(4px - var(--est-thumb) / 2);
+  border: 3px solid #fff; border-radius: 50%; background: var(--target); box-shadow: 0 0 0 1.5px var(--ink);
+}
+.est-range::-moz-range-thumb {
+  box-sizing: border-box; width: var(--est-thumb); height: var(--est-thumb);
+  border: 3px solid #fff; border-radius: 50%; background: var(--target); box-shadow: 0 0 0 1.5px var(--ink);
+}
+/* Fokus nur am Knopf zeigen (Tastatur) */
+.est-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1.5px var(--ink), 0 0 0 5px var(--focus); }
+.est-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 1.5px var(--ink), 0 0 0 5px var(--focus); }
+.est-ends { display: flex; justify-content: space-between; gap: 12px; margin-top: -5px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.est-sub { margin-top: -8px; }
+.hint.est-ref { margin: 0; }
+.est-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.est-row .ok { margin-left: auto; min-width: 76px; }
+.chip-btn.est-step { min-height: 40px; padding: 6px 12px; font-size: 15px; color: var(--ink); touch-action: manipulation; }
+.chip-btn.est-step[aria-disabled="true"] { opacity: 0.4; border-color: var(--line); cursor: default; }
+
+/* Nach der Antwort: Knopf = deine Schätzung, grüne Marke = der richtige Wert, dazwischen die Abweichung in Farbe */
+.est-scale.done { --gap: var(--wrong); margin-top: 4px; padding-top: 15px; }
+.est-scale.done.right { --gap: var(--right); }
+.est-scale.done.mid { --gap: #f5c542; }
+.est-scale.done .est-range {
+  cursor: default;
+  --x0: calc(var(--est-thumb) / 2 + (100% - var(--est-thumb)) * var(--a));
+  --x1: calc(var(--est-thumb) / 2 + (100% - var(--est-thumb)) * var(--b));
+}
+.est-scale.done .est-range::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--line) var(--x0), var(--gap) var(--x0), var(--gap) var(--x1), var(--line) var(--x1)); }
+.est-scale.done .est-range::-moz-range-track { background: linear-gradient(to right, var(--line) var(--x0), var(--gap) var(--x0), var(--gap) var(--x1), var(--line) var(--x1)); }
+.est-scale.done .est-range::-webkit-slider-thumb { background: var(--ink); }
+.est-scale.done .est-range::-moz-range-thumb { background: var(--ink); }
+.est-mark {
+  position: absolute; top: 3px; bottom: 3px; width: 4px; margin-left: -2px; border-radius: 2px;
+  left: calc(var(--est-thumb) / 2 + (100% - var(--est-thumb)) * var(--p));
+  background: var(--right); box-shadow: 0 0 0 1.5px #fff; pointer-events: none;
+}
+.est-mark b {
+  position: absolute; bottom: calc(100% + 1px); left: 50%; transform: translateX(-50%);
+  font-size: 13.5px; font-weight: 700; line-height: 1.1; color: var(--right-ink); white-space: nowrap;
+}
+.est-mark.l b { left: -2px; transform: none; }
+.est-mark.r b { left: auto; right: -2px; transform: none; }
+
+/* Entfernungsfrage: Namen der Hauptstädte mittig über den Sternen statt rechts daneben – so braucht der Ausschnitt
+   seitlich nur die halbe Namensbreite als Rand, und die Entfernung auf der Linie bleibt frei */
+#map.est-dist .pin.capital .pin-label { text-anchor: middle; transform: translate(-11px, -17px); }
+
+/* Ergebnisliste: Urteil unter der Frage – mit drei Spalten würden lange Namen wie „Panama-Stadt“ zerrissen */
+.est-res li { grid-template-columns: 1fr auto; row-gap: 1px; }
+.est-res .res-km { grid-row: 2; text-align: left; }
+.est-res b { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+
+/* Handy quer: Unten angedockt ließe die Spielkarte mit Regler kaum etwas von der Karte übrig – sie steht links
+   wie die Panels, die Karte rechts daneben (die Kamera liest --dock und nutzt den freien Bereich) */
+@media (max-height: 500px) {
+  #view-game.est-card {
+    --dock: left;
+    left: calc(10px + env(safe-area-inset-left)); right: auto; transform: none;
+    top: calc(var(--top) + 11px + env(safe-area-inset-top)); bottom: auto;
+    width: min(400px, 50%); padding: 12px 14px;
+    max-height: calc(100% - var(--top) - 19px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+  .est-val { font-size: 27px; }
+  .est-range { height: 36px; }
+  .est-row { margin-top: 8px; }
+  .chip-btn.est-step { min-height: 38px; }
+  .est-row .ok { height: 42px; }
+}
