@@ -1,15 +1,15 @@
 // Minispiele: kurze Spiele mit Rekorden, die Emilia und Lars gegenseitig sehen –
 // Blitzrunde, Städte-Pin, Nachbarn, Entweder-oder, Umrisse und das Tagesrätsel.
 // Weitere Spiele kommen als eigene Module aus js/games/ dazu (Schnittstelle: „Spiele als Module“ ganz unten).
-import { W, REGION_BOX } from './map.js?v=18';
-import { NUMBERS } from './data/numbers.js?v=18';
-import { DE_CITIES } from './data/de-cities.js?v=18';
-import * as geo from './games/geo.js?v=18';
-import route from './games/route.js?v=18';
-import heiss from './games/heiss.js?v=18';
-import alle from './games/alle.js?v=18';
-import blind from './games/blind.js?v=18';
-import schaetzen from './games/schaetzen.js?v=18';
+import { W, REGION_BOX } from './map.js?v=19';
+import { NUMBERS } from './data/numbers.js?v=19';
+import { DE_CITIES } from './data/de-cities.js?v=19';
+import * as geo from './games/geo.js?v=19';
+import route from './games/route.js?v=19';
+import heiss from './games/heiss.js?v=19';
+import alle from './games/alle.js?v=19';
+import blind from './games/blind.js?v=19';
+import schaetzen from './games/schaetzen.js?v=19';
 
 const fmt = n => Math.round(n).toLocaleString('de-DE');
 const genName = n => (/[sßxz]$/.test(n) ? n + '’' : n + 's');   // „Emilias Rekord“, „Lars’ Rekord“
@@ -142,8 +142,13 @@ export function createGames(ctx) {
 
   /* ---------- Rekorde anzeigen ---------- */
 
+  // Wer in Listen erscheint: Bei Emilia und Lars allein beide, wie immer. Gibt es weitere Konten, du und alle,
+  // die etwas vorzuweisen haben – sonst stünde da eine lange Reihe aus „–“ und „offen“.
+  const listed = has => (PLAYERS.length <= 2 ? PLAYERS : PLAYERS.filter(p => p.id === me() || has(p.id)));
+  const together = () => (PLAYERS.length > 2 ? 'für alle dieselben' : 'für euch beide dieselben');
+
   function recordsHtml(key, unit, { compact = false } = {}) {
-    const rows = PLAYERS.map(p => ({ ...p, best: bestOf(p.id, key) }));
+    const rows = listed(id => bestOf(id, key) != null).map(p => ({ ...p, best: bestOf(p.id, key) }));
     if (!state.player) {
       const b = bestOf(null, key);
       return b == null ? '' : `<span class="rec">Dein Rekord: <b>${fmt(b)}</b></span>`;
@@ -178,8 +183,8 @@ export function createGames(ctx) {
     const label = mine ? 'Ergebnis ansehen' : run ? 'Weiterspielen' : 'Jetzt spielen';
     return `<div class="daily-game">
       <div class="dg-head"><span class="swatch">${SW.tagesraetsel}</span>
-        <span><span class="name">Tagesrätsel</span><span class="dg-sub">Fünf Orte, für euch beide dieselben. Ein Versuch pro Tag.</span></span></div>
-      ${state.player ? `<div class="dg-scores">${PLAYERS.map(p => { const r = dayOf(p.id, day); return `<span class="p-${p.id}">${esc(p.name)} <b>${r ? fmt(r.score) : 'offen'}</b></span>`; }).join('')}</div>` : ''}
+        <span><span class="name">Tagesrätsel</span><span class="dg-sub">Fünf Orte, ${together()}. Ein Versuch pro Tag.</span></span></div>
+      ${state.player ? `<div class="dg-scores">${listed(id => !!dayOf(id, day)).map(p => { const r = dayOf(p.id, day); return `<span class="p-${p.id}">${esc(p.name)} <b>${r ? fmt(r.score) : 'offen'}</b></span>`; }).join('')}</div>` : ''}
       <button class="btn ${mine ? '' : 'primary'} wide" type="button" data-gact="daily">${label}</button>
     </div>`;
   }
@@ -273,8 +278,10 @@ export function createGames(ctx) {
   function showResult({ g, title, score, big, unit, details = '', key }) {
     const res = ctx.saveRecord(key, score);
     if (res.isRecord) sfx.record();
-    const other = state.player && PLAYERS.find(p => p.id !== state.player);
-    const theirs = other ? bestOf(other.id, key) : null;
+    // der beste Rekord unter den anderen – bei Emilia und Lars einfach der des anderen
+    const other = state.player && PLAYERS.filter(p => p.id !== state.player)
+      .map(p => ({ ...p, best: bestOf(p.id, key) })).filter(p => p.best != null).sort((a, b) => b.best - a.best)[0];
+    const theirs = other ? other.best : null;
     const def = defOf(g.id);
     let line = '';
     if (res.isRecord) line = `<p class="record-badge">Neuer Rekord!${res.prev != null ? ` Vorher: ${fmt(res.prev)}` : ''}</p>`;
@@ -678,35 +685,41 @@ export function createGames(ctx) {
     screen = 'result';
     pickable(false);
     veil(false);
-    const scores = PLAYERS.map(p => ({ ...p, r: dayOf(p.id, day) }));
+    const scores = listed(id => !!dayOf(id, day)).map(p => ({ ...p, r: dayOf(p.id, day) }));
     const mine = dayOf(me(), day);
-    const other = scores.find(s => s.id !== me());
+    // verglichen wird mit dem Besten unter den anderen
+    const others = PLAYERS.filter(p => p.id !== me()).map(p => ({ ...p, r: dayOf(p.id, day) }));
+    const best = others.filter(s => s.r).sort((a, b) => b.r.score - a.r.score)[0];
+    const top = mine && best ? Math.max(mine.score, best.r.score) : null;
     let verdict = '';
-    if (state.player && mine && other) {
-      if (!other.r) verdict = `${esc(other.name)} hat heute noch nicht gespielt.`;
-      else if (other.r.score === mine.score) verdict = 'Gleichstand!';
-      else verdict = mine.score > other.r.score ? 'Du gewinnst heute!' : `${esc(other.name)} gewinnt heute.`;
+    if (state.player && mine && others.length) {
+      if (!best) verdict = others.length === 1 ? `${esc(others[0].name)} hat heute noch nicht gespielt.` : 'Von den anderen hat heute noch niemand gespielt.';
+      else if (best.r.score === mine.score) verdict = 'Gleichstand!';
+      else verdict = mine.score > best.r.score ? 'Du gewinnst heute!' : `${esc(best.name)} gewinnt heute.`;
     }
-    // Siege über alle Tage
+    // Siege über alle Tage: Wer an einem Tag allein vorn lag – gezählt, wenn mindestens zwei gespielt haben
     const wins = Object.fromEntries(PLAYERS.map(p => [p.id, 0]));
     const days = new Set(PLAYERS.flatMap(p => Object.keys(ctx.dailyOf(p.id) || {})));
     for (const d of days) {
-      const [a, b] = PLAYERS.map(p => ctx.dailyOf(p.id)?.[d]?.score);
-      if (a == null || b == null || a === b) continue;
-      wins[a > b ? PLAYERS[0].id : PLAYERS[1].id]++;
+      const res = PLAYERS.map(p => [p.id, ctx.dailyOf(p.id)?.[d]?.score]).filter(([, s]) => s != null);
+      if (res.length < 2) continue;
+      const most = Math.max(...res.map(([, s]) => s));
+      const leaders = res.filter(([, s]) => s === most);
+      if (leaders.length === 1) wins[leaders[0][0]]++;
     }
+    const winners = listed(id => wins[id] > 0);
     const places = pickPlaces(5, seeded('weltquiz-' + day));
     $('#view-games').innerHTML = `
       <button class="back" type="button" data-gact="hub">‹ Minispiele</button>
       <h2 class="h2">Tagesrätsel</h2>
       <p class="lead">${new Date(day + 'T12:00').toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-      <div class="rec-board">${scores.map(s => `<div class="rb p-${s.id}${s.r && other?.r && mine && s.r.score === Math.max(mine.score, other.r.score) ? ' lead' : ''}">
+      <div class="rec-board">${scores.map(s => `<div class="rb p-${s.id}${s.r && top != null && s.r.score === top ? ' lead' : ''}">
         <span class="rb-name">${esc(s.name)}${s.id === me() ? ' <small>(du)</small>' : ''}</span>
         <span class="rb-val">${s.r ? fmt(s.r.score) : '–'}</span>
         <span class="rb-unit">${s.r ? 'Punkte' : 'noch offen'}</span></div>`).join('')}</div>
       ${verdict ? `<p class="duel-verdict">${verdict}</p>` : ''}
       ${results ? pinTable(results) : `<p class="field-label" style="margin-top:14px">Die Orte heute</p><p class="name-list">${places.map(p => esc(p.name)).join(', ')}</p>`}
-      ${state.player && (wins[PLAYERS[0].id] || wins[PLAYERS[1].id]) ? `<p class="hint" style="margin-top:12px">Gewonnene Tage: ${PLAYERS.map(p => `${esc(p.name)} ${wins[p.id]}`).join(' · ')}</p>` : ''}
+      ${state.player && PLAYERS.some(p => wins[p.id]) ? `<p class="hint" style="margin-top:12px">Gewonnene Tage: ${winners.map(p => `${esc(p.name)} ${wins[p.id]}`).join(' · ')}</p>` : ''}
       <p class="hint" style="margin-top:12px">Morgen gibt es fünf neue Orte.</p>
       <div class="actions"><button class="btn primary" type="button" data-gact="hub">Zu den Minispielen</button></div>`;
     ctx.show('games');
@@ -1264,12 +1277,13 @@ export function createGames(ctx) {
   function homeRows() {
     const mine = dayOf(me());
     return {
-      daily: { name: 'Tagesrätsel', desc: mine ? `Heute: ${fmt(mine.score)} Punkte – morgen gibt es neue Orte.` : 'Fünf Orte, für euch beide dieselben', count: mine ? fmt(mine.score) : 'neu' },
+      daily: { name: 'Tagesrätsel', desc: mine ? `Heute: ${fmt(mine.score)} Punkte – morgen gibt es neue Orte.` : `Fünf Orte, ${together()}`, count: mine ? fmt(mine.score) : 'neu' },
       games: { name: 'Minispiele', desc: 'Blitzrunde, Städte-Pin, Nachbarn, Umrisse …' },
     };
   }
 
-  function duelHtml() {
+  /** Rekorde im Duell – für die beiden, die gerade gegeneinander antreten (pair aus app.js). */
+  function duelHtml(pair = PLAYERS.slice(0, 2)) {
     if (!state.player) return '';
     const rows = [];
     for (const g of allGames()) {
@@ -1277,17 +1291,17 @@ export function createGames(ctx) {
       const lvls = g.levels?.length ? g.levels.map(l => [l.id, ` · ${l.label}`]) : [[null, '']];
       const keys = regs.flatMap(([r, rl]) => lvls.map(([l, ll]) => [keyOf(g.id, r, l), g.name + rl + ll]));
       for (const [key, label] of keys) {
-        const vals = PLAYERS.map(p => bestOf(p.id, key));
+        const vals = pair.map(p => bestOf(p.id, key));
         if (vals.every(v => v == null)) continue;
         const top = Math.max(...vals.map(v => v ?? -1));
-        rows.push(`<div class="rec-row"><span class="rec-name">${esc(label)}</span>${PLAYERS.map((p, i) => `<span class="rec-val p-${p.id}${vals[i] === top ? ' lead' : ''}">${vals[i] == null ? '–' : fmt(vals[i])}</span>`).join('')}</div>`);
+        rows.push(`<div class="rec-row"><span class="rec-name">${esc(label)}</span>${pair.map((p, i) => `<span class="rec-val p-${p.id}${vals[i] === top ? ' lead' : ''}">${vals[i] == null ? '–' : fmt(vals[i])}</span>`).join('')}</div>`);
       }
     }
     const day = today();
-    const d = PLAYERS.map(p => dayOf(p.id, day));
+    const d = pair.map(p => dayOf(p.id, day));
     return `<p class="field-label" style="margin-top:18px">Minispiele: Rekorde</p>
-      ${rows.length ? `<div class="rec-rows"><div class="rec-row head"><span></span>${PLAYERS.map(p => `<span class="rec-val p-${p.id}">${esc(p.name)}</span>`).join('')}</div>${rows.join('')}</div>` : '<p class="hint" style="margin:0">Noch keine Rekorde – ab zu den Minispielen!</p>'}
-      <p class="hint" style="margin:10px 0 0">Tagesrätsel heute: ${PLAYERS.map((p, i) => `${esc(p.name)} ${d[i] ? fmt(d[i].score) : 'offen'}`).join(' · ')}</p>`;
+      ${rows.length ? `<div class="rec-rows"><div class="rec-row head"><span></span>${pair.map(p => `<span class="rec-val p-${p.id}">${esc(p.name)}</span>`).join('')}</div>${rows.join('')}</div>` : '<p class="hint" style="margin:0">Noch keine Rekorde – ab zu den Minispielen!</p>'}
+      <p class="hint" style="margin:10px 0 0">Tagesrätsel heute: ${pair.map((p, i) => `${esc(p.name)} ${d[i] ? fmt(d[i].score) : 'offen'}`).join(' · ')}</p>`;
   }
 
   /** Für die Neuzeichnen-Prüfung: ändern sich Rekorde oder Tagesergebnisse? */
@@ -1319,7 +1333,7 @@ export function createGames(ctx) {
    *
    *   export default function (api) { return { …Definition… }; }    // oder null: Spiel noch nicht fertig
    *
-   * Es steht oben in PLUGINS (Import mit ?v=18) und wird beim Start der App einmal aufgerufen.
+   * Es steht oben in PLUGINS (Import mit ?v=19) und wird beim Start der App einmal aufgerufen.
    * Eigene Stile gehören nach css/games/<id>.css – Klassen mit eigener Vorsilbe, z. B. .rt-…
    *
    * Definition (Pflicht: id, name, desc, how, swatch, key, unit, start):

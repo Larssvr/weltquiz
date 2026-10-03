@@ -1,6 +1,6 @@
 // Minispiel „Ohne Grenzen“: Die Karte zeigt nur Land und Meer. Wo liegt das Land? Punkt setzen, bestätigen – dann wird
 // aufgedeckt. Bedienung wie beim Städte-Pin (js/games.js), Stile in css/games/blind.css (Klasse blind an #map).
-import { W, REGION_BOX } from '../map.js?v=18';
+import { W, REGION_BOX } from '../map.js?v=19';
 
 const FULL = 25;     // bis so viele km neben der Grenze volle Punkte – trifft auch Inselstaaten, die man kaum sieht
 const DECAY = 600;   // danach weniger: 600 km daneben gibt noch rund ein Drittel

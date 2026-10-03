@@ -83,11 +83,11 @@ button { cursor: pointer; }
 .land path.is-wrong { fill: var(--wrong); stroke: var(--wrong); }
 .land path.is-target, .land path.is-pick, .land path.is-right, .land path.is-wrong { stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .compare .land path { fill: #e9e5de; }
-.compare .land path.cmp-a { fill: var(--pa-soft); }
-.compare .land path.cmp-b { fill: var(--pb-soft); }
+.compare .land path.cmp-a { fill: var(--cmp-a, var(--pa-soft)); }
+.compare .land path.cmp-b { fill: var(--cmp-b, var(--pb-soft)); }
 .compare .land path.cmp-ab { fill: #86c895; }
-.water-hl path.cmp-a, .lakes path.cmp-a { fill: var(--pa-soft); }
-.water-hl path.cmp-b, .lakes path.cmp-b { fill: var(--pb-soft); }
+.water-hl path.cmp-a, .lakes path.cmp-a { fill: var(--cmp-a, var(--pa-soft)); }
+.water-hl path.cmp-b, .lakes path.cmp-b { fill: var(--cmp-b, var(--pb-soft)); }
 .water-hl path.cmp-ab, .lakes path.cmp-ab { fill: #86c895; }
 .mastery .land path { fill: #e9e5de; }
 .mastery .land path.m1 { fill: #f3b3a1; }
@@ -237,6 +237,11 @@ h1, h2, h3 { margin: 0; font-weight: 700; }
 .who-btn:hover { background: var(--paper-tint); }
 .who-btn[aria-pressed="true"] { box-shadow: inset 0 0 0 3px var(--ink); }
 p.who-note { margin: 14px 0 0; }
+/* „+ Neu“: eigenes Konto mit dem eigenen Namen */
+.who-btn.who-new { border-style: dashed; color: var(--muted); font-size: 24px; }
+.who-btn.who-new[aria-expanded="true"] { color: var(--ink); border-style: solid; }
+.who-form { margin-top: 12px; }
+p.who-msg { margin: 8px 0 0; color: var(--wrong-ink); }
 .who-tabs .opt.p-emilia[aria-pressed="true"] { background: var(--pa); border-color: var(--pa); }
 .who-tabs .opt.p-lars[aria-pressed="true"] { background: var(--pb); border-color: var(--pb); }
 
@@ -279,8 +284,8 @@ p.who-note { margin: 14px 0 0; }
 .duel-stats { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 18px; margin: 12px 0 0; font-size: 15px; }
 .duel-stats dt { color: var(--muted); }
 .duel-stats dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
-.key i.k-a { background: var(--pa-soft); }
-.key i.k-b { background: var(--pb-soft); }
+.key i.k-a { background: var(--cmp-a, var(--pa-soft)); }
+.key i.k-b { background: var(--cmp-b, var(--pb-soft)); }
 
 /* Einstellungen */
 .back { background: none; border: 0; padding: 4px 0; font-weight: 600; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; margin: -4px 0 10px; }

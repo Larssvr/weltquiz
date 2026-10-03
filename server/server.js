@@ -1,5 +1,5 @@
-// Weltquiz-Server: speichert den Lernfortschritt von Emilia und Lars, damit beide ihn auf jedem Gerät
-// haben und sich gegenseitig sehen – dazu die Minispiel-Rekorde und die Ergebnisse des Tagesrätsels.
+// Weltquiz-Server: speichert den Lernfortschritt von Emilia, Lars und allen, die sich ein eigenes Konto anlegen, damit
+// jeder ihn auf jedem Gerät hat und alle sich gegenseitig sehen – dazu die Minispiel-Rekorde und die Ergebnisse des Tagesrätsels.
 // Ohne Abhängigkeiten, Daten als JSON-Datei auf dem Railway-Volume.
 // Schreiben führt immer zusammen und löscht nie etwas; jeden Tag entsteht eine Sicherungskopie.
 
@@ -12,7 +12,11 @@ const DIR = process.env.DATA_DIR || '/data';
 const FILE = path.join(DIR, 'weltquiz.json');
 // Nur die echte Seite darf schreiben – lokale Testversionen reden mit einem eigenen Test-Server (ALLOWED_ORIGINS setzen)
 const ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://larssvr.github.io').split(',').map(s => s.trim());
+// Emilia und Lars gibt es immer; weitere Konten legt die App an, wenn jemand seinen Namen eingibt
 const PLAYERS = { emilia: 'Emilia', lars: 'Lars' };
+const PLAYER_ID = /^[a-z][a-z0-9-]{1,23}$/;
+const MAX_PLAYERS = 40;   // Bremse gegen Missbrauch: so viele Konten höchstens
+const cleanName = s => String(s ?? '').replace(/[\u0000-\u001f<>"]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
 const MODES = new Set(['laender', 'hauptstaedte', 'gewaesser', 'flaggen']);
 const MAX_BODY = 1_000_000;
 
@@ -148,8 +152,9 @@ function cleanDaily(daily) {
   return out;
 }
 
-function mergeInto(player, stats, games = {}, daily = {}) {
-  const p = db.players[player] ||= { name: PLAYERS[player], stats: {}, updatedAt: 0 };
+function mergeInto(player, stats, games = {}, daily = {}, name = '') {
+  // der Name gilt ab dem Anlegen – später kann ihn niemand mehr überschreiben
+  const p = db.players[player] ||= { name: PLAYERS[player] || name || player, stats: {}, updatedAt: 0 };
   for (const [mode, items] of Object.entries(stats)) {
     const m = p.stats[mode] ||= {};
     for (const [id, v] of Object.entries(items)) m[id] = mergeItem(m[id], v);
@@ -200,17 +205,19 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'GET' && url.pathname === '/api/state') {
     const players = {};
-    for (const id of Object.keys(PLAYERS)) {
+    for (const id of new Set([...Object.keys(PLAYERS), ...Object.keys(db.players)])) {
       const p = db.players[id];
-      players[id] = { name: PLAYERS[id], stats: p?.stats || {}, games: p?.games || {}, daily: p?.daily || {}, updatedAt: p?.updatedAt || 0 };
+      players[id] = { name: PLAYERS[id] || p?.name || id, stats: p?.stats || {}, games: p?.games || {}, daily: p?.daily || {}, updatedAt: p?.updatedAt || 0 };
     }
     return send(res, 200, { players, now: Date.now() }, origin);
   }
 
-  const m = url.pathname.match(/^\/api\/players\/([a-z]+)$/);
+  const m = url.pathname.match(/^\/api\/players\/([a-z0-9-]+)$/);
   if (req.method === 'POST' && m) {
     const player = m[1];
-    if (!PLAYERS[player]) return send(res, 404, { error: 'Unbekannter Spieler' }, origin);
+    if (!PLAYER_ID.test(player)) return send(res, 404, { error: 'Unbekannter Spieler' }, origin);
+    const isNew = !PLAYERS[player] && !db.players[player];
+    if (isNew && Object.keys(db.players).length >= MAX_PLAYERS) return send(res, 403, { error: 'Keine weiteren Konten möglich' }, origin);
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
     if (limited(ip)) return send(res, 429, { error: 'Zu viele Anfragen' }, origin);
     let size = 0;
@@ -225,9 +232,12 @@ const server = http.createServer((req, res) => {
       let body;
       try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { return send(res, 400, { error: 'Kein gültiges JSON' }, origin); }
       if (!body || typeof body !== 'object') return send(res, 400, { error: 'Kein gültiges JSON' }, origin);
+      // ein neues Konto braucht einen Namen
+      const name = cleanName(body.name);
+      if (isNew && !name) return send(res, 400, { error: 'Name fehlt' }, origin);
       const stats = cleanStats(body.stats), games = cleanGames(body.games), daily = cleanDaily(body.daily);
       const blocked = takeQuarantined(player, stats, games, daily);
-      const p = mergeInto(player, stats, games, daily);
+      const p = mergeInto(player, stats, games, daily, name);
       try { persist(); } catch (e) { console.error('Speichern fehlgeschlagen', e); return send(res, 500, { error: 'Speichern fehlgeschlagen' }, origin); }
       // Gesperrtes nur dem Absender zurückspiegeln, gespeichert wird es nicht
       const echo = { ...p.stats };

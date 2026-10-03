@@ -1,11 +1,11 @@
-import { WorldMap, REGION_BOX, W } from './map.js?v=18';
-import { Searcher } from './search.js?v=18';
-import { setupSound, setSoundEnabled, sfx } from './sound.js?v=18';
-import { COUNTRIES } from './data/countries.js?v=18';
-import { WATER } from './data/water.js?v=18';
-import { WORLD_FACTS } from './data/world-facts.js?v=18';
-import { CITIES } from './data/cities.js?v=18';
-import { createGames } from './games.js?v=18';
+import { WorldMap, REGION_BOX, W } from './map.js?v=19';
+import { Searcher } from './search.js?v=19';
+import { setupSound, setSoundEnabled, sfx } from './sound.js?v=19';
+import { COUNTRIES } from './data/countries.js?v=19';
+import { WATER } from './data/water.js?v=19';
+import { WORLD_FACTS } from './data/world-facts.js?v=19';
+import { CITIES } from './data/cities.js?v=19';
+import { createGames } from './games.js?v=19';
 
 /* ================= Daten ================= */
 
@@ -130,10 +130,10 @@ const state = (() => {
     if (s && typeof s === 'object' && s.stats) {
       // Sicherheitskopie des zuletzt gültigen Spielstands
       try { localStorage.setItem(KEY + '.backup', raw); } catch { /* voll/blockiert */ }
-      return { sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null, games: {}, daily: {}, gdirty: 0, dailyRun: null, ...s };
+      return { sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null, games: {}, daily: {}, gdirty: 0, dailyRun: null, people: {}, rivals: {}, ...s };
     }
   } catch { /* kaputter Eintrag: Sicherheitskopie bleibt unangetastet */ }
-  return { stats: {}, sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null, games: {}, daily: {}, gdirty: 0, dailyRun: null };
+  return { stats: {}, sound: true, last: {}, factIdx: {}, round: null, player: null, bench: {}, dirty: {}, remote: null, games: {}, daily: {}, gdirty: 0, dailyRun: null, people: {}, rivals: {} };
 })();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* egal */ } };
 
@@ -1242,10 +1242,56 @@ function renderProgress() {
 // ?api=… wählt einen anderen. So bleiben echte Spielstände garantiert unberührt.
 const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
 const API = LOCAL ? (new URLSearchParams(location.search).get('api') || 'http://127.0.0.1:8787') : 'https://weltquiz-api-production.up.railway.app';
-const PLAYERS = [{ id: 'emilia', name: 'Emilia' }, { id: 'lars', name: 'Lars' }];
-const playerName = id => PLAYERS.find(p => p.id === id)?.name || id;
-const otherPlayer = id => PLAYERS.find(p => p.id !== id)?.id;
+// Emilia und Lars gibt es immer; dazu Konten, die jemand mit seinem Namen angelegt hat (auf diesem Gerät oder online).
+// PLAYERS bleibt dasselbe Feld (die Minispiele halten es fest) und wird nur aufgefüllt.
+const BUILTIN = [{ id: 'emilia', name: 'Emilia' }, { id: 'lars', name: 'Lars' }];
+const PLAYERS = [...BUILTIN];
+const playerName = id => PLAYERS.find(p => p.id === id)?.name || state.people?.[id] || id;
+const isBuiltin = id => BUILTIN.some(p => p.id === id);
 const sync = { online: null, pushing: false, retry: null, pushTimer: null };
+
+// Farben für neue Konten (Emilia lila, Lars orange): kräftig und hell, fest nach dem Namen gewählt – auf jedem Gerät gleich
+const PALETTE = [['#0e8f86', '#a6e0da'], ['#2563c9', '#b8cdf3'], ['#b8327f', '#f0bddb'], ['#3f8a2c', '#c3e2b5'], ['#8b5a2b', '#e3c9ad'], ['#4b5f8a', '#c5cde0']];
+function colorsOf(id) {
+  if (id === 'emilia') return ['var(--pa)', 'var(--pa-soft)'];
+  if (id === 'lars') return ['var(--pb)', 'var(--pb-soft)'];
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
+
+/** Spielerliste auffrischen: feste Spieler, auf diesem Gerät angelegte und alle, die der Server kennt. true, wenn sie sich geändert hat. */
+function syncPlayers() {
+  const extra = new Map(Object.entries(state.people || {}));
+  for (const [id, p] of Object.entries(state.remote?.players || {})) if (!isBuiltin(id)) extra.set(id, p?.name || extra.get(id) || id);
+  const list = [...BUILTIN, ...[...extra].filter(([id]) => !isBuiltin(id)).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, 'de'))];
+  if (JSON.stringify(list) === JSON.stringify(PLAYERS)) return false;
+  PLAYERS.splice(0, PLAYERS.length, ...list);
+  paintPlayers();
+  return true;
+}
+
+/**
+ * Farben neuer Spieler: Alle Stile für Emilia (.p-emilia …) gibt es für jedes neue Konto noch einmal,
+ * mit dessen Farbe statt Lila – so sehen Duell, Rekorde und Spielerwahl für alle gleich aus.
+ */
+function paintPlayers() {
+  const base = [];
+  for (const sheet of document.styleSheets) {
+    let rules;
+    try { rules = sheet.cssRules; } catch { continue; }
+    for (const r of rules) if (r.selectorText?.includes('p-emilia')) base.push(r.cssText);
+  }
+  let css = '';
+  for (const p of PLAYERS) {
+    if (isBuiltin(p.id)) continue;
+    const [c, soft] = colorsOf(p.id);
+    for (const t of base) css += t.replaceAll('p-emilia', 'p-' + p.id).replaceAll('var(--pa-soft)', soft).replaceAll('var(--pa)', c) + '\n';
+  }
+  let el = document.getElementById('player-colors');
+  if (!el) { el = document.createElement('style'); el.id = 'player-colors'; document.head.appendChild(el); }
+  el.textContent = css;
+}
 
 function statsOf(pid) {
   if (!pid || pid === state.player) return state.stats;
@@ -1377,11 +1423,15 @@ async function push(opts = {}) {
       }
       const gver = owner.gdirty || 0;
       if (!sent.length && !gver) continue;
-      const body = JSON.stringify(gver ? { stats: payload, games: owner.games || {}, daily: owner.daily || {} } : { stats: payload });
+      // der Name legt beim ersten Mal ein neues Konto an (für Emilia und Lars übergeht der Server ihn)
+      const name = isBuiltin(player) ? undefined : playerName(player);
+      const body = JSON.stringify(gver ? { name, stats: payload, games: owner.games || {}, daily: owner.daily || {} } : { name, stats: payload });
       const res = await fetch(`${API}/api/players/${player}`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body,
         keepalive: !!opts.keepalive && body.length < 60000,
       });
+      // Konto, das der Server (noch) nicht annimmt: später erneut – die anderen Spieler nicht aufhalten
+      if (!isBuiltin(player) && (res.status === 403 || res.status === 404)) continue;
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       // bestätigte Antworten aus der Warteschlange nehmen – außer sie wurden inzwischen neu beantwortet
@@ -1428,6 +1478,8 @@ async function pull() {
     const mine = state.player && data.players[state.player];
     if (mine) { mergeRemoteIntoLocal(mine.stats); mergeRemoteGames(mine.games, mine.daily); }
     save();
+    // neue Konten von anderen Geräten: in der Spielerwahl gleich mit anbieten
+    if (syncPlayers() && view === 'player' && $('#who-form')?.hidden !== false) openChooser(!!state.player);
     onRemoteUpdate();
     push();
   } catch {
@@ -1438,7 +1490,7 @@ async function pull() {
 let remoteSig = '';
 function onRemoteUpdate() {
   // nur neu zeichnen, wenn sich Zahlen geändert haben – und dabei die Scrollposition behalten
-  const sig = JSON.stringify(duelScores().map(p => [p.sc.total, p.sc.sure, p.sc.answers, p.sc.last])) + (games?.signature() || '');
+  const sig = JSON.stringify(duelPair().map(p => [p.id, p.sc.total, p.sc.sure, p.sc.answers, p.sc.last])) + PLAYERS.map(p => p.id).join() + (games?.signature() || '');
   if (sig === remoteSig) return;
   remoteSig = sig;
   const redraw = (el, fn) => { const top = el.scrollTop; fn(); el.scrollTop = top; };
@@ -1450,7 +1502,7 @@ function onRemoteUpdate() {
 /* ---------- Updates ohne Unterbrechung ---------- */
 
 // Neue Versionen werden erkannt und nur zwischen den Runden geladen – nie mitten in einer Frage.
-const APP_VERSION = 18;
+const APP_VERSION = 19;
 let updateReady = false;
 
 async function checkUpdate() {
@@ -1506,14 +1558,54 @@ function openChooser(canGoBack) {
     <p class="subtitle">${state.player ? 'Wer spielt jetzt?' : 'Wer spielt?'}</p>
     <div class="who">
       ${PLAYERS.map(p => `<button type="button" class="who-btn p-${p.id}" data-player="${p.id}"${p.id === state.player ? ' aria-pressed="true"' : ''}>${esc(p.name)}</button>`).join('')}
+      <button type="button" class="who-btn who-new" data-act="new-player" aria-expanded="false">+ Neu</button>
     </div>
+    <form class="answer who-form" id="who-form" autocomplete="off" hidden>
+      <input id="who-name" type="text" maxlength="20" placeholder="Dein Name" autocapitalize="words" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Dein Name">
+      <button class="btn primary ok" type="submit">Los</button>
+    </form>
+    <p class="hint who-msg" id="who-msg" hidden></p>
     ${!state.player && answered ? `<p class="hint who-note">Auf diesem Gerät wurde schon gespielt (${learned} gewusst). Dieser Fortschritt gehört dann zu dem Namen, den du antippst.</p>` : ''}
-    <p class="hint who-note">Euer Fortschritt wird online gespeichert. So seid ihr auf jedem Gerät auf dem gleichen Stand und seht euch gegenseitig im Duell.</p>`;
+    <p class="hint who-note">Euer Fortschritt wird online gespeichert. So seid ihr auf jedem Gerät auf dem gleichen Stand und seht euch gegenseitig im Duell. Neu dabei? Tipp auf „+ Neu“ und gib deinen Namen ein.</p>`;
+  $('#who-form').addEventListener('submit', e => { e.preventDefault(); createPlayer($('#who-name').value); });
   show('player');
   map.showRegion('welt');
 }
 
-function choosePlayer(id) {
+/** „+ Neu“: Feld für den eigenen Namen aufklappen. */
+function openNewPlayer() {
+  const form = $('#who-form');
+  form.hidden = false;
+  $('[data-act="new-player"]').setAttribute('aria-expanded', 'true');
+  $('#who-name').focus();
+}
+
+// Konto-ID aus dem Namen: „Jörg Müller“ → „joerg-mueller“ (Buchstaben, Ziffern, Bindestrich)
+const slugOf = name => name.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+  .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24).replace(/-+$/, '');
+
+/** Neues Konto mit dem eigenen Namen – oder, wenn es den Namen schon gibt, als diese Person weiterspielen. */
+function createPlayer(raw) {
+  const name = String(raw).replace(/[<>"]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20);
+  const id = slugOf(name);
+  const msg = $('#who-msg');
+  if (!/^[a-z][a-z0-9-]{1,23}$/.test(id)) {
+    msg.hidden = false;
+    msg.textContent = 'Bitte einen Namen mit mindestens zwei Buchstaben eingeben.';
+    $('#who-name').focus();
+    return;
+  }
+  const known = PLAYERS.find(p => p.id === id);
+  if (known) {
+    if (confirm(`„${known.name}“ gibt es schon. Als ${known.name} weiterspielen?`)) choosePlayer(id);
+    return;
+  }
+  state.people = { ...(state.people || {}), [id]: name.charAt(0).toUpperCase() + name.slice(1) };
+  syncPlayers();
+  choosePlayer(id, { fresh: true });
+}
+
+function choosePlayer(id, { fresh = false } = {}) {
   if (!PLAYERS.some(p => p.id === id)) return;
   if (state.player && state.player !== id) {
     // anderen Spieler auf dem Gerät parken
@@ -1538,6 +1630,8 @@ function choosePlayer(id) {
   state.player = id;
   const remoteMe = state.remote?.players?.[id];
   if (remoteMe) { mergeRemoteIntoLocal(remoteMe.stats); mergeRemoteGames(remoteMe.games, remoteMe.daily); }
+  // neues Konto: gleich beim Server anmelden (mit Namen), damit es auch auf anderen Geräten zur Wahl steht
+  if (fresh) state.gdirty = (state.gdirty || 0) + 1;
   games?.settle();   // liegen gebliebenes Tagesrätsel von gestern zählen
   save();
   renderPlayerChip();
@@ -1577,13 +1671,26 @@ function ago(t) {
   return d === 1 ? 'gestern' : `vor ${d} Tagen`;
 }
 
-function duelScores() {
-  return PLAYERS.map(p => ({ ...p, sc: scoreOf(statsOf(p.id)) }));
+/**
+ * Wer im Duell gegeneinander antritt: du und dein Gegner – Emilia und Lars spielen gegeneinander, wer ein eigenes
+ * Konto hat, gegen den Stärksten oder wen er auswählt. Ohne Spieler: Emilia und Lars. Reihenfolge wie in der Spielerliste.
+ */
+function duelPair() {
+  const me = state.player && PLAYERS.find(p => p.id === state.player);
+  let pair = [PLAYERS[0], PLAYERS[1]];
+  if (me) {
+    const others = PLAYERS.filter(p => p.id !== me.id);
+    const rival = others.find(p => p.id === state.rivals?.[me.id])
+      || (isBuiltin(me.id) ? others.find(p => isBuiltin(p.id)) : null)
+      || others.map(p => ({ p, t: scoreOf(statsOf(p.id)).total })).sort((x, y) => y.t - x.t)[0]?.p;
+    pair = [me, rival].sort((x, y) => PLAYERS.indexOf(x) - PLAYERS.indexOf(y));
+  }
+  return pair.map(p => ({ ...p, sc: scoreOf(statsOf(p.id)) }));
 }
 
 function duelStrip() {
   if (!state.player) return '';
-  const [a, b] = duelScores();
+  const [a, b] = duelPair();
   const fa = a.sc.total || (b.sc.total ? 0 : 1), fb = b.sc.total || (a.sc.total ? 0 : 1);
   return `<button class="duel-strip" type="button" data-go="duell" aria-label="Duell: ${esc(a.name)} ${a.sc.total}, ${esc(b.name)} ${b.sc.total}">
     <span class="ds-name p-${a.id}">${esc(a.name)} <b>${a.sc.total}</b></span>
@@ -1599,7 +1706,11 @@ function openDuel() {
 }
 
 function renderDuel(withMap = true) {
-  const [a, b] = duelScores();
+  const [a, b] = duelPair();
+  const me = state.player;
+  // mehr als zwei Spieler: Gegner wählen
+  const rivals = me && PLAYERS.length > 2 ? PLAYERS.filter(p => p.id !== me) : [];
+  const rivalId = [a, b].find(p => p.id !== me)?.id;
   const lead = a.sc.total === b.sc.total ? null : (a.sc.total > b.sc.total ? a : b);
   const diff = Math.abs(a.sc.total - b.sc.total);
   const verdict = !a.sc.total && !b.sc.total ? 'Noch hat niemand etwas gewusst. Wer fängt an?'
@@ -1611,6 +1722,8 @@ function renderDuel(withMap = true) {
     <button class="back" type="button" data-act="home">‹ Zurück</button>
     <h2 class="h2">Duell</h2>
     <p class="lead">Gezählt wird, was du gerade weißt: die letzte Antwort war richtig. Eine falsche Antwort zieht es wieder ab.</p>
+    ${rivals.length ? `<div class="field"><p class="field-label">Gegen</p>
+      <div class="options who-tabs">${rivals.map(p => `<button type="button" class="opt p-${p.id}" data-rival="${p.id}" aria-pressed="${p.id === rivalId}">${esc(p.name)}</button>`).join('')}</div></div>` : ''}
     <div class="duel-head">
       ${[a, b].map(p => `<div class="duel-side p-${p.id}${lead && lead.id === p.id ? ' lead' : ''}">
         <span class="duel-name">${esc(p.name)}${p.id === state.player ? ' <small>(du)</small>' : ''}</span>
@@ -1635,8 +1748,8 @@ function renderDuel(withMap = true) {
     <p class="field-label" style="margin-top:16px">Wer kann was? Auf der Karte:</p>
     <div class="options">${tabs.map(([id, l]) => `<button type="button" class="opt" data-dmode="${id}" aria-pressed="${id === duelMode}">${l}</button>`).join('')}</div>
     <div class="key"><span><i class="k-a"></i>nur ${esc(a.name)}</span><span><i class="k-b"></i>nur ${esc(b.name)}</span><span><i style="background:#86c895"></i>beide</span><span><i style="background:#e9e5de"></i>noch keiner</span></div>
-    <div class="actions">${PLAYERS.map(p => `<button class="btn" type="button" data-pplayer-open="${p.id}">Karte von ${esc(p.name)}</button>`).join('')}</div>
-    ${games ? games.duelHtml() : ''}
+    <div class="actions">${[a, b].map(p => `<button class="btn" type="button" data-pplayer-open="${p.id}">Karte von ${esc(p.name)}</button>`).join('')}</div>
+    ${games ? games.duelHtml([a, b]) : ''}
     ${sync.online === false ? '<p class="hint" style="margin-top:10px">Gerade offline – der Stand wird nachgeholt, sobald wieder Internet da ist.</p>' : ''}`;
   $('#view-duel').querySelectorAll('[data-pplayer-open]').forEach(btn => btn.addEventListener('click', () => openProgress(btn.dataset.pplayerOpen)));
   // Vergleichskarte
@@ -1646,6 +1759,9 @@ function renderDuel(withMap = true) {
     const la = levelIn(sa, mode, id) >= KNOWN, lb = levelIn(sb, mode, id) >= KNOWN;
     return la && lb ? 'ab' : la ? 'a' : lb ? 'b' : null;
   };
+  // Farben der Vergleichskarte und ihrer Legende: die beiden, die gerade gegeneinander antreten
+  document.documentElement.style.setProperty('--cmp-a', colorsOf(a.id)[1]);
+  document.documentElement.style.setProperty('--cmp-b', colorsOf(b.id)[1]);
   map.clear();
   if (mode === 'gewaesser') {
     for (const w of WATER) { const k = cls(w.id); if (k) map.setWaterClass(w.id, 'cmp-' + k); }
@@ -1696,6 +1812,7 @@ function wire() {
     if (t.dataset.pplayer) { progressPlayer = t.dataset.pplayer; renderProgress(); return; }
     if (t.dataset.dmode) { duelMode = t.dataset.dmode; renderDuel(); return; }
     if (t.dataset.player) { choosePlayer(t.dataset.player); return; }
+    if (t.dataset.rival && state.player) { state.rivals = { ...(state.rivals || {}), [state.player]: t.dataset.rival }; save(); renderDuel(true); return; }
     switch (t.dataset.act) {
       case 'home': goHome(); break;
       case 'resume': resumeRound(); break;
@@ -1716,6 +1833,7 @@ function wire() {
       case 'again': openSetup(round.mode); break;
       case 'next-fact': factPos++; renderFact(); break;
       case 'switch-player': openChooser(true); break;
+      case 'new-player': openNewPlayer(); break;
     }
   });
 
@@ -1761,6 +1879,7 @@ async function main() {
   }
   map = new WorldMap($('#map'), topo);
   map.getInsets = insets;
+  syncPlayers();   // eigene Konten (auf diesem Gerät angelegt oder zuletzt vom Server gesehen) gleich mit anbieten
   games = createGames({
     map, state, save, show, sfx, C, COUNTRIES, CITIES, PLAYERS, CONTINENTS,
     $, esc, flagUrl, shuffle, nameOf, nom, acc, gen, inDat, pl, capFirst, emph, unionBox, regionLabel, playerName,
