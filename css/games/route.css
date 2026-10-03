@@ -1,1 +1,41 @@
 /* Minispiel „route“ (js/games/route.js): eigene Stile, Klassen mit eigener Vorsilbe. */
+
+/* Ziel der Reise: dunkel – klar anders als Start (rosa), besuchte (grün) und falsche Länder (rot) */
+.land path.is-goal { fill: var(--ink); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.maplabel.rt-goal text.halo { stroke: var(--ink); }
+.maplabel.rt-goal text:not(.halo) { fill: #fff; }
+
+/* Spielkarte: als Raster, damit sie auf flachen Bildschirmen enger zusammenrücken kann */
+.rt-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'head head' 'state state' 'form form' 'below below'; }
+.rt-card > .q-head { grid-area: head; }
+.rt-card > .rt-state { grid-area: state; }
+.rt-card > .answer { grid-area: form; }
+.rt-card > .below { grid-area: below; }
+.rt-state.bad { color: var(--wrong-ink); }
+.rt-meta { display: inline-flex; align-items: center; gap: 12px; }
+.rt-steps { font-family: var(--font-cond); font-weight: 600; font-size: 16px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rt-done { grid-template-areas: 'result result' 'detail detail' 'next next'; }
+.rt-done > .result { grid-area: result; }
+.rt-done > .result-detail { grid-area: detail; }
+.rt-done > .next-row { grid-area: next; }
+
+/* Ergebnisliste: Reise oben, Schritte darunter */
+.rt-res li { grid-template-columns: minmax(0, 1fr) 44px; }
+.rt-res .res-km { display: block; text-align: left; margin-top: 1px; }
+
+/* Handy hochkant: Platz für zwei Zeilen Rückmeldung, damit das Eingabefeld beim Tippen nicht springt */
+@media (max-width: 700px) and (min-height: 501px) {
+  .rt-state { min-height: 2.9em; }
+}
+
+/* Flach (Handy quer): Knöpfe neben die Frage, „Weiter“ neben die Auflösung – die Karte braucht die Höhe */
+@media (max-height: 500px) {
+  .rt-card { grid-template-areas: 'head below' 'state state' 'form form'; column-gap: 14px; }
+  .rt-card > .below { margin-top: 0; align-self: start; padding-top: 4px; }
+  .rt-card .q-prompt { margin-bottom: 4px; }
+  .rt-card .rt-state { margin: 0 0 8px; }
+  .rt-card .answer input, .rt-card .answer .ok { height: 44px; }
+  .rt-done { grid-template-areas: 'result result' 'detail next'; align-items: end; }
+  .rt-done > .next-row { margin-top: 0; }
+  .rt-done > .result-detail { font-size: 15.5px; }
+}
