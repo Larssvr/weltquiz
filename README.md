@@ -39,7 +39,11 @@ Statische Seite ohne Build-Schritt: HTML, CSS, JavaScript (ES-Module), [d3](http
 
 ## Spieler & Online-Speicher
 
-Der Fortschritt von Emilia und Lars liegt zusätzlich auf einem kleinen Server (`server/`, Node ohne Abhängigkeiten,
+Emilia und Lars gibt es fest. Wer mitspielen will, tippt unter „Wer spielt?“ auf „+ Neu“ und gibt seinen Namen ein –
+dann hat er ein eigenes Konto mit eigener Farbe, wählbar auf jedem Gerät. Im Duell tritt man gegen einen Gegner an
+(bei mehr als zwei Spielern zur Wahl), bei Rekorden und im Tagesrätsel stehen alle, die etwas vorzuweisen haben.
+
+Der Fortschritt aller Spieler liegt zusätzlich auf einem kleinen Server (`server/`, Node ohne Abhängigkeiten,
 läuft auf Railway mit Volume unter `/data`) – ebenso die Minispiel-Rekorde und die Ergebnisse des Tagesrätsels.
 Er führt Stände von mehreren Geräten zusammen, löscht nie etwas und legt jeden Tag eine Sicherungskopie an.
 Ohne Internet spielt man lokal weiter; der Stand wird später nachgeliefert. Fehlt dem Server etwas, das auf einem
